@@ -9,14 +9,19 @@ import SwiftUI
 
 struct AddFillButton: View {
     @State private var didTap: Bool = false
+    var initialize: () -> Bool
+    var action: (_: Bool) -> Void
     
     var body: some View {
         Button {
             self.didTap = !self.didTap
+            action(didTap)
         } label: {
             Image(systemName: didTap ? "plus.circle.fill" : "plus.circle")
                 .frame(width: 18, height: 18)
                 .clipShape(Circle())
+        }.onAppear {
+            didTap = initialize()
         }
     }
 }
@@ -24,7 +29,9 @@ struct AddFillButton: View {
 struct RecipeDetail: View {
     @State private var favorited: Bool = false
     var recipe: Recipe
-    
+    @AppStorage("favorites") var favorites: [Recipe] = []
+    @AppStorage("groceries") var groceries: [Ingredient] = []
+
     var body: some View {
         ScrollView {
             VStack {
@@ -38,7 +45,21 @@ struct RecipeDetail: View {
                 
                 ForEach (recipe.ingredients) { ingredient in
                     HStack {
-                        AddFillButton()
+                        AddFillButton() {
+                            let index = groceries.firstIndex(where: {$0.id == ingredient.id})
+                            return index != nil
+                        } action: { tapped in
+                            let index = groceries.firstIndex(where: {$0.id == ingredient.id})
+                            if tapped {
+                                if index == nil {
+                                    groceries.append(ingredient)
+                                }
+                            } else {
+                                if index != nil {
+                                    groceries.remove(at: index!)
+                                }
+                            }
+                        }
                         
                         Text(ingredient.quantity)
                         Text(ingredient.unit)
@@ -54,18 +75,17 @@ struct RecipeDetail: View {
                 }
             }.frame(maxWidth: .infinity)
         }
+        .onAppear {
+            if favorites.firstIndex(where: {$0.id == recipe.id}) != nil {
+                    favorited = true
+            } else {
+                favorited = false
+            }
+        }
         .navigationBarTitle(recipe.name)
         .navigationBarItems(trailing:
                                 Button(action: {
             favorited = !favorited
-            
-            var favorites: [Recipe] = []
-            
-            if let data = UserDefaults.standard.data(forKey: "favorites") {
-                if let decoded = try? JSONDecoder().decode([Recipe].self, from: data) {
-                    favorites = decoded
-                }
-            }
             
             if favorited {
                 favorites.append(recipe)
@@ -75,11 +95,6 @@ struct RecipeDetail: View {
                 }
 
             }
-            
-            if let encoded = try? JSONEncoder().encode(favorites) {
-                UserDefaults.standard.set(encoded, forKey: "favorites")
-            }
-            
         }) {
             Image(systemName: favorited ? "heart.fill" : "heart")
         })
@@ -98,7 +113,7 @@ struct RecipeDetail_Previews: PreviewProvider {
             "Mix sugar and tea",
             "Add milk"
         ]
-        let boba_recipe = Recipe(id: UUID(), name: "boba", author: "Micky Abir", rating: 4.5, ingredients: ingredients, steps: steps)
+        let boba_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09e")!, name: "boba", author: "Micky Abir", rating: 4.5, ingredients: ingredients, steps: steps)
         RecipeDetail(recipe: boba_recipe)
             .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
             .previewDisplayName("iPhone 12")

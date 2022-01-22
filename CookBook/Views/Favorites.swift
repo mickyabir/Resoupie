@@ -7,18 +7,8 @@
 
 import SwiftUI
 
-func loadFavorites() -> [Recipe] {
-    if let data = UserDefaults.standard.data(forKey: "favorites") {
-        if let decoded = try? JSONDecoder().decode([Recipe].self, from: data) {
-            return decoded
-        }
-    }
-    
-    return []
-}
-
 struct FavoritesView: View {
-    @State var favorites: [Recipe] = []
+    @AppStorage("favorites") var favorites: [Recipe] = []
     
     var body: some View {
         ScrollView {
@@ -26,9 +16,6 @@ struct FavoritesView: View {
             ForEach(favorites, id: \.self) { recipe in
                 Text(recipe.name)
             }
-        }.onAppear {
-            favorites = loadFavorites()
-            print("loaded!")
         }
     }
 }

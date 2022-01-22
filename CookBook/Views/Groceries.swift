@@ -8,8 +8,15 @@
 import SwiftUI
 
 struct GroceriesView: View {
+    @AppStorage("groceries") var groceries: [Ingredient] = []
+    
     var body: some View {
-        Text("Groceries")
+        ScrollView {
+            Text("Grocery List")
+            ForEach(groceries, id: \.self) { ingredient in
+                Text(ingredient.name)
+            }
+        }
     }
 }
 
