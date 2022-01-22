@@ -9,10 +9,11 @@ import SwiftUI
 import MapKit
 
 struct WorldView: View {
-    @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.507222, longitude: -0.1275), span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5))
+    @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
 
     var body: some View {
         Map(coordinateRegion: $region, showsUserLocation: true, userTrackingMode: .constant(.follow))
+        
     }
 }
 

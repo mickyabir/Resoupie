@@ -30,12 +30,12 @@ struct RecipeDetail: View {
     @State private var favorited: Bool = false
     var recipe: Recipe
     @AppStorage("favorites") var favorites: [Recipe] = []
-    @AppStorage("groceries") var groceries: [Ingredient] = []
+    @AppStorage("groceries") var groceries: [GroceryListItem] = []
 
     var body: some View {
         ScrollView {
             VStack {
-                Image("example_recipe_image")
+                Image(recipe.image)
                     .resizable()
                     .scaledToFit()
                 Text(recipe.author)
@@ -46,13 +46,13 @@ struct RecipeDetail: View {
                 ForEach (recipe.ingredients) { ingredient in
                     HStack {
                         AddFillButton() {
-                            let index = groceries.firstIndex(where: {$0.id == ingredient.id})
+                            let index = groceries.firstIndex(where: {$0.id == (recipe.id.uuidString + "_" + ingredient.id)})
                             return index != nil
                         } action: { tapped in
-                            let index = groceries.firstIndex(where: {$0.id == ingredient.id})
+                            let index = groceries.firstIndex(where: {$0.id == (recipe.id.uuidString + "_" + ingredient.id)})
                             if tapped {
                                 if index == nil {
-                                    groceries.append(ingredient)
+                                    groceries.append(GroceryListItem(id: recipe.id.uuidString + "_" + ingredient.id, ingredient: ingredient, check: false))
                                 }
                             } else {
                                 if index != nil {
@@ -105,15 +105,15 @@ struct RecipeDetail: View {
 struct RecipeDetail_Previews: PreviewProvider {
     static var previews: some View {
         let ingredients = [
-            Ingredient(id: 0, name: "milk", quantity: "2", unit: "cup"),
-            Ingredient(id: 1, name: "tea", quantity: "1/2", unit: "cup"),
-            Ingredient(id: 2, name: "sugar", quantity: "2", unit: "tblsp")
+            Ingredient(id: "0", name: "milk", quantity: "2", unit: "cup"),
+            Ingredient(id: "1", name: "tea", quantity: "1/2", unit: "cup"),
+            Ingredient(id: "2", name: "sugar", quantity: "2", unit: "tblsp")
         ]
         let steps = [
             "Mix sugar and tea",
             "Add milk"
         ]
-        let boba_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09e")!, name: "boba", author: "Micky Abir", rating: 4.5, ingredients: ingredients, steps: steps)
+        let boba_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09e")!, image: "simple_milk_tea", name: "boba", author: "Micky Abir", rating: 4.5, ingredients: ingredients, steps: steps)
         RecipeDetail(recipe: boba_recipe)
             .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
             .previewDisplayName("iPhone 12")

@@ -8,7 +8,7 @@
 import Foundation
 
 struct Ingredient: Hashable, Codable, Identifiable {
-    var id: Int
+    var id: String
     var name: String
     var quantity: String
     var unit: String
@@ -16,6 +16,7 @@ struct Ingredient: Hashable, Codable, Identifiable {
 
 struct Recipe: Hashable, Codable, Identifiable {
     var id: UUID
+    var image: String
     var name: String
     var author: String
     var rating: Double

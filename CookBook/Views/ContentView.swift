@@ -10,28 +10,39 @@ import SwiftUI
 struct ContentView: View {
     var recipes: [Recipe]
     @AppStorage("favorites") var favorites: [Recipe] = []
-    
+    @State private var selection = 2
+
     var body: some View {
-        TabView {
+        TabView(selection: $selection) {
             WorldView()
                 .tabItem {
                     Label("World", systemImage: "map")
                 }
+                .tag(0)
             
             RecipesMainView(recipes: recipes)
                 .tabItem {
                     Label("Recipes", systemImage: "globe")
                 }
+                .tag(1)
+            
+            ProfileView()
+                .tabItem {
+                    Label("Profile", systemImage: "person.crop.circle")
+                }
+                .tag(2)
             
             FavoritesView(favorites: favorites)
                 .tabItem {
                     Label("Favorites", systemImage: "heart")
                 }
+                .tag(3)
 
             GroceriesView()
                 .tabItem {
                     Label("Groceries", systemImage: "checklist")
                 }
+                .tag(4)
         }
     }
 }
@@ -59,15 +70,15 @@ extension Array: RawRepresentable where Element: Codable {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         let ingredients = [
-            Ingredient(id: 0, name: "milk", quantity: "2", unit: "cup"),
-            Ingredient(id: 1, name: "tea", quantity: "1/2", unit: "cup"),
-            Ingredient(id: 2, name: "sugar", quantity: "2", unit: "tblsp")
+            Ingredient(id: "0", name: "milk", quantity: "2", unit: "cup"),
+            Ingredient(id: "1", name: "tea", quantity: "1/2", unit: "cup"),
+            Ingredient(id: "2", name: "sugar", quantity: "2", unit: "tblsp")
         ]
         let steps = [
             "Mix sugar and tea",
             "Add milk"
         ]
-        let boba_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09e")!, name: "boba", author: "Micky Abir", rating: 4.5, ingredients: ingredients, steps: steps)
+        let boba_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09e")!, image: "simple_milk_tea", name: "boba", author: "Micky Abir", rating: 4.5, ingredients: ingredients, steps: steps)
         let recipes = [boba_recipe]
         ContentView(recipes: recipes, favorites: recipes)
             .previewDevice(PreviewDevice(rawValue: "iPhone 12"))

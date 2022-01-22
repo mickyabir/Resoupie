@@ -11,3 +11,9 @@ struct GroceryList: Hashable, Codable, Identifiable {
     var id: Int
     var list: [String]
 }
+
+struct GroceryListItem: Hashable, Codable, Identifiable {
+    var id: String
+    var ingredient: Ingredient
+    var check: Bool
+}

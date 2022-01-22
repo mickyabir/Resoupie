@@ -22,6 +22,7 @@
 		81BAF3EE2799FDBB004B0767 /* World.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BAF3ED2799FDBB004B0767 /* World.swift */; };
 		81BAF3F2279A035B004B0767 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 81BAF3F1279A035B004B0767 /* MapKit.framework */; };
 		81BAF3F4279A03E3004B0767 /* GroceryList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BAF3F3279A03E3004B0767 /* GroceryList.swift */; };
+		81BAF3F6279CB8DB004B0767 /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BAF3F5279CB8DB004B0767 /* Profile.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +62,7 @@
 		81BAF3EF279A02D0004B0767 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		81BAF3F1279A035B004B0767 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		81BAF3F3279A03E3004B0767 /* GroceryList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryList.swift; sourceTree = "<group>"; };
+		81BAF3F5279CB8DB004B0767 /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -153,10 +155,11 @@
 			children = (
 				814C8CF82797631E0056A7D2 /* ContentView.swift */,
 				814C8D24279766940056A7D2 /* RecipeDetail.swift */,
-				815E826E2798CA8800530BA2 /* Groceries.swift */,
 				815E82702798CAC800530BA2 /* RecipesMain.swift */,
+				815E826E2798CA8800530BA2 /* Groceries.swift */,
 				81BAF3EB2798D408004B0767 /* Favorites.swift */,
 				81BAF3ED2799FDBB004B0767 /* World.swift */,
+				81BAF3F5279CB8DB004B0767 /* Profile.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -309,6 +312,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				815E82712798CAC800530BA2 /* RecipesMain.swift in Sources */,
+				81BAF3F6279CB8DB004B0767 /* Profile.swift in Sources */,
 				81BAF3F4279A03E3004B0767 /* GroceryList.swift in Sources */,
 				814C8D25279766940056A7D2 /* RecipeDetail.swift in Sources */,
 				814C8D23279764CE0056A7D2 /* Recipe.swift in Sources */,
