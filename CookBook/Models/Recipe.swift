@@ -24,6 +24,7 @@ struct Recipe: Hashable, Codable, Identifiable {
     var ingredients: [Ingredient]
     var steps: [String]
     var coordinate: CLLocationCoordinate2D?
+    var emoji: String
 }
 
 extension CLLocationCoordinate2D: Hashable {

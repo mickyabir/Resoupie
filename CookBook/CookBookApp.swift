@@ -22,7 +22,7 @@ struct CookBookApp: App {
                 "Mix sugar and tea",
                 "Add milk"
             ]
-            let boba_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09e")!, image: "simple_milk_tea", name: "Simple Milk Tea", author: "Micky Abir", rating: 4.5, ingredients: ingredients_boba, steps: steps_boba, coordinate: coordinates_boba)
+            let boba_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09e")!, image: "simple_milk_tea", name: "Simple Milk Tea", author: "Micky Abir", rating: 4.5, ingredients: ingredients_boba, steps: steps_boba, coordinate: coordinates_boba, emoji: "🧋")
             
             
             let ingredients_coffee = [
@@ -36,7 +36,7 @@ struct CookBookApp: App {
             ]
             
             let coordinates_coffee = CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992)
-            let coffee_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09f")!, image: "flat_white", name: "Flat White", author: "Kane Statton", rating: 5, ingredients: ingredients_coffee, steps: steps_coffee, coordinate: coordinates_coffee)
+            let coffee_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09f")!, image: "flat_white", name: "Flat White", author: "Kane Statton", rating: 5, ingredients: ingredients_coffee, steps: steps_coffee, coordinate: coordinates_coffee, emoji: "☕")
             
             let recipes = [boba_recipe, coffee_recipe]
             ContentView(recipes: recipes)

@@ -10,28 +10,15 @@ import MapKit
 
 struct Place: Identifiable {
     var id: UUID
-    var name: String
+    var emoji: String
     var coordinate: CLLocationCoordinate2D
 }
 
-struct PlaceAnnotationView: View {
+struct PlaceAnnotationEmojiView: View {
     let title: String
     var body: some View {
-        VStack(spacing: 0) {
-            Text(title)
-                .font(.callout)
-                .padding(5)
-                .background(Color(.white))
-                .cornerRadius(10)
-            Image(systemName: "mappin.circle.fill")
-                .font(.title)
-                .foregroundColor(.red)
-            
-            Image(systemName: "arrowtriangle.down.fill")
-                .font(.caption)
-                .foregroundColor(.red)
-                .offset(x: 0, y: -5)
-        }
+        Text(title)
+            .font(.largeTitle)
     }
 }
 
@@ -44,7 +31,7 @@ struct WorldView: View {
         let places = recipes.filter {
             $0.coordinate != nil
         } .map {
-            Place(id: $0.id, name: $0.name, coordinate: $0.coordinate!)
+            Place(id: $0.id, emoji: $0.emoji, coordinate: $0.coordinate!)
         }
         
         NavigationView {
@@ -55,7 +42,7 @@ struct WorldView: View {
                             RecipeDetail(recipe: recipes[index])
                         }
                     } label: {
-                        PlaceAnnotationView(title: place.name)
+                        PlaceAnnotationEmojiView(title: place.emoji)
                     }
                 }
             }
