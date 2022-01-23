@@ -50,6 +50,7 @@ struct GroceriesView: View {
                     }
                     
                     Text(item.ingredient.name)
+
                 }
             }
         }

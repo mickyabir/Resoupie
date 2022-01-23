@@ -12,6 +12,10 @@ struct RecipeRow: View {
     
     var body: some View {
         HStack {
+            Image(recipe.image)
+                .resizable()
+                .frame(width: 128.0, height: 128.0)
+                .cornerRadius(20)
             Text(recipe.name)
         }
     }

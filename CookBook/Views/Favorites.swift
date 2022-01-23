@@ -11,10 +11,17 @@ struct FavoritesView: View {
     @AppStorage("favorites") var favorites: [Recipe] = []
     
     var body: some View {
-        ScrollView {
-            Text("Favorites")
-            ForEach(favorites, id: \.self) { recipe in
-                Text(recipe.name)
+        NavigationView {
+            ScrollView {
+                Text("Favorites")
+                ForEach(favorites, id: \.self) { recipe in
+                    NavigationLink {
+                        RecipeDetail(recipe: recipe)
+                    } label: {
+                        Text(recipe.name)
+                    }
+                    Spacer()
+                }
             }
         }
     }
