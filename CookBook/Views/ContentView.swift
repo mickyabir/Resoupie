@@ -14,15 +14,15 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selection) {
-            WorldView()
+            WorldView(recipes: recipes)
                 .tabItem {
-                    Label("World", systemImage: "map")
+                    Label("World", systemImage: "globe")
                 }
                 .tag(0)
             
             RecipesMainView(recipes: recipes)
                 .tabItem {
-                    Label("Recipes", systemImage: "globe")
+                    Label("Recipes", systemImage: "fork.knife")
                 }
                 .tag(1)
             
