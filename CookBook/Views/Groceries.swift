@@ -32,27 +32,36 @@ struct GroceriesView: View {
     @State private var selection: UUID?
     
     var body: some View {
-        ScrollView {
+        VStack {
             Text("Grocery List")
-            ForEach(groceries, id: \.self) { item in
-                HStack {
-                    ChecklistButton {
-                        return item.check
-                    } action: {_ in
-                        if let index = groceries.firstIndex(of: item) {
-                            groceries[index].check = !groceries[index].check
+                .font(.title)
+            ScrollView {
+                VStack(alignment: .leading) {
+                    ForEach(groceries, id: \.self) { item in
+                        HStack {
+                            ChecklistButton {
+                                return item.check
+                            } action: {_ in
+                                if let index = groceries.firstIndex(of: item) {
+                                    groceries[index].check = !groceries[index].check
+                                }
+                            }
+                            
+                            Text(item.ingredient.name)
                         }
                     }
-                    
-                    Text(item.ingredient.name)
                 }
+                .offset(x: 30, y: 30)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             
             Button {
                 groceries = groceries.filter({ !$0.check })
             } label: {
                 Text("Delete All Checked Items")
             }
+            .offset(y: -20)
         }
     }
 }

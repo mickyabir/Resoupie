@@ -34,11 +34,14 @@ struct RecipeDetail: View {
 
     var body: some View {
         ScrollView {
-            VStack {
+            VStack(alignment: .leading) {
                 Image(recipe.image)
                     .resizable()
                     .scaledToFit()
+                HStack {
                 Text(recipe.author)
+                    .frame(alignment: .center)
+                }
                 Text(String(recipe.rating))
                 
                 Spacer()
@@ -70,8 +73,21 @@ struct RecipeDetail: View {
                     .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                 }
                 
+                VStack(alignment: .leading) {
                 ForEach (recipe.steps, id: \.self) { step in
-                    Text(step)
+                    HStack {
+                        ZStack{
+                            Image(systemName: "circle.fill")
+                                .font(.largeTitle)
+                            let index = recipe.steps.firstIndex(of: step)! + 1
+                            Text(String(index))
+                                .foregroundColor(Color.black)
+                        }
+                        
+                        Text(step)
+                            .padding()
+                    }
+                }
                 }
             }.frame(maxWidth: .infinity)
         }
