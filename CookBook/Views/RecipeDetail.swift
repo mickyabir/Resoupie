@@ -18,8 +18,7 @@ struct AddFillButton: View {
             action(didTap)
         } label: {
             Image(systemName: didTap ? "plus.circle.fill" : "plus.circle")
-                .frame(width: 18, height: 18)
-                .clipShape(Circle())
+                .font(.system(size: 20))
         }.onAppear {
             didTap = initialize()
         }
@@ -78,10 +77,11 @@ struct RecipeDetail: View {
                     HStack {
                         ZStack{
                             Image(systemName: "circle.fill")
-                                .font(.largeTitle)
+                                .font(.system(size: 24))
+                                .foregroundColor(Color.orange)
                             let index = recipe.steps.firstIndex(of: step)! + 1
                             Text(String(index))
-                                .foregroundColor(Color.black)
+                                .foregroundColor(Color.white)
                         }
                         
                         Text(step)

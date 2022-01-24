@@ -18,8 +18,9 @@ struct ChecklistButton: View {
             action(didTap)
         } label: {
             Image(systemName: didTap ? "checkmark.circle.fill" : "circle")
-                .frame(width: 18, height: 18)
-                .clipShape(Circle())
+                .frame(width: 22, height: 22)
+                .foregroundColor(Color.orange)
+                .font(.system(size: 22))
         }.onAppear {
             didTap = initialize()
         }
