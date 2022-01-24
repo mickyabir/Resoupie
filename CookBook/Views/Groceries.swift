@@ -28,7 +28,9 @@ struct ChecklistButton: View {
 
 struct GroceriesView: View {
     @AppStorage("groceries") var groceries: [GroceryListItem] = []
+    
     @State private var selection: UUID?
+    
     var body: some View {
         ScrollView {
             Text("Grocery List")
@@ -37,21 +39,19 @@ struct GroceriesView: View {
                     ChecklistButton {
                         return item.check
                     } action: {_ in
-                        let index = groceries.firstIndex(where: {$0.ingredient.id == item.ingredient.id})
-                        if index != nil {
-                            groceries.remove(at: index!)
-                        }
-                        
-                        if item.check {
-                            groceries.append(item)
-                        } else {
-                            groceries.insert(item, at: 0)
+                        if let index = groceries.firstIndex(of: item) {
+                            groceries[index].check = !groceries[index].check
                         }
                     }
                     
                     Text(item.ingredient.name)
-
                 }
+            }
+            
+            Button {
+                groceries = groceries.filter({ !$0.check })
+            } label: {
+                Text("Delete All Checked Items")
             }
         }
     }
