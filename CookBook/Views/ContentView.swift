@@ -14,7 +14,7 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selection) {
-            WorldView(recipes: recipes)
+            WorldView()
                 .tabItem {
                     Label("World", systemImage: "globe")
                 }
@@ -78,7 +78,7 @@ struct ContentView_Previews: PreviewProvider {
             "Mix sugar and tea",
             "Add milk"
         ]
-        let boba_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09e")!, image: "simple_milk_tea", name: "boba", author: "Micky Abir", rating: 4.5, ingredients: ingredients, steps: steps, emoji: "🧋")
+        let boba_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09e")!, image: "simple_milk_tea", name: "boba", author: "Micky Abir", rating: 4.5, ingredients: ingredients, steps: steps, emoji: "🧋", favorited: 100)
         let recipes = [boba_recipe]
         ContentView(recipes: recipes, favorites: recipes)
             .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
