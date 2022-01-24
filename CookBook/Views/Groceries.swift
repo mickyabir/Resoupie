@@ -30,38 +30,51 @@ struct GroceriesView: View {
     @AppStorage("groceries") var groceries: [GroceryListItem] = []
     
     @State private var selection: UUID?
-    
+    @State private var showingDeleteAlert = false
+
     var body: some View {
-        VStack {
-            Text("Grocery List")
-                .font(.title)
-            ScrollView {
-                VStack(alignment: .leading) {
-                    ForEach(groceries, id: \.self) { item in
-                        HStack {
-                            ChecklistButton {
-                                return item.check
-                            } action: {_ in
-                                if let index = groceries.firstIndex(of: item) {
-                                    groceries[index].check = !groceries[index].check
+        NavigationView{
+            VStack {
+                ScrollView {
+                    VStack(alignment: .leading) {
+                        ForEach(groceries, id: \.self) { item in
+                            HStack {
+                                ChecklistButton {
+                                    return item.check
+                                } action: {_ in
+                                    if let index = groceries.firstIndex(of: item) {
+                                        groceries[index].check = !groceries[index].check
+                                    }
                                 }
+                                
+                                Text(item.ingredient.name)
                             }
-                            
-                            Text(item.ingredient.name)
                         }
                     }
+                    .offset(x: 30, y: 30)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .offset(x: 30, y: 30)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Button {
+                    if groceries.firstIndex(where: {$0.check}) != nil {
+                        showingDeleteAlert = true
+                    }
+                } label: {
+                    Text("Delete All Checked Items")
+                }
+                .offset(y: -20)
+                .alert(isPresented: $showingDeleteAlert) {
+                    Alert(
+                        title: Text("Are you sure?"),
+                        primaryButton: .destructive(Text("Delete")) {
+                            groceries = groceries.filter({ !$0.check })
+                        },
+                        secondaryButton: .cancel()
+                    )
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            
-            Button {
-                groceries = groceries.filter({ !$0.check })
-            } label: {
-                Text("Delete All Checked Items")
-            }
-            .offset(y: -20)
+            .navigationTitle("Grocery List")
         }
     }
 }

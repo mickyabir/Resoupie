@@ -38,7 +38,28 @@ struct CookBookApp: App {
             let coordinates_coffee = CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992)
             let coffee_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09f")!, image: "flat_white", name: "Flat White", author: "Kane Statton", rating: 5, ingredients: ingredients_coffee, steps: steps_coffee, coordinate: coordinates_coffee, emoji: "☕")
             
-            let recipes = [boba_recipe, coffee_recipe]
+            
+            let ingredients_spaghetti = [
+                Ingredient(id: "0", name: "Barilla® Pronto® Half-Cut Spaghetti", quantity: "12", unit: "oz"),
+                Ingredient(id: "1", name: "salt", quantity: "1", unit: "pinch"),
+                Ingredient(id: "2", name: "ground beef", quantity: "1", unit: "lb"),
+                Ingredient(id: "3", name: "Barilla® Tomato and Basil Sauce", quantity: "24", unit: "oz"),
+            ]
+            
+            let steps_spaghetti = [
+                "To a large pan, add the pasta, cover with 3 cups cold water, optional salt to taste, and boil over high heat until water has absorbed, about 10 minutes, but watch your pasta and cook as needed until al dente. While pasta boils, brown the ground beef.",
+                "To a large skillet, add the ground beef and cook over medium-high heat, breaking up the meat with a spatula as it cooks to ensure even cooking.",
+                "After beef has cooked through, add the pasta sauce, stir to combine, and cook for 1 to 2 minutes, or until heated through.",
+                "After pasta has cooked for about 10 minutes, or until all the water has been absorbed, add the sauce over the pasta and toss to combine in the skillet or alternatively plate the pasta and add sauce to each individual plate as desired.",
+                "Optionally garnish with basil and Parmesan to taste and serve immediately. Pasta and sauce are best warm and fresh but extra will keep airtight in the fridge for up to 5 days."
+            ]
+            
+            let coordinates_spaghetti = CLLocationCoordinate2D(latitude: 34.047, longitude: -118.454)
+            let spaghetti_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09d")!, image: "spaghetti", name: "Easy Spaghetti", author: "Averie Sunshine", rating: 4.6, ingredients: ingredients_spaghetti, steps: steps_spaghetti, coordinate: coordinates_spaghetti, emoji: "🍝")
+
+            
+            
+            let recipes = [boba_recipe, coffee_recipe, spaghetti_recipe]
             ContentView(recipes: recipes)
         }
     }

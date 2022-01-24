@@ -16,14 +16,20 @@ struct RecipeRow: View {
                 .resizable()
                 .frame(width: 128.0, height: 128.0)
                 .cornerRadius(20)
-            Text(recipe.name)
+            VStack {
+                Text(recipe.name)
+                Text("by")
+                    .padding(3)
+                Text(recipe.author)
+            }
         }
     }
 }
 
 struct RecipesMainView: View {
     var recipes: [Recipe]
-    
+    @State private var searchText = ""
+
     var body: some View {
         NavigationView {
             List(recipes) { recipe in

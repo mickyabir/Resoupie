@@ -12,17 +12,15 @@ struct FavoritesView: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                Text("Favorites")
-                ForEach(favorites, id: \.self) { recipe in
-                    NavigationLink {
-                        RecipeDetail(recipe: recipe)
-                    } label: {
-                        Text(recipe.name)
-                    }
-                    Spacer()
+
+            List(favorites) { recipe in
+                NavigationLink {
+                    RecipeDetail(recipe: recipe)
+                } label: {
+                    RecipeRow(recipe: recipe)
                 }
             }
+            .navigationTitle("Favorites")
         }
     }
 }
