@@ -49,19 +49,17 @@ struct NewRecipeView: View {
                 }
                 
                 Divider()
-                
-                VStack {
-                    Text("Lat: " + String(coordinate?.latitude ?? 0))
-                        .opacity(coordinate != nil ? 1 : 0)
-                    
-                    Text("Long: " + String(coordinate?.longitude ?? 0))
-                        .opacity(coordinate != nil ? 1 : 0)
-                }
 
-                NavigationLink {
-                    CoordinatePicker(viewModel: coordinatePickerViewModel)
-                } label: {
-                    Text("Coordinate Picker")
+                HStack {
+                    NavigationLink {
+                        CoordinatePicker(viewModel: coordinatePickerViewModel)
+                    } label: {
+                        Text("Choose Location (Optional)")
+                    }
+                    
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(Color.green)
+                        .opacity(coordinate != nil ? 1 : 0)
                 }
                 
                 Divider()

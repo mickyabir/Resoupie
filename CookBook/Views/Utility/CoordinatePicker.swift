@@ -14,18 +14,17 @@ struct PinLocation: Identifiable {
 }
 
 class CoordinatePickerViewModel: ObservableObject {
-    @State var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-    
     var chosenRegion: CLLocationCoordinate2D?
+    var region: MKCoordinateRegion?
     
     var locations: [PinLocation] = []
     
     func selectCurrentRegion() {
-        let latDelta = Double.random(in: -0.02 ..< 0.02)
-        let longDelta = Double.random(in: -0.02 ..< 0.02)
+        let latDelta = Double.random(in: -0.03 ..< 0.03)
+        let longDelta = Double.random(in: -0.03 ..< 0.03)
 
-        let latitude = region.center.latitude
-        let longitude = region.center.longitude
+        let latitude = region!.center.latitude
+        let longitude = region!.center.longitude
         
         chosenRegion = CLLocationCoordinate2D(latitude: latitude + latDelta, longitude: longitude + longDelta)
         
@@ -40,12 +39,15 @@ struct CoordinatePicker: View {
     
     @ObservedObject var viewModel: CoordinatePickerViewModel
     
+    @State var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 0.07, longitudeDelta: 0.07))
+    
     var body: some View {
         ZStack {
-            Map(coordinateRegion: $viewModel.region, interactionModes: .all, showsUserLocation: true, annotationItems: viewModel.locations) { place in
+            Map(coordinateRegion: $region, interactionModes: .all, showsUserLocation: true, annotationItems: viewModel.locations) { place in
                 MapPin(coordinate: place.coordinate, tint: Color.red)
             }
-            .onChange(of: viewModel.region) { newRegion in
+            .onChange(of: region) { newRegion in
+                viewModel.region = region
             }
             
             VStack {
