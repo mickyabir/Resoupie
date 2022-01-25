@@ -12,12 +12,15 @@ struct GroceriesView: View {
     
     @State private var selection: UUID?
     @State private var showingDeleteAlert = false
-
+    
+    func move(from source: IndexSet, to destination: Int) {
+        //        users.move(fromOffsets: source, toOffset: destination)
+    }
     var body: some View {
         NavigationView{
             VStack {
-                ScrollView {
-                    VStack(alignment: .leading) {
+                VStack(alignment: .leading) {
+                    List {
                         ForEach(groceries, id: \.self) { item in
                             HStack {
                                 ChecklistButton {
@@ -31,11 +34,12 @@ struct GroceriesView: View {
                                 Text(item.ingredient.name)
                             }
                         }
+                        .onMove(perform: move)
                     }
-                    .offset(x: 30, y: 30)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .toolbar {
+                        EditButton()
+                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Button {
                     if groceries.firstIndex(where: {$0.check}) != nil {

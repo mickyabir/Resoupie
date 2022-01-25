@@ -105,56 +105,56 @@ class WorldViewModel: ObservableObject {
         }
     }
 }
+
+struct WorldView: View {
+    @State var zoom: CGFloat = 15
     
-    struct WorldView: View {
-        @State var zoom: CGFloat = 15
+    @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+    
+    @ObservedObject var viewModel = WorldViewModel()
+    
+    var body: some View {
+        let places = viewModel.recipes.filter {
+            $0.coordinate != nil
+        } .map {
+            Place(id: $0.id, emoji: $0.emoji, coordinate: $0.coordinate!)
+        }
         
-        @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-        
-        @ObservedObject var viewModel = WorldViewModel()
-        
-        var body: some View {
-            let places = viewModel.recipes.filter {
-                $0.coordinate != nil
-            } .map {
-                Place(id: $0.id, emoji: $0.emoji, coordinate: $0.coordinate!)
-            }
-            
-            NavigationView {
-                Map(coordinateRegion: $region, annotationItems: places) { place in
-                    MapAnnotation(coordinate: place.coordinate) {
-                        NavigationLink {
-                            if let index = viewModel.recipes.firstIndex(where: { $0.id == place.id }) {
-                                RecipeDetail(recipe: viewModel.recipes[index])
-                            }
-                        } label: {
-                            PlaceAnnotationEmojiView(title: place.emoji)
+        NavigationView {
+            Map(coordinateRegion: $region, annotationItems: places) { place in
+                MapAnnotation(coordinate: place.coordinate) {
+                    NavigationLink {
+                        if let index = viewModel.recipes.firstIndex(where: { $0.id == place.id }) {
+                            RecipeDetail(recipe: viewModel.recipes[index])
                         }
+                    } label: {
+                        PlaceAnnotationEmojiView(title: place.emoji)
                     }
                 }
-                .edgesIgnoringSafeArea(.top)
-                .onChange(of: region) { newRegion in
-                    viewModel.fetchRecipes(region: newRegion)
-                }
-                
-                
             }
-            .onAppear {
-                viewModel.fetchRecipes(region: region)
+            .edgesIgnoringSafeArea(.top)
+            .onChange(of: region) { newRegion in
+                viewModel.fetchRecipes(region: newRegion)
             }
+            
+            
+        }
+        .onAppear {
+            viewModel.fetchRecipes(region: region)
         }
     }
-    
-    extension MKCoordinateRegion: Equatable {
-        public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
-            return lhs.span.latitudeDelta == rhs.span.latitudeDelta && lhs.span.longitudeDelta == rhs.span.longitudeDelta && lhs.center.latitude == rhs.center.latitude && lhs.center.longitude == rhs.center.longitude
-        }
+}
+
+extension MKCoordinateRegion: Equatable {
+    public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
+        return lhs.span.latitudeDelta == rhs.span.latitudeDelta && lhs.span.longitudeDelta == rhs.span.longitudeDelta && lhs.center.latitude == rhs.center.latitude && lhs.center.longitude == rhs.center.longitude
     }
-    
-    struct World_Previews: PreviewProvider {
-        static var previews: some View {
-            WorldView()
-                .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
-                .previewDisplayName("iPhone 12")
-        }
+}
+
+struct World_Previews: PreviewProvider {
+    static var previews: some View {
+        WorldView()
+            .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
+            .previewDisplayName("iPhone 12")
     }
+}
