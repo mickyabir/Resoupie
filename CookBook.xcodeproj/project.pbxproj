@@ -18,6 +18,9 @@
 		814C8D25279766940056A7D2 /* RecipeDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814C8D24279766940056A7D2 /* RecipeDetail.swift */; };
 		815E826F2798CA8800530BA2 /* Groceries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 815E826E2798CA8800530BA2 /* Groceries.swift */; };
 		815E82712798CAC800530BA2 /* RecipesMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 815E82702798CAC800530BA2 /* RecipesMain.swift */; };
+		81B1BF82279F669300EC85BB /* NewRecipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF81279F669300EC85BB /* NewRecipe.swift */; };
+		81B1BF85279F851A00EC85BB /* EmojiPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF84279F851A00EC85BB /* EmojiPicker.swift */; };
+		81B1BF87279F852200EC85BB /* PhotoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF86279F852200EC85BB /* PhotoPicker.swift */; };
 		81BAF3EC2798D408004B0767 /* Favorites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BAF3EB2798D408004B0767 /* Favorites.swift */; };
 		81BAF3EE2799FDBB004B0767 /* World.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BAF3ED2799FDBB004B0767 /* World.swift */; };
 		81BAF3F2279A035B004B0767 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 81BAF3F1279A035B004B0767 /* MapKit.framework */; };
@@ -57,6 +60,9 @@
 		814C8D24279766940056A7D2 /* RecipeDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeDetail.swift; sourceTree = "<group>"; };
 		815E826E2798CA8800530BA2 /* Groceries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Groceries.swift; sourceTree = "<group>"; };
 		815E82702798CAC800530BA2 /* RecipesMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipesMain.swift; sourceTree = "<group>"; };
+		81B1BF81279F669300EC85BB /* NewRecipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewRecipe.swift; sourceTree = "<group>"; };
+		81B1BF84279F851A00EC85BB /* EmojiPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPicker.swift; sourceTree = "<group>"; };
+		81B1BF86279F852200EC85BB /* PhotoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoPicker.swift; sourceTree = "<group>"; };
 		81BAF3EB2798D408004B0767 /* Favorites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Favorites.swift; sourceTree = "<group>"; };
 		81BAF3ED2799FDBB004B0767 /* World.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = World.swift; sourceTree = "<group>"; };
 		81BAF3EF279A02D0004B0767 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -153,6 +159,7 @@
 		814C8D20279764B50056A7D2 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				81B1BF83279F84FB00EC85BB /* Utility */,
 				814C8CF82797631E0056A7D2 /* ContentView.swift */,
 				814C8D24279766940056A7D2 /* RecipeDetail.swift */,
 				815E82702798CAC800530BA2 /* RecipesMain.swift */,
@@ -160,6 +167,7 @@
 				81BAF3EB2798D408004B0767 /* Favorites.swift */,
 				81BAF3ED2799FDBB004B0767 /* World.swift */,
 				81BAF3F5279CB8DB004B0767 /* Profile.swift */,
+				81B1BF81279F669300EC85BB /* NewRecipe.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -171,6 +179,15 @@
 				81BAF3F3279A03E3004B0767 /* GroceryList.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		81B1BF83279F84FB00EC85BB /* Utility */ = {
+			isa = PBXGroup;
+			children = (
+				81B1BF84279F851A00EC85BB /* EmojiPicker.swift */,
+				81B1BF86279F852200EC85BB /* PhotoPicker.swift */,
+			);
+			path = Utility;
 			sourceTree = "<group>";
 		};
 		81BAF3F0279A035B004B0767 /* Frameworks */ = {
@@ -314,12 +331,15 @@
 				815E82712798CAC800530BA2 /* RecipesMain.swift in Sources */,
 				81BAF3F6279CB8DB004B0767 /* Profile.swift in Sources */,
 				81BAF3F4279A03E3004B0767 /* GroceryList.swift in Sources */,
+				81B1BF82279F669300EC85BB /* NewRecipe.swift in Sources */,
 				814C8D25279766940056A7D2 /* RecipeDetail.swift in Sources */,
 				814C8D23279764CE0056A7D2 /* Recipe.swift in Sources */,
 				814C8CF92797631E0056A7D2 /* ContentView.swift in Sources */,
 				81BAF3EC2798D408004B0767 /* Favorites.swift in Sources */,
 				814C8CF72797631E0056A7D2 /* CookBookApp.swift in Sources */,
 				81BAF3EE2799FDBB004B0767 /* World.swift in Sources */,
+				81B1BF87279F852200EC85BB /* PhotoPicker.swift in Sources */,
+				81B1BF85279F851A00EC85BB /* EmojiPicker.swift in Sources */,
 				815E826F2798CA8800530BA2 /* Groceries.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

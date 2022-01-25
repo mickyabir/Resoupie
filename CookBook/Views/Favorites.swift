@@ -12,7 +12,6 @@ struct FavoritesView: View {
     
     var body: some View {
         NavigationView {
-
             List(favorites) { recipe in
                 NavigationLink {
                     RecipeDetail(recipe: recipe)
