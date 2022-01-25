@@ -28,8 +28,12 @@ struct NewRecipeView: View {
     @State var uuid = UUID()
     @State var ingredients: [Ingredient] = []
     @State var steps: [String] = [""]
+    @State var coordinate: CLLocationCoordinate2D?
     @State private var recipeImage: UIImage?
     @State private var showImageLibrary = false
+    
+    private let coordinatePickerViewModel = CoordinatePickerViewModel()
+
     
     var body: some View {
         ScrollView {
@@ -42,6 +46,22 @@ struct NewRecipeView: View {
                     showImageLibrary = true
                 } label: {
                     Text("Add Image")
+                }
+                
+                Divider()
+                
+                VStack {
+                    Text("Lat: " + String(coordinate?.latitude ?? 0))
+                        .opacity(coordinate != nil ? 1 : 0)
+                    
+                    Text("Long: " + String(coordinate?.longitude ?? 0))
+                        .opacity(coordinate != nil ? 1 : 0)
+                }
+
+                NavigationLink {
+                    CoordinatePicker(viewModel: coordinatePickerViewModel)
+                } label: {
+                    Text("Coordinate Picker")
                 }
                 
                 Divider()
@@ -69,6 +89,9 @@ struct NewRecipeView: View {
             let resign = #selector(UIResponder.resignFirstResponder)
             UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
             
+        }
+        .onAppear {
+            coordinate = coordinatePickerViewModel.chosenRegion
         }
     }
 }

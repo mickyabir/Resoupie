@@ -25,6 +25,7 @@
 		81B1BF8B279F97AA00EC85BB /* AddFillButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF8A279F97AA00EC85BB /* AddFillButton.swift */; };
 		81B1BF8E279F97DE00EC85BB /* TextEditorListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF8D279F97DE00EC85BB /* TextEditorListView.swift */; };
 		81B1BF90279FA6CA00EC85BB /* CoordinatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF8F279FA6CA00EC85BB /* CoordinatePicker.swift */; };
+		81B1BF92279FB0B300EC85BB /* SearchAreaButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF91279FB0B300EC85BB /* SearchAreaButton.swift */; };
 		81BAF3EC2798D408004B0767 /* Favorites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BAF3EB2798D408004B0767 /* Favorites.swift */; };
 		81BAF3EE2799FDBB004B0767 /* World.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BAF3ED2799FDBB004B0767 /* World.swift */; };
 		81BAF3F2279A035B004B0767 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 81BAF3F1279A035B004B0767 /* MapKit.framework */; };
@@ -71,6 +72,7 @@
 		81B1BF8A279F97AA00EC85BB /* AddFillButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFillButton.swift; sourceTree = "<group>"; };
 		81B1BF8D279F97DE00EC85BB /* TextEditorListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorListView.swift; sourceTree = "<group>"; };
 		81B1BF8F279FA6CA00EC85BB /* CoordinatePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatePicker.swift; sourceTree = "<group>"; };
+		81B1BF91279FB0B300EC85BB /* SearchAreaButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchAreaButton.swift; sourceTree = "<group>"; };
 		81BAF3EB2798D408004B0767 /* Favorites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Favorites.swift; sourceTree = "<group>"; };
 		81BAF3ED2799FDBB004B0767 /* World.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = World.swift; sourceTree = "<group>"; };
 		81BAF3EF279A02D0004B0767 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -195,6 +197,7 @@
 				81B1BF84279F851A00EC85BB /* EmojiPicker.swift */,
 				81B1BF86279F852200EC85BB /* PhotoPicker.swift */,
 				81B1BF88279F977600EC85BB /* ChecklistButton.swift */,
+				81B1BF91279FB0B300EC85BB /* SearchAreaButton.swift */,
 				81B1BF8A279F97AA00EC85BB /* AddFillButton.swift */,
 				81B1BF8D279F97DE00EC85BB /* TextEditorListView.swift */,
 				81B1BF8F279FA6CA00EC85BB /* CoordinatePicker.swift */,
@@ -350,6 +353,7 @@
 				814C8D23279764CE0056A7D2 /* Recipe.swift in Sources */,
 				814C8CF92797631E0056A7D2 /* ContentView.swift in Sources */,
 				81BAF3EC2798D408004B0767 /* Favorites.swift in Sources */,
+				81B1BF92279FB0B300EC85BB /* SearchAreaButton.swift in Sources */,
 				814C8CF72797631E0056A7D2 /* CookBookApp.swift in Sources */,
 				81BAF3EE2799FDBB004B0767 /* World.swift in Sources */,
 				81B1BF87279F852200EC85BB /* PhotoPicker.swift in Sources */,

@@ -27,7 +27,7 @@ struct GroceriesView: View {
                                     return item.check
                                 } action: {_ in
                                     if let index = groceries.firstIndex(of: item) {
-                                        groceries[index].check = !groceries[index].check
+                                        groceries[index].check.toggle()
                                     }
                                 }
                                 
