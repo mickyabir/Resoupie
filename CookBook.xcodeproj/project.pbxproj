@@ -21,6 +21,9 @@
 		81B1BF82279F669300EC85BB /* NewRecipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF81279F669300EC85BB /* NewRecipe.swift */; };
 		81B1BF85279F851A00EC85BB /* EmojiPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF84279F851A00EC85BB /* EmojiPicker.swift */; };
 		81B1BF87279F852200EC85BB /* PhotoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF86279F852200EC85BB /* PhotoPicker.swift */; };
+		81B1BF89279F977600EC85BB /* ChecklistButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF88279F977600EC85BB /* ChecklistButton.swift */; };
+		81B1BF8B279F97AA00EC85BB /* AddFillButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF8A279F97AA00EC85BB /* AddFillButton.swift */; };
+		81B1BF8E279F97DE00EC85BB /* TextFieldListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF8D279F97DE00EC85BB /* TextFieldListView.swift */; };
 		81BAF3EC2798D408004B0767 /* Favorites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BAF3EB2798D408004B0767 /* Favorites.swift */; };
 		81BAF3EE2799FDBB004B0767 /* World.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BAF3ED2799FDBB004B0767 /* World.swift */; };
 		81BAF3F2279A035B004B0767 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 81BAF3F1279A035B004B0767 /* MapKit.framework */; };
@@ -63,6 +66,9 @@
 		81B1BF81279F669300EC85BB /* NewRecipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewRecipe.swift; sourceTree = "<group>"; };
 		81B1BF84279F851A00EC85BB /* EmojiPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPicker.swift; sourceTree = "<group>"; };
 		81B1BF86279F852200EC85BB /* PhotoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoPicker.swift; sourceTree = "<group>"; };
+		81B1BF88279F977600EC85BB /* ChecklistButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistButton.swift; sourceTree = "<group>"; };
+		81B1BF8A279F97AA00EC85BB /* AddFillButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFillButton.swift; sourceTree = "<group>"; };
+		81B1BF8D279F97DE00EC85BB /* TextFieldListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldListView.swift; sourceTree = "<group>"; };
 		81BAF3EB2798D408004B0767 /* Favorites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Favorites.swift; sourceTree = "<group>"; };
 		81BAF3ED2799FDBB004B0767 /* World.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = World.swift; sourceTree = "<group>"; };
 		81BAF3EF279A02D0004B0767 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -186,6 +192,9 @@
 			children = (
 				81B1BF84279F851A00EC85BB /* EmojiPicker.swift */,
 				81B1BF86279F852200EC85BB /* PhotoPicker.swift */,
+				81B1BF88279F977600EC85BB /* ChecklistButton.swift */,
+				81B1BF8A279F97AA00EC85BB /* AddFillButton.swift */,
+				81B1BF8D279F97DE00EC85BB /* TextFieldListView.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -328,7 +337,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				81B1BF89279F977600EC85BB /* ChecklistButton.swift in Sources */,
 				815E82712798CAC800530BA2 /* RecipesMain.swift in Sources */,
+				81B1BF8E279F97DE00EC85BB /* TextFieldListView.swift in Sources */,
 				81BAF3F6279CB8DB004B0767 /* Profile.swift in Sources */,
 				81BAF3F4279A03E3004B0767 /* GroceryList.swift in Sources */,
 				81B1BF82279F669300EC85BB /* NewRecipe.swift in Sources */,
@@ -341,6 +352,7 @@
 				81B1BF87279F852200EC85BB /* PhotoPicker.swift in Sources */,
 				81B1BF85279F851A00EC85BB /* EmojiPicker.swift in Sources */,
 				815E826F2798CA8800530BA2 /* Groceries.swift in Sources */,
+				81B1BF8B279F97AA00EC85BB /* AddFillButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
