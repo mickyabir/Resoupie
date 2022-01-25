@@ -46,7 +46,7 @@ struct NewRecipeView: View {
                 
                 Divider()
                 
-                TextAreaListView()
+                TextEditorListView()
                 
                 
                 Divider()
