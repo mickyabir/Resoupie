@@ -54,7 +54,7 @@ class NewRecipeViewController: ObservableObject {
     @Published var ingredients: [Ingredient] = []
     @Published var steps: [String] = [] // might need to add one? not sure
     @Published var coordinate: CLLocationCoordinate2D?
-    @Published var image: Image?
+    @Published var image: UIImage?
     @Published var servings: String = ""
     
     @Published var showEmptyRecipeWarning = false
@@ -68,11 +68,67 @@ class NewRecipeViewController: ObservableObject {
         
         let _ = Recipe(id: uuid, image: "image", name: name, author: "author", rating: 0, ingredients: ingredients, steps: steps, coordinate: coordinate, emoji: emoji, favorited: 0, servings: Int(servings) ?? 0)
         
+        uploadImageToServer()
         
-        
-        
+        print("here")
     }
     
+    func uploadImageToServer() {
+        guard let image = image else { return }
+        guard let url = URL(string: "http://127.0.0.1:8000/images/") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        //create boundary
+        let boundary = generateBoundary()
+        //set content type
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        //call createDataBody method
+        let dataBody = createDataBody(media: image, boundary: boundary)
+        request.httpBody = dataBody
+        let session = URLSession.shared
+        session.dataTask(with: request) { (data, response, error) in
+            if let response = response {
+                print(response)
+            }
+            if let data = data {
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data, options: [])
+                    print(json)
+                } catch {
+                    print(error)
+                }
+            }
+        }.resume()
+    }
+    
+    func createDataBody(media: UIImage?, boundary: String) -> Data {
+        let lineBreak = "\r\n"
+        var body = Data()
+        if let media = media {
+            body.append("--\(boundary + lineBreak)")
+            body.append("Content-Disposition: form-data; name=\"file\"; filename=\"filename\"\(lineBreak)")
+            body.append("Content-Type: image/png\(lineBreak + lineBreak)")
+            body.append(media.pngData()!)
+            body.append(lineBreak)
+        }
+        
+        body.append("--\(boundary)--\(lineBreak)")
+        return body
+    }
+    
+    func generateBoundary() -> String {
+        return "Boundary-\(NSUUID().uuidString)"
+    }
+    
+}
+
+extension Data {
+    mutating func append(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
+            print("data======>>>",data)
+        }
+    }
 }
 
 struct NewRecipeView: View {
@@ -95,7 +151,7 @@ struct NewRecipeView: View {
                         .keyboardType(.numberPad)
                     
                     if viewController.image != nil {
-                        viewController.image!
+                        Image(uiImage: viewController.image!)
                             .resizable()
                             .scaledToFit()
                             .clipped()
@@ -156,7 +212,7 @@ struct NewRecipeView: View {
         }
         .onChange(of: inputImage) { _ in
             guard let inputImage = inputImage else { return }
-            viewController.image = Image(uiImage: inputImage)
+            viewController.image = inputImage
         }
         .alert(isPresented: $viewController.showEmptyRecipeWarning) {
             Alert(
