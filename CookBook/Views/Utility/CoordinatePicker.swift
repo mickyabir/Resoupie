@@ -56,7 +56,7 @@ struct CoordinatePicker: View {
                     self.presentationMode.wrappedValue.dismiss()
                 }
                 .offset(y: 280)
-                .opacity(0.85)
+                .opacity(1)
             }
         }
         .navigationBarTitle("Location", displayMode: .inline)

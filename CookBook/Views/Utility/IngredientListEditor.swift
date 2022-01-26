@@ -12,6 +12,44 @@ class IngredientListEditorViewController: ObservableObject {
     @Published var ingredients: [String] = ["Ingredient"]
     @Published var quantities: [String] = ["Quantity"]
     @Published var units: [String] = ["Unit"]
+    var isEmpty: Bool {
+        for index in listItems {
+            if (ingredients[index] != "Ingredient" || ingredients[index] != "") && (quantities[index] != "Quantity" || quantities[index] != "") && (units[index] != "Unit" || units[index] != "") {
+                return false
+            }
+        }
+        
+        return true
+    }
+    
+    var ingredientsList: [Ingredient] {
+        if !isEmpty {
+            var list: [Ingredient] = []
+
+            for index in listItems {
+                if rowIsEmpty(index: index) {
+                    continue
+                }
+                list.append(Ingredient(id: String(index), name: ingredients[index], quantity: quantities[index], unit: units[index]))
+            }
+            
+            return list
+        }
+
+        return []
+    }
+    
+    func rowIsEmpty(index: Int) -> Bool {
+        if index >= listItems.count {
+            return true
+        }
+        
+        if ingredients[index] == "Ingredient" || quantities[index] == "Quantity" || units[index] == "Unit" {
+            return true
+        }
+        
+        return false
+    }
     
     func addRow() {
         listItems.append(listItems.count)
@@ -79,8 +117,8 @@ struct IngredientListEditorView: View {
                                     RoundedRectangle(cornerRadius: 10)
                                         .stroke(Color.orange, lineWidth: 2))
                                 .frame(height: 40)
+                                .keyboardType(.numberPad)
                                 .foregroundColor(viewController.quantities[index] == "Quantity" ? Color.gray : Color.black)
-                            
                                 .disableAutocorrection(true)
                                 .onTapGesture {
                                     if viewController.quantities[index] == "Quantity" {

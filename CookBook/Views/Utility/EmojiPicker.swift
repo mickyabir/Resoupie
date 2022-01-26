@@ -26,7 +26,7 @@ struct EmojiPickerView: View {
             .frame(width: 120)
             .cornerRadius(5)
             
-            CustomTextField("Emoji", text: $emoji)
+            CustomTextField("Enter your recipe as an emoji!", text: $emoji)
                 .onReceive(Just(emoji), perform: { _ in
                     if self.emoji != self.emoji.onlyEmoji() {
                         withAnimation {

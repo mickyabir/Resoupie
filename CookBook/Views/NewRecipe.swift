@@ -24,18 +24,26 @@ import PhotosUI
 
 struct NewRecipeRow<Content: View>: View {
     let content: Content
-    let heading: String
+    let heading: String?
     
-    init(_ heading: String, @ViewBuilder content: () -> Content) {
+    init(_ heading: String? = nil, @ViewBuilder content: () -> Content) {
         self.content = content()
         self.heading = heading
     }
     var body: some View {
-        Text(heading)
-            .font(.title2)
-        content
-            .frame(minHeight: 100)
-        Divider()
+        VStack(spacing: 20) {
+            if heading != nil {
+                Text(heading!)
+                    .font(.title2)
+            }
+            content
+        }
+        .frame(minHeight: 100)
+        
+        Rectangle()
+            .fill(Color.orange)
+            .frame(height: 5)
+            .edgesIgnoringSafeArea(.horizontal)
     }
 }
 
@@ -44,12 +52,25 @@ class NewRecipeViewController: ObservableObject {
     @Published var uuid = UUID()
     @Published var emoji: String = ""
     @Published var ingredients: [Ingredient] = []
-    @Published var steps: [String] = [""]
+    @Published var steps: [String] = [] // might need to add one? not sure
     @Published var coordinate: CLLocationCoordinate2D?
     @Published var image: Image?
+    @Published var servings: String = ""
+    
+    @Published var showEmptyRecipeWarning = false
     
     func publishRecipe() {
         // Send recipe to backend
+        if name == "" || ingredients.isEmpty || steps.isEmpty {
+            showEmptyRecipeWarning = true
+            return
+        }
+        
+        let _ = Recipe(id: uuid, image: "image", name: name, author: "author", rating: 0, ingredients: ingredients, steps: steps, coordinate: coordinate, emoji: emoji, favorited: 0, servings: Int(servings) ?? 0)
+        
+        
+        
+        
     }
     
 }
@@ -68,11 +89,11 @@ struct NewRecipeView: View {
     var body: some View {
         ScrollView {
             VStack {
-                NewRecipeRow("Recipe Name") {
+                NewRecipeRow {
                     CustomTextField("Recipe name", text: $viewController.name)
-                }
-                
-                NewRecipeRow("Image") {
+                    CustomTextField("Servings", text: $viewController.servings)
+                        .keyboardType(.numberPad)
+                    
                     if viewController.image != nil {
                         viewController.image!
                             .resizable()
@@ -124,25 +145,6 @@ struct NewRecipeView: View {
                     }
                 }
             }
-            .navigationTitle("New Recipe")
-            .sheet(isPresented: $showImageLibrary) {
-                PhotoPicker(image: $inputImage)
-                
-            }
-            
-            Button {
-                var ingredients: [Ingredient] = []
-                for index in ingredientsViewController.listItems {
-                    ingredients.append(Ingredient(id: String(index), name: ingredientsViewController.ingredients[index], quantity: ingredientsViewController.quantities[index], unit: ingredientsViewController.units[index]))
-                }
-                viewController.ingredients = ingredients
-                
-                viewController.steps = textEditorListViewController.listItemsText
-                
-                viewController.publishRecipe()
-            } label: {
-                Text("Publish")
-            }
         }
         .onTapGesture {
             let resign = #selector(UIResponder.resignFirstResponder)
@@ -156,6 +158,40 @@ struct NewRecipeView: View {
             guard let inputImage = inputImage else { return }
             viewController.image = Image(uiImage: inputImage)
         }
+        .alert(isPresented: $viewController.showEmptyRecipeWarning) {
+            Alert(
+                title: Text("Please fill out the full recipe!"),
+                dismissButton: .none
+            )
+        }
+        //        .navigationTitle("New Recipe")
+        .navigationTitle(viewController.name != "" ? viewController.name : "New Recipe")
+        .sheet(isPresented: $showImageLibrary) {
+            PhotoPicker(image: $inputImage)
+            
+        }
+        .navigationBarItems(trailing:
+                                Button(action: {
+            
+            //            if !ingredientsViewController.isEmpty {
+            //                var ingredients: [Ingredient] = []
+            //                for index in ingredientsViewController.listItems {
+            //                    if ingredientsViewController.rowIsEmpty(index: index) {
+            //                        continue
+            //                    }
+            //                    ingredients.append(Ingredient(id: String(index), name: ingredientsViewController.ingredients[index], quantity: ingredientsViewController.quantities[index], unit: ingredientsViewController.units[index]))
+            //                }
+            //                viewController.ingredients = ingredients
+            //            }
+            
+            viewController.ingredients = ingredientsViewController.ingredientsList
+            
+            viewController.steps = textEditorListViewController.listItemsText
+            
+            viewController.publishRecipe()
+        }) {
+            Text("Publish")
+        })
     }
 }
 

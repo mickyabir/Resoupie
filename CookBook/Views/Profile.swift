@@ -8,12 +8,19 @@
 import SwiftUI
 
 struct ProfileView: View {
+    @State var showNewRecipe = false
+    
     var body: some View {
         NavigationView {
-            NavigationLink {
-                NewRecipeView()
+            Button {
+                showNewRecipe = true
             } label: {
-                Text("New Recipe")
+                Text("Sheet new recipe")
+            }
+            .sheet(isPresented: $showNewRecipe) {
+                NavigationView {
+                    NewRecipeView()
+                }
             }
             .navigationTitle("Profile")
         }

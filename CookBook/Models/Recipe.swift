@@ -7,6 +7,7 @@
 
 import Foundation
 import MapKit
+import SwiftUI
 
 struct Ingredient: Hashable, Codable, Identifiable {
     var id: String
@@ -26,6 +27,7 @@ struct Recipe: Hashable, Codable, Identifiable {
     var coordinate: CLLocationCoordinate2D?
     var emoji: String
     var favorited: Int
+    var servings: Int
 }
 
 extension CLLocationCoordinate2D: Hashable {
