@@ -16,8 +16,6 @@ struct EmojiPickerView: View {
     
     var body: some View {
         VStack(alignment: .center) {
-            Text("Emoji")
-            
             ZStack {
                 Rectangle()
                     .foregroundColor(Color.gray)
@@ -28,9 +26,7 @@ struct EmojiPickerView: View {
             .frame(width: 120)
             .cornerRadius(5)
             
-            TextField("Emoji", text: $emoji)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
+            CustomTextField("Emoji", text: $emoji)
                 .onReceive(Just(emoji), perform: { _ in
                     if self.emoji != self.emoji.onlyEmoji() {
                         withAnimation {

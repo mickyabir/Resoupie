@@ -28,12 +28,13 @@ class TextEditorListViewController: ObservableObject {
 }
 
 struct TextEditorListView: View {
-    @ObservedObject var viewController = TextEditorListViewController()
+    @ObservedObject var viewController: TextEditorListViewController
     
     var body: some View {
         VStack {
             ForEach(viewController.listItems, id: \.self) { index in
                 HStack {
+                    Text("Step " + String(index + 1) + ": ")
                     TextEditor(text: $viewController.listItemsText[index])
                         .overlay(
                                  RoundedRectangle(cornerRadius: 10)
@@ -62,7 +63,7 @@ struct TextEditorListView: View {
 
 struct TextFieldListView_Previews: PreviewProvider {
     static var previews: some View {
-        TextEditorListView()
+        TextEditorListView(viewController: TextEditorListViewController())
             .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
             .previewDisplayName("iPhone 12")
     }

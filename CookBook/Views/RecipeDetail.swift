@@ -12,17 +12,13 @@ struct RecipeDetail: View {
     var recipe: Recipe
     @AppStorage("favorites") var favorites: [Recipe] = []
     @AppStorage("groceries") var groceries: [GroceryListItem] = []
-
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
                 Image(recipe.image)
                     .resizable()
                     .scaledToFit()
-                HStack {
-                Text(recipe.author)
-                    .frame(alignment: .center)
-                }
                 Text(String(recipe.rating))
                 
                 Spacer()
@@ -55,32 +51,39 @@ struct RecipeDetail: View {
                 }
                 
                 VStack(alignment: .leading) {
-                ForEach (recipe.steps, id: \.self) { step in
-                    HStack {
-                        ZStack{
-                            Image(systemName: "circle.fill")
-                                .font(.system(size: 24))
-                                .foregroundColor(Color.orange)
-                            let index = recipe.steps.firstIndex(of: step)! + 1
-                            Text(String(index))
-                                .foregroundColor(Color.white)
+                    ForEach (recipe.steps, id: \.self) { step in
+                        HStack {
+                            ZStack{
+                                Image(systemName: "circle.fill")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(Color.orange)
+                                let index = recipe.steps.firstIndex(of: step)! + 1
+                                Text(String(index))
+                                    .foregroundColor(Color.white)
+                            }
+                            
+                            Text(step)
+                                .padding()
                         }
-                        
-                        Text(step)
-                            .padding()
                     }
-                }
                 }
             }.frame(maxWidth: .infinity)
         }
         .onAppear {
             if favorites.firstIndex(where: {$0.id == recipe.id}) != nil {
-                    favorited = true
+                favorited = true
             } else {
                 favorited = false
             }
         }
-        .navigationBarTitle(recipe.name)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                VStack {
+                    Text(recipe.name).font(.headline)
+                    Text(recipe.author).font(.subheadline)
+                }
+            }
+        }
         .navigationBarItems(trailing:
                                 Button(action: {
             favorited = !favorited
@@ -91,7 +94,7 @@ struct RecipeDetail: View {
                 if let offset = favorites.firstIndex(where: {$0.id == recipe.id}) {
                     favorites.remove(at: offset)
                 }
-
+                
             }
         }) {
             Image(systemName: favorited ? "heart.fill" : "heart")

@@ -36,9 +36,7 @@ struct GroceriesView: View {
                         }
                         .onMove(perform: move)
                     }
-                    .toolbar {
-                        EditButton()
-                    }
+                    .environment(\.editMode, .constant(EditMode.active))
                 }
                 
                 Button {

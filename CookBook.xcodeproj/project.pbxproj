@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		813F156227A0C13700214CE0 /* IngredientListEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813F156127A0C13700214CE0 /* IngredientListEditor.swift */; };
+		813F156427A0CC5D00214CE0 /* CustomeTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813F156327A0CC5D00214CE0 /* CustomeTextField.swift */; };
 		814C8CF72797631E0056A7D2 /* CookBookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814C8CF62797631E0056A7D2 /* CookBookApp.swift */; };
 		814C8CF92797631E0056A7D2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814C8CF82797631E0056A7D2 /* ContentView.swift */; };
 		814C8CFB2797631F0056A7D2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 814C8CFA2797631F0056A7D2 /* Assets.xcassets */; };
@@ -51,6 +53,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		813F156127A0C13700214CE0 /* IngredientListEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientListEditor.swift; sourceTree = "<group>"; };
+		813F156327A0CC5D00214CE0 /* CustomeTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomeTextField.swift; sourceTree = "<group>"; };
 		814C8CF32797631E0056A7D2 /* CookBook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CookBook.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		814C8CF62797631E0056A7D2 /* CookBookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookBookApp.swift; sourceTree = "<group>"; };
 		814C8CF82797631E0056A7D2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -201,6 +205,8 @@
 				81B1BF8A279F97AA00EC85BB /* AddFillButton.swift */,
 				81B1BF8D279F97DE00EC85BB /* TextEditorListView.swift */,
 				81B1BF8F279FA6CA00EC85BB /* CoordinatePicker.swift */,
+				813F156127A0C13700214CE0 /* IngredientListEditor.swift */,
+				813F156327A0CC5D00214CE0 /* CustomeTextField.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -344,6 +350,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				81B1BF89279F977600EC85BB /* ChecklistButton.swift in Sources */,
+				813F156227A0C13700214CE0 /* IngredientListEditor.swift in Sources */,
 				815E82712798CAC800530BA2 /* RecipesMain.swift in Sources */,
 				81B1BF8E279F97DE00EC85BB /* TextEditorListView.swift in Sources */,
 				81BAF3F6279CB8DB004B0767 /* Profile.swift in Sources */,
@@ -360,6 +367,7 @@
 				81B1BF90279FA6CA00EC85BB /* CoordinatePicker.swift in Sources */,
 				81B1BF85279F851A00EC85BB /* EmojiPicker.swift in Sources */,
 				815E826F2798CA8800530BA2 /* Groceries.swift in Sources */,
+				813F156427A0CC5D00214CE0 /* CustomeTextField.swift in Sources */,
 				81B1BF8B279F97AA00EC85BB /* AddFillButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
