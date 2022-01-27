@@ -61,65 +61,29 @@ class NewRecipeViewController: ObservableObject {
     
     func publishRecipe() {
         // Send recipe to backend
-        if name == "" || ingredients.isEmpty || steps.isEmpty {
-            showEmptyRecipeWarning = true
-            return
-        }
+//        if name == "" || ingredients.isEmpty || steps.isEmpty {
+//            showEmptyRecipeWarning = true
+//            return
+//        }
+//
+        let imageUploader = ImageBackendController()
         
-        let _ = Recipe(id: uuid, image: "image", name: name, author: "author", rating: 0, ingredients: ingredients, steps: steps, coordinate: coordinate, emoji: emoji, favorited: 0, servings: Int(servings) ?? 0)
+        var imageIdString: String = ""
         
-        uploadImageToServer()
-        
-        print("here")
-    }
-    
-    func uploadImageToServer() {
-        guard let image = image else { return }
-        guard let url = URL(string: "http://127.0.0.1:8000/images/") else { return }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        //create boundary
-        let boundary = generateBoundary()
-        //set content type
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        //call createDataBody method
-        let dataBody = createDataBody(media: image, boundary: boundary)
-        request.httpBody = dataBody
-        let session = URLSession.shared
-        session.dataTask(with: request) { (data, response, error) in
-            if let response = response {
-                print(response)
-            }
-            if let data = data {
-                do {
-                    let json = try JSONSerialization.jsonObject(with: data, options: [])
-                    print(json)
-                } catch {
-                    print(error)
+        if let image = image {
+            imageUploader.uploadImageToServer(image: image) { [self] imageId in
+                guard let imageId = imageId else { return }
+                imageIdString = imageId.uuidString
+                let recipe = Recipe(id: uuid, image: imageIdString, name: name, author: "author", rating: 0, ingredients: ingredients, steps: steps, coordinate: self.coordinate, emoji: emoji, favorited: 0, servings: Int(servings) ?? 0)
+
+                let recipeUploader = RecipeBackendController()
+                recipeUploader.uploadRecipeToServer(recipe: recipe) { result in
+                    print(result)
                 }
+                print(imageId)
             }
-        }.resume()
-    }
-    
-    func createDataBody(media: UIImage?, boundary: String) -> Data {
-        let lineBreak = "\r\n"
-        var body = Data()
-        if let media = media {
-            body.append("--\(boundary + lineBreak)")
-            body.append("Content-Disposition: form-data; name=\"file\"; filename=\"filename\"\(lineBreak)")
-            body.append("Content-Type: image/png\(lineBreak + lineBreak)")
-            body.append(media.pngData()!)
-            body.append(lineBreak)
         }
-        
-        body.append("--\(boundary)--\(lineBreak)")
-        return body
     }
-    
-    func generateBoundary() -> String {
-        return "Boundary-\(NSUUID().uuidString)"
-    }
-    
 }
 
 extension Data {
