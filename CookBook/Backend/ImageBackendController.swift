@@ -13,9 +13,21 @@ struct ImageUploadResponse: Codable {
 }
 
 class ImageBackendController {
-    private let url = "http://127.0.0.1:8000/images/"
+    private let url = BackendController.url + "images/"
     
-    func uploadImageToServer(image: UIImage, continuation: @escaping (UUID?) -> Void ) {
+//    func loadImageFromServer(imageId: String, continuation: @escaping (UIImage?) -> Void) {
+//        URLSession.shared.dataTask(with: URL(string: url + imageId)!) { data, response, error in
+//            guard let data = data, error == nil else { return }
+//            print("Download Finished")
+//            // always update the UI from the main thread
+//            DispatchQueue.main.async() { [weak self] in
+//                continuation(UIImage(data: data))
+//            }
+//        }.resume()
+//    }
+    
+    
+    func uploadImageToServer(image: UIImage, continuation: @escaping (UUID?) -> Void) {
         var uuid: UUID?
         
         guard let url = URL(string: url) else {
@@ -66,5 +78,14 @@ class ImageBackendController {
     
     func generateBoundary() -> String {
         return "Boundary-\(NSUUID().uuidString)"
+    }
+}
+
+extension Data {
+    mutating func append(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
+            print("data======>>>",data)
+        }
     }
 }

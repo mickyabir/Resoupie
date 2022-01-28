@@ -7,22 +7,27 @@
 
 import SwiftUI
 
+class PresentNewRecipe: ObservableObject {
+    @Published var showNewRecipe = false
+}
+
 struct ProfileView: View {
-    @State var showNewRecipe = false
+    @StateObject var presentNewRecipe = PresentNewRecipe()
     
     var body: some View {
         NavigationView {
             Button {
-                showNewRecipe = true
+                presentNewRecipe.showNewRecipe = true
             } label: {
                 Text("Sheet new recipe")
             }
-            .sheet(isPresented: $showNewRecipe) {
+            .sheet(isPresented: $presentNewRecipe.showNewRecipe) {
                 NavigationView {
                     NewRecipeView()
                 }
             }
             .navigationTitle("Profile")
+            .environmentObject(presentNewRecipe)
         }
     }
 }

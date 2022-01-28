@@ -81,21 +81,18 @@ class NewRecipeViewController: ObservableObject {
                     print(result)
                 }
                 print(imageId)
+                
+                recipeUploader.loadAllRecipes { recipes in
+                    print(recipes)
+                }
             }
         }
     }
 }
 
-extension Data {
-    mutating func append(_ string: String) {
-        if let data = string.data(using: .utf8) {
-            append(data)
-            print("data======>>>",data)
-        }
-    }
-}
-
 struct NewRecipeView: View {
+    @EnvironmentObject var presentNewRecipe: PresentNewRecipe
+
     @State private var inputImage: UIImage?
     @State private var recipeImage: UIImage?
     @State private var showImageLibrary = false
@@ -169,7 +166,6 @@ struct NewRecipeView: View {
         .onTapGesture {
             let resign = #selector(UIResponder.resignFirstResponder)
             UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
-            
         }
         .onAppear {
             viewController.coordinate = coordinatePickerViewModel.chosenRegion
@@ -209,6 +205,7 @@ struct NewRecipeView: View {
             viewController.steps = textEditorListViewController.listItemsText
             
             viewController.publishRecipe()
+            presentNewRecipe.showNewRecipe = false
         }) {
             Text("Publish")
         })

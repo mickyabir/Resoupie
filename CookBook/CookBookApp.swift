@@ -60,6 +60,7 @@ struct CookBookApp: App {
             
             
             let recipes = [boba_recipe, coffee_recipe, spaghetti_recipe]
+
             ContentView(recipes: recipes)
                 .preferredColorScheme(.light)
         }

@@ -27,7 +27,7 @@ struct RecipeRow: View {
 }
 
 struct RecipesMainView: View {
-    var recipes: [Recipe]
+    @State var recipes: [Recipe]
     @State private var searchText = ""
 
     var body: some View {
@@ -40,6 +40,14 @@ struct RecipesMainView: View {
                 }
             }
             .navigationTitle("Recipes")
+        }
+        .onAppear {
+            let recipeBackendController = RecipeBackendController()
+            let _ = recipeBackendController.loadAllRecipes { allRecipes in
+                self.recipes = allRecipes
+                print("Recipes: ")
+                print(recipes)
+            }
         }
     }
 }
