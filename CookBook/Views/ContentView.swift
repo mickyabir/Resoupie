@@ -36,7 +36,7 @@ struct ContentView: View {
             
             Text("")
                 .tabItem {
-                    Label("New", systemImage: "plus")
+                    Label("New", systemImage: "plus.circle.fill")
                 }
                 .tag(2)
             

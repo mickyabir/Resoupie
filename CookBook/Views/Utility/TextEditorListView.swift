@@ -62,6 +62,7 @@ struct TextEditorListView: View {
                 viewController.addRow()
             } label: {
                 Image(systemName: "plus")
+                    .foregroundColor(Color.orange)
             }
         }
     }

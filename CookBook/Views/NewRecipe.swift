@@ -203,6 +203,7 @@ struct NewRecipeView: View {
             presentNewRecipe.showNewRecipe = false
         }) {
             Text("Cancel")
+                .foregroundColor(Color.orange)
         })
         .navigationBarItems(trailing:
                                 Button(action: {
@@ -214,6 +215,7 @@ struct NewRecipeView: View {
             presentNewRecipe.showNewRecipe = false
         }) {
             Text("Publish")
+                .foregroundColor(Color.orange)
         })
     }
 }
