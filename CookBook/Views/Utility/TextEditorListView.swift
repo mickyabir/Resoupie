@@ -34,7 +34,13 @@ struct TextEditorListView: View {
         VStack {
             ForEach(viewController.listItems, id: \.self) { index in
                 HStack {
-                    Text("Step " + String(index + 1) + ": ")
+                    ZStack{
+                        Image(systemName: "circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(Color.orange)
+                        Text(String(index + 1))
+                            .foregroundColor(Color.white)
+                    }
                     TextEditor(text: $viewController.listItemsText[index])
                         .overlay(
                                  RoundedRectangle(cornerRadius: 10)

@@ -12,42 +12,67 @@ struct RecipeRow: View {
     
     var body: some View {
         HStack {
-            Image(recipe.image)
-                .resizable()
-                .frame(width: 128.0, height: 128.0)
-                .cornerRadius(20)
+            CustomAsyncImage(imageId: recipe.image)
             VStack {
                 Text(recipe.name)
-                Text("by")
-                    .padding(3)
+                    .fontWeight(.medium)
                 Text(recipe.author)
+                    .fontWeight(.light)
+                    .foregroundColor(Color.gray)
             }
+            .offset(x: 40)
         }
     }
 }
 
-struct RecipesMainView: View {
-    @State var recipes: [Recipe]
+struct SearchField: View {
     @State private var searchText = ""
 
     var body: some View {
+        HStack(spacing: 4) {
+            CustomTextField("", text: $searchText)
+            Button {
+                
+            } label: {
+                Image(systemName: "magnifyingglass")
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
+struct RecipesMainView: View {
+    @State var recipes: [Recipe] = [Recipe]()
+
+    var body: some View {
         NavigationView {
-            List(recipes) { recipe in
-                NavigationLink {
-                    RecipeDetail(recipe: recipe)
-                } label: {
-                    RecipeRow(recipe: recipe)
+            VStack {
+                SearchField()
+                
+                List(recipes) { recipe in
+                    NavigationLink {
+                        RecipeDetail(recipe: recipe)
+                    } label: {
+                        RecipeRow(recipe: recipe)
+                    }
+                }
+                .refreshable {
+                    loadRecipes()
                 }
             }
             .navigationTitle("Recipes")
         }
         .onAppear {
-            let recipeBackendController = RecipeBackendController()
-            let _ = recipeBackendController.loadAllRecipes { allRecipes in
-                self.recipes = allRecipes
-                print("Recipes: ")
-                print(recipes)
-            }
+            loadRecipes()
+        }
+    }
+    
+    func loadRecipes() {
+        let recipeBackendController = RecipeBackendController()
+        let _ = recipeBackendController.loadAllRecipes { allRecipes in
+            self.recipes = allRecipes
+            print("Recipes: ")
+            print(self.recipes)
         }
     }
 }

@@ -38,12 +38,17 @@ struct NewRecipeRow<Content: View>: View {
             }
             content
         }
-        .frame(minHeight: 100)
-        
+        .frame(minHeight: 100)        
+    }
+}
+
+struct NewRecipeRowDivider: View {
+    var body: some View {
         Rectangle()
             .fill(Color.orange)
-            .frame(height: 5)
+            .frame(height: 1)
             .edgesIgnoringSafeArea(.horizontal)
+
     }
 }
 
@@ -61,11 +66,11 @@ class NewRecipeViewController: ObservableObject {
     
     func publishRecipe() {
         // Send recipe to backend
-//        if name == "" || ingredients.isEmpty || steps.isEmpty {
-//            showEmptyRecipeWarning = true
-//            return
-//        }
-//
+        //        if name == "" || ingredients.isEmpty || steps.isEmpty {
+        //            showEmptyRecipeWarning = true
+        //            return
+        //        }
+        //
         let imageUploader = ImageBackendController()
         
         var imageIdString: String = ""
@@ -75,7 +80,7 @@ class NewRecipeViewController: ObservableObject {
                 guard let imageId = imageId else { return }
                 imageIdString = imageId.uuidString
                 let recipe = Recipe(id: uuid, image: imageIdString, name: name, author: "author", rating: 0, ingredients: ingredients, steps: steps, coordinate: self.coordinate, emoji: emoji, favorited: 0, servings: Int(servings) ?? 0)
-
+                
                 let recipeUploader = RecipeBackendController()
                 recipeUploader.uploadRecipeToServer(recipe: recipe) { result in
                     print(result)
@@ -92,7 +97,7 @@ class NewRecipeViewController: ObservableObject {
 
 struct NewRecipeView: View {
     @EnvironmentObject var presentNewRecipe: PresentNewRecipe
-
+    
     @State private var inputImage: UIImage?
     @State private var recipeImage: UIImage?
     @State private var showImageLibrary = false
@@ -108,8 +113,16 @@ struct NewRecipeView: View {
             VStack {
                 NewRecipeRow {
                     CustomTextField("Recipe name", text: $viewController.name)
-                    CustomTextField("Servings", text: $viewController.servings)
-                        .keyboardType(.numberPad)
+                    
+                    HStack {
+                        CustomTextField("Servings", text: $viewController.servings)
+                            .keyboardType(.numberPad)
+                            .frame(width: 150)
+                        
+                        EmojiPickerView() { emoji in
+                            viewController.emoji = emoji
+                        }
+                    }
                     
                     if viewController.image != nil {
                         Image(uiImage: viewController.image!)
@@ -131,6 +144,24 @@ struct NewRecipeView: View {
                     }
                 }
                 
+                NewRecipeRowDivider()
+
+                
+                Group {
+                    NewRecipeRow("Ingredients") {
+                        IngredientListEditorView(viewController: ingredientsViewController)
+                            .padding()
+                    }
+                    
+                    NewRecipeRowDivider()
+                    
+                    NewRecipeRow("Method") {
+                        TextEditorListView(viewController: textEditorListViewController)
+                    }
+                }
+                
+                NewRecipeRowDivider()
+                
                 NewRecipeRow("Location") {
                     HStack {
                         NavigationLink {
@@ -142,23 +173,6 @@ struct NewRecipeView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(Color.green)
                             .opacity(viewController.coordinate != nil ? 1 : 0)
-                    }
-                }
-                
-                Group {
-                    NewRecipeRow("Ingredients") {
-                        IngredientListEditorView(viewController: ingredientsViewController)
-                            .padding()
-                    }
-                    
-                    NewRecipeRow("Method") {
-                        TextEditorListView(viewController: textEditorListViewController)
-                    }
-                }
-                
-                NewRecipeRow("Emoji") {
-                    EmojiPickerView() { emoji in
-                        viewController.emoji = emoji
                     }
                 }
             }
@@ -180,26 +194,18 @@ struct NewRecipeView: View {
                 dismissButton: .none
             )
         }
-        //        .navigationTitle("New Recipe")
         .navigationTitle(viewController.name != "" ? viewController.name : "New Recipe")
         .sheet(isPresented: $showImageLibrary) {
             PhotoPicker(image: $inputImage)
-            
         }
+        .navigationBarItems(leading:
+                                Button(action: {
+            presentNewRecipe.showNewRecipe = false
+        }) {
+            Text("Cancel")
+        })
         .navigationBarItems(trailing:
                                 Button(action: {
-            
-            //            if !ingredientsViewController.isEmpty {
-            //                var ingredients: [Ingredient] = []
-            //                for index in ingredientsViewController.listItems {
-            //                    if ingredientsViewController.rowIsEmpty(index: index) {
-            //                        continue
-            //                    }
-            //                    ingredients.append(Ingredient(id: String(index), name: ingredientsViewController.ingredients[index], quantity: ingredientsViewController.quantities[index], unit: ingredientsViewController.units[index]))
-            //                }
-            //                viewController.ingredients = ingredients
-            //            }
-            
             viewController.ingredients = ingredientsViewController.ingredientsList
             
             viewController.steps = textEditorListViewController.listItemsText

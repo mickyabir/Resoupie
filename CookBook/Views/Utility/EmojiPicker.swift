@@ -16,23 +16,16 @@ struct EmojiPickerView: View {
     
     var body: some View {
         VStack(alignment: .center) {
-            ZStack {
-                Rectangle()
-                    .foregroundColor(Color.gray)
-                    .frame(width: 120)
-                Text("Emoji Only!")
-            }
-            .opacity(displayEmojiWarning ? 1 : 0)
-            .frame(width: 120)
-            .cornerRadius(5)
-            
-            CustomTextField("Enter your recipe as an emoji!", text: $emoji)
+            CustomTextField("Emoji", text: $emoji)
+                .alert("Emoji only!", isPresented: $displayEmojiWarning) {
+                    Button("OK", role: .cancel) {}
+                }
                 .onReceive(Just(emoji), perform: { _ in
                     if self.emoji != self.emoji.onlyEmoji() {
                         withAnimation {
                             displayEmojiWarning = true
                         }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.25) {
                             withAnimation {
                                 displayEmojiWarning.toggle()
                             }

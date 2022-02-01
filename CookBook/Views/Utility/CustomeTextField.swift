@@ -20,7 +20,7 @@ struct CustomTextField: View {
         TextField(placholder, text: text)
             .textFieldStyle(RoundedBorderTextFieldStyle())
             .overlay(
-                     RoundedRectangle(cornerRadius: 10)
+                     RoundedRectangle(cornerRadius: 8)
                        .stroke(Color.orange, lineWidth: 2))
 
             .padding()

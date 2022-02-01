@@ -6,30 +6,28 @@
 //
 
 import Foundation
+import CoreLocation
 
-struct Coordinate: Codable {
-    var long: Double
-    var lat: Double
-}
-
-struct RecipeListResponse: Codable {
+struct RecipeBackendModel: Codable {
     var id: String
     var image: String
     var name: String
     var author: String
     var ingredients: [Ingredient]
     var steps: [String]
-    var coordinate: Coordinate
     var emoji: String
     var servings: Int
     var rating: Double
     var favorited: Int
+    var coordinate_lat: String
+    var coordinate_long: String
 }
 
 class RecipeBackendController {
     private let url = BackendController.url + "recipes/"
     
     func loadAllRecipes(continuation: @escaping ([Recipe]) -> Void) {
+        var coordinate: CLLocationCoordinate2D? = nil
         let url = URL(string: url)!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -41,10 +39,10 @@ class RecipeBackendController {
                 return
             }
             
-            var recipes: [RecipeListResponse]?
+            var recipes: [RecipeBackendModel]?
             
             do {
-                recipes = try JSONDecoder().decode([RecipeListResponse].self, from: data)
+                recipes = try JSONDecoder().decode([RecipeBackendModel].self, from: data)
             } catch DecodingError.dataCorrupted(let context) {
                 print(context)
             } catch DecodingError.keyNotFound(let key, let context) {
@@ -60,8 +58,12 @@ class RecipeBackendController {
                 print("error: ", error)
             }
             if let recipes = recipes {
-                let recipeModels = recipes.map { recipe in
-                    Recipe(id: UUID(uuidString: recipe.id)!, image: recipe.image, name: recipe.name, author: recipe.author, rating: recipe.rating, ingredients: recipe.ingredients, steps: recipe.steps, coordinate: nil, emoji: recipe.emoji, favorited: recipe.favorited, servings: recipe.servings)
+                let recipeModels = recipes.map { recipe -> Recipe in
+                    if let lat = Double(recipe.coordinate_lat), let long = Double(recipe.coordinate_long) {
+                        coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+                    }
+                    
+                    return Recipe(id: UUID(uuidString: recipe.id)!, image: recipe.image, name: recipe.name, author: recipe.author, rating: recipe.rating, ingredients: recipe.ingredients, steps: recipe.steps, coordinate: coordinate, emoji: recipe.emoji, favorited: recipe.favorited, servings: recipe.servings)
                 }
                 continuation(recipeModels)
             }
@@ -71,9 +73,16 @@ class RecipeBackendController {
     }
     
     func uploadRecipeToServer(recipe: Recipe, continuation: @escaping (Bool) -> Void) {
+        var lat = ""
+        var long = ""
+        if let coordinate = recipe.coordinate {
+            lat = String(coordinate.latitude)
+            long = String(coordinate.longitude)
+        }
+        let recipeModel = RecipeBackendModel(id: recipe.id.uuidString, image: recipe.image, name: recipe.name, author: recipe.author, ingredients: recipe.ingredients, steps: recipe.steps, emoji: recipe.emoji, servings: recipe.servings, rating: 0, favorited: 0, coordinate_lat: lat, coordinate_long: long)
         var jsonData: Data?
         do {
-            jsonData = try JSONEncoder().encode(recipe)
+            jsonData = try JSONEncoder().encode(recipeModel)
         } catch {
             print(error)
         }
@@ -98,7 +107,9 @@ class RecipeBackendController {
             }
             let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
             if let responseJSON = responseJSON as? [String: String] {
-                continuation(responseJSON["response"] == "success")
+                if let responseString = responseJSON["response"] {
+                    continuation(responseString == "success")
+                }
             } else {
                 continuation(false)
             }

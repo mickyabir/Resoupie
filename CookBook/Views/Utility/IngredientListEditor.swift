@@ -81,11 +81,12 @@ struct IngredientListEditorView: View {
             ForEach(viewController.listItems, id: \.self) { index in
                 Divider()
                     .opacity(index > 0 ? 1 : 0)
+                    .padding(.bottom)
                 HStack {
-                    VStack {
+                    VStack() {
                         TextEditor(text: $viewController.ingredients[index])
                             .overlay(
-                                RoundedRectangle(cornerRadius: 10)
+                                RoundedRectangle(cornerRadius: 8)
                                     .stroke(Color.orange, lineWidth: 2))
                             .frame(minHeight: 40, maxHeight: 80)
                             .foregroundColor(viewController.ingredients[index] == "Ingredient" ? Color.gray : Color.black)
@@ -95,26 +96,14 @@ struct IngredientListEditorView: View {
                                     viewController.ingredients[index] = ""
                                 }
                             }
-                            .padding(10)
+                            .padding(.bottom)
                         
                         HStack {
-                            TextEditor(text: $viewController.units[index])
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color.orange, lineWidth: 2))
-                                .frame(height: 40)
-                                .foregroundColor(viewController.units[index] == "Unit" ? Color.gray : Color.black)
-                                .disableAutocorrection(true)
-                                .onTapGesture {
-                                    if viewController.units[index] == "Unit" {
-                                        viewController.units[index] = ""
-                                    }
-                                }
-                                .padding(10)
+
                             
                             TextEditor(text: $viewController.quantities[index])
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
+                                    RoundedRectangle(cornerRadius: 8)
                                         .stroke(Color.orange, lineWidth: 2))
                                 .frame(height: 40)
                                 .keyboardType(.numberPad)
@@ -125,10 +114,23 @@ struct IngredientListEditorView: View {
                                         viewController.quantities[index] = ""
                                     }
                                 }
-                                .padding(10)
+                            
+                            TextEditor(text: $viewController.units[index])
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.orange, lineWidth: 2))
+                                .frame(width: 100, height: 40)
+                                .foregroundColor(viewController.units[index] == "Unit" ? Color.gray : Color.black)
+                                .disableAutocorrection(true)
+                                .onTapGesture {
+                                    if viewController.units[index] == "Unit" {
+                                        viewController.units[index] = ""
+                                    }
+                                }
+                                .padding(.leading)
                         }
                     }
-                    .padding()
+                    .padding(.bottom)
                     
                     Button {
                         viewController.deleteRow(index: index)
@@ -136,6 +138,7 @@ struct IngredientListEditorView: View {
                         Image(systemName: "minus.circle")
                     }
                     .foregroundColor(Color.red)
+                    .offset(y: -6)
                 }
             }
             

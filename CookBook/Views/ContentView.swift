@@ -7,10 +7,18 @@
 
 import SwiftUI
 
+class PresentNewRecipe: ObservableObject {
+    @Published var showNewRecipe = false
+}
+
+
 struct ContentView: View {
     var recipes: [Recipe]
     @AppStorage("favorites") var favorites: [Recipe] = []
-    @State private var selection = 2
+    @State private var selection = 1
+    @State private var oldSelection = 1
+    @StateObject var presentNewRecipe = PresentNewRecipe()
+
 
     var body: some View {
         TabView(selection: $selection) {
@@ -26,9 +34,9 @@ struct ContentView: View {
                 }
                 .tag(1)
             
-            ProfileView()
+            Text("")
                 .tabItem {
-                    Label("Profile", systemImage: "person.crop.circle")
+                    Label("New", systemImage: "plus")
                 }
                 .tag(2)
             
@@ -45,6 +53,21 @@ struct ContentView: View {
                 .tag(4)
         }
         .accentColor(Color.orange)
+        .onChange(of: selection) { selected in
+            if selected == 2 {
+                presentNewRecipe.showNewRecipe = true
+            } else {
+                self.oldSelection = selected
+            }
+        }
+        .sheet(isPresented: $presentNewRecipe.showNewRecipe, onDismiss: {
+            self.selection = self.oldSelection
+        }) {
+            NavigationView {
+                NewRecipeView()
+            }
+        }
+        .environmentObject(presentNewRecipe)
     }
 }
 
