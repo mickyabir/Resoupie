@@ -16,9 +16,7 @@ struct RecipeDetail: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
-                Image(recipe.image)
-                    .resizable()
-                    .scaledToFit()
+                CustomAsyncImage(imageId: recipe.image, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.width, cornerRadius: 0)
                 Text(String(recipe.rating))
                 
                 Spacer()

@@ -6,5 +6,31 @@
 	<array>
 		<dict/>
 	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>http://2301-2603-8001-7301-ceb0-34ed-16c7-b188-cf9.ngrok.io/</key>
+			<string></string>
+			<key>https://2301-2603-8001-7301-ceb0-34ed-16c7-b188-cf9.ngrok.io</key>
+			<string></string>
+			<key>http://44.201.79.172</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+			<key>https://44.201.79.172</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 </dict>
 </plist>

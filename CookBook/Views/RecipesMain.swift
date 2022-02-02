@@ -12,7 +12,7 @@ struct RecipeRow: View {
     
     var body: some View {
         HStack {
-            CustomAsyncImage(imageId: recipe.image)
+            CustomAsyncImage(imageId: recipe.image, width: 512, height: 512, cornerRadius: 20)
             VStack {
                 Text(recipe.name)
                     .fontWeight(.medium)
@@ -41,29 +41,44 @@ struct SearchField: View {
     }
 }
 
+extension Color {
+    static let offWhite = Color(red: 225 / 255, green: 225 / 255, blue: 235 / 255)
+    static let lightGray = Color(red: 250 / 255, green: 250 / 255, blue: 250 / 255)
+}
+
 struct RecipesMainView: View {
     @State var recipes: [Recipe] = [Recipe]()
 
     var body: some View {
         NavigationView {
-            VStack {
-                SearchField()
-                
-                List(recipes) { recipe in
-                    NavigationLink {
-                        RecipeDetail(recipe: recipe)
-                    } label: {
-                        RecipeRow(recipe: recipe)
+            ZStack {
+                Color.lightGray
+                VStack {
+                    SearchField()
+                    
+                    VStack(alignment: .leading) {
+                        Text("Popular")
+                            .font(.headline)
+                        ScrollView(.horizontal) {
+                            HStack {
+                                ForEach(recipes) { recipe in
+                                    PopularRecipeCard(recipe: recipe)
+                                }
+                            }
+                            .padding()
+                        }
                     }
                 }
-                .refreshable {
-                    loadRecipes()
-                }
+                .navigationTitle("Recipes")
             }
-            .navigationTitle("Recipes")
+            .edgesIgnoringSafeArea(.all)
         }
         .onAppear {
             loadRecipes()
+        }
+        .onTapGesture {
+            let resign = #selector(UIResponder.resignFirstResponder)
+            UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
         }
     }
     
@@ -93,5 +108,54 @@ struct RecipesMainView_Previews: PreviewProvider {
         RecipesMainView(recipes: recipes)
             .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
             .previewDisplayName("iPhone 12")
+    }
+}
+
+struct PopularRecipeCard: View {
+    var recipe: Recipe
+    @State var presentRecipe = false
+    
+    var body: some View {
+        ZStack(alignment: .top) {
+            RoundedRectangle(cornerRadius: 10)
+                .foregroundColor(Color.white)
+                .frame(width: 250, height: 250)
+                .shadow(color: Color.black.opacity(0.08), radius: 10, x: 5, y: 5)
+            VStack {
+                AsyncImage(url: URL(string: BackendController.url + "images/" + recipe.image)) { image in
+                    image
+                        .resizable()
+                        .frame(width: 250, height: 200)
+                        .aspectRatio(contentMode: .fill)
+                        .cornerRadius(10)
+                        .clipped()
+                } placeholder: {
+                    Color.orange
+                }
+                
+                VStack {
+                    Text(recipe.name)
+                        .font(.headline)
+                    Text(recipe.author)
+                        .font(.subheadline)
+                }
+            }
+        }
+        .onTapGesture {
+            presentRecipe = true
+        }
+        .padding(.horizontal, 5)
+        .sheet(isPresented: $presentRecipe, content: {
+            NavigationView {
+                RecipeDetail(recipe: recipe)
+                    .navigationBarItems(leading:
+                                            Button(action: {
+                        presentRecipe = false
+                    }) {
+                        Image(systemName: "chevron.down")
+                            .foregroundColor(Color.orange)
+                    })
+            }
+        })
     }
 }
