@@ -84,7 +84,7 @@ struct RecipeDetail: View {
         }
         .navigationBarItems(trailing:
                                 Button(action: {
-            favorited = !favorited
+            favorited.toggle()
             
             if favorited {
                 favorites.append(recipe)

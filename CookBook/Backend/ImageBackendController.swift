@@ -13,7 +13,7 @@ struct ImageUploadResponse: Codable {
 }
 
 class ImageBackendController {
-    private let url = BackendController.url + "images/"
+    public static let url = BackendController.url + "images/"
     
 //    func loadImageFromServer(imageId: String, continuation: @escaping (UIImage?) -> Void) {
 //        URLSession.shared.dataTask(with: URL(string: url + imageId)!) { data, response, error in
@@ -30,7 +30,7 @@ class ImageBackendController {
     func uploadImageToServer(image: UIImage, continuation: @escaping (UUID?) -> Void) {
         var uuid: UUID?
         
-        guard let url = URL(string: url) else {
+        guard let url = URL(string: ImageBackendController.url) else {
             continuation(nil)
             return
         }
@@ -78,6 +78,27 @@ class ImageBackendController {
     
     func generateBoundary() -> String {
         return "Boundary-\(NSUUID().uuidString)"
+    }
+    
+    static func downloadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
+        print("Download Started")
+        URLSession.shared.dataTask(with: url, completionHandler: { data, response, error in
+            guard let data = data, error == nil else { return }
+            print("Download Finished")
+            // always update the UI from the main thread
+            DispatchQueue.main.async() {
+                completion(UIImage(data: data))
+            }
+        }).resume()
+    }
+}
+
+extension Recipe {
+    func getMainImage(completion: @escaping (UIImage?) -> Void) {
+        let url = URL(string: ImageBackendController.url + self.image)!
+        ImageBackendController.downloadImage(from: url) { image in
+            completion(image)
+        }
     }
 }
 

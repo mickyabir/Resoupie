@@ -21,7 +21,7 @@ struct CustomAsyncImage: View {
                 .scaledToFit()
                 .cornerRadius(cornerRadius ?? 0)
         } placeholder: {
-            Color.orange
+            Color.white
         }
     }
 }

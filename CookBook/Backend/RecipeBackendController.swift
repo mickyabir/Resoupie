@@ -24,11 +24,11 @@ struct RecipeBackendModel: Codable {
 }
 
 class RecipeBackendController {
-    private let url = BackendController.url + "recipes/"
+    public static let url = BackendController.url + "recipes/"
     
     func loadAllRecipes(continuation: @escaping ([Recipe]) -> Void) {
         var coordinate: CLLocationCoordinate2D? = nil
-        let url = URL(string: url)!
+        let url = URL(string: RecipeBackendController.url)!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         
@@ -92,7 +92,7 @@ class RecipeBackendController {
             return
         }
         
-        let url = URL(string: url)!
+        let url = URL(string: RecipeBackendController.url)!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.httpBody = jsonData

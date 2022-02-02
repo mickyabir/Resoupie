@@ -12,11 +12,18 @@ struct FavoritesView: View {
     
     var body: some View {
         NavigationView {
-            List(favorites) { recipe in
-                NavigationLink {
-                    RecipeDetail(recipe: recipe)
-                } label: {
-                    RecipeRow(recipe: recipe)
+            ZStack {
+                Color.backgroundPeach
+                    .ignoresSafeArea()
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 50) {
+                        ForEach(favorites) { recipe in
+                            PopularRecipeCard(recipe: recipe, width: 350)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 40)
+                    .frame(maxWidth: .infinity)
                 }
             }
             .navigationTitle("Favorites")
