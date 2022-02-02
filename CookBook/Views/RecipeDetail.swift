@@ -14,89 +14,94 @@ struct RecipeDetail: View {
     @AppStorage("groceries") var groceries: [GroceryListItem] = []
     
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading) {
-                CustomAsyncImage(imageId: recipe.image, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.width, cornerRadius: 0)
-                Text(String(recipe.rating))
-                
-                Spacer()
-                
-                ForEach (recipe.ingredients) { ingredient in
-                    HStack {
-                        AddFillButton() {
-                            let index = groceries.firstIndex(where: {$0.id == (recipe.id.uuidString + "_" + ingredient.id)})
-                            return index != nil
-                        } action: { tapped in
-                            let index = groceries.firstIndex(where: {$0.id == (recipe.id.uuidString + "_" + ingredient.id)})
-                            if tapped {
-                                if index == nil {
-                                    groceries.append(GroceryListItem(id: recipe.id.uuidString + "_" + ingredient.id, ingredient: ingredient, check: false))
-                                }
-                            } else {
-                                if index != nil {
-                                    groceries.remove(at: index!)
-                                }
-                            }
-                        }
-                        
-                        Text(ingredient.quantity)
-                        Text(ingredient.unit)
-                        Text("of")
-                        Text(ingredient.name)
-                    }
-                    .padding()
-                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-                }
-                
+        ZStack {
+            Color.backgroundPeach
+            
+            ScrollView {
                 VStack(alignment: .leading) {
-                    ForEach (recipe.steps, id: \.self) { step in
+                    CustomAsyncImage(imageId: recipe.image, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.width, cornerRadius: 0)
+                    Text(String(recipe.rating))
+                    
+                    Spacer()
+                    
+                    ForEach (recipe.ingredients) { ingredient in
                         HStack {
-                            ZStack{
-                                Image(systemName: "circle.fill")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(Color.orange)
-                                let index = recipe.steps.firstIndex(of: step)! + 1
-                                Text(String(index))
-                                    .foregroundColor(Color.white)
+                            AddFillButton() {
+                                let index = groceries.firstIndex(where: {$0.id == (recipe.id.uuidString + "_" + ingredient.id)})
+                                return index != nil
+                            } action: { tapped in
+                                let index = groceries.firstIndex(where: {$0.id == (recipe.id.uuidString + "_" + ingredient.id)})
+                                if tapped {
+                                    if index == nil {
+                                        groceries.append(GroceryListItem(id: recipe.id.uuidString + "_" + ingredient.id, ingredient: ingredient, check: false))
+                                    }
+                                } else {
+                                    if index != nil {
+                                        groceries.remove(at: index!)
+                                    }
+                                }
                             }
                             
-                            Text(step)
-                                .padding()
+                            Text(ingredient.quantity)
+                            Text(ingredient.unit)
+                            Text("of")
+                            Text(ingredient.name)
+                        }
+                        .padding()
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                    }
+                    
+                    VStack(alignment: .leading) {
+                        ForEach (recipe.steps, id: \.self) { step in
+                            HStack {
+                                ZStack{
+                                    Image(systemName: "circle.fill")
+                                        .font(.system(size: 24))
+                                        .foregroundColor(Color.orange)
+                                    let index = recipe.steps.firstIndex(of: step)! + 1
+                                    Text(String(index))
+                                        .foregroundColor(Color.white)
+                                }
+                                
+                                Text(step)
+                                    .padding()
+                            }
                         }
                     }
-                }
-            }.frame(maxWidth: .infinity)
-        }
-        .onAppear {
-            if favorites.firstIndex(where: {$0.id == recipe.id}) != nil {
-                favorited = true
-            } else {
-                favorited = false
+                }.frame(maxWidth: .infinity)
             }
-        }
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                VStack {
-                    Text(recipe.name).font(.headline)
-                    Text(recipe.author).font(.subheadline)
+            .onAppear {
+                if favorites.firstIndex(where: {$0.id == recipe.id}) != nil {
+                    favorited = true
+                } else {
+                    favorited = false
                 }
             }
-        }
-        .navigationBarItems(trailing:
-                                Button(action: {
-            favorited.toggle()
-            
-            if favorited {
-                favorites.append(recipe)
-            } else {
-                if let offset = favorites.firstIndex(where: {$0.id == recipe.id}) {
-                    favorites.remove(at: offset)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    VStack {
+                        Text(recipe.name).font(.headline)
+                        Text(recipe.author).font(.subheadline)
+                    }
                 }
+            }
+            .navigationBarItems(trailing:
+                                    Button(action: {
+                favorited.toggle()
                 
-            }
-        }) {
-            Image(systemName: favorited ? "heart.fill" : "heart")
-        })
+                if favorited {
+                    favorites.append(recipe)
+                } else {
+                    if let offset = favorites.firstIndex(where: {$0.id == recipe.id}) {
+                        favorites.remove(at: offset)
+                    }
+                    
+                }
+            }) {
+                Image(systemName: favorited ? "heart.fill" : "heart")
+                    .foregroundColor(Color.red)
+            })
+        }
         
     }
 }

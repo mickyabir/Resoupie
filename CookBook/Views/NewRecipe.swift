@@ -38,7 +38,7 @@ struct NewRecipeRow<Content: View>: View {
             }
             content
         }
-        .frame(minHeight: 100)        
+        .frame(minHeight: 100)
     }
 }
 
@@ -48,7 +48,7 @@ struct NewRecipeRowDivider: View {
             .fill(Color.orange)
             .frame(height: 1)
             .edgesIgnoringSafeArea(.horizontal)
-
+        
     }
 }
 
@@ -65,12 +65,12 @@ class NewRecipeViewController: ObservableObject {
     @Published var showEmptyRecipeWarning = false
     
     func publishRecipe() {
-        // Send recipe to backend
-        //        if name == "" || ingredients.isEmpty || steps.isEmpty {
-        //            showEmptyRecipeWarning = true
-        //            return
-        //        }
-        //
+        //         Send recipe to backend
+        if name == "" || ingredients.isEmpty || steps.isEmpty {
+            showEmptyRecipeWarning = true
+            return
+        }
+        
         let imageUploader = ImageBackendController()
         
         var imageIdString: String = ""
@@ -109,114 +109,119 @@ struct NewRecipeView: View {
     @ObservedObject var viewController = NewRecipeViewController()
     
     var body: some View {
-        ScrollView {
-            VStack {
-                NewRecipeRow {
-                    CustomTextField("Recipe name", text: $viewController.name)
-                    
-                    HStack {
-                        CustomTextField("Servings", text: $viewController.servings)
-                            .keyboardType(.numberPad)
-                            .frame(width: 150)
+        ZStack {
+            Color.backgroundPeach
+                .ignoresSafeArea()
+            
+            ScrollView {
+                VStack {
+                    NewRecipeRow {
+                        CustomTextField("Recipe name", text: $viewController.name)
                         
-                        EmojiPickerView() { emoji in
-                            viewController.emoji = emoji
+                        HStack {
+                            CustomTextField("Servings", text: $viewController.servings)
+                                .keyboardType(.numberPad)
+                                .frame(width: 150)
+                            
+                            EmojiPickerView() { emoji in
+                                viewController.emoji = emoji
+                            }
                         }
-                    }
-                    
-                    if viewController.image != nil {
-                        Image(uiImage: viewController.image!)
-                            .resizable()
-                            .scaledToFit()
-                            .clipped()
-                            .cornerRadius(10)
-                            .padding(10)
-                    }
-                    
-                    Button() {
-                        showImageLibrary = true
-                    } label: {
-                        if viewController.image == nil {
-                            Text("Add Image")
-                        } else {
-                            Text("Edit Image")
+                        
+                        if viewController.image != nil {
+                            Image(uiImage: viewController.image!)
+                                .resizable()
+                                .scaledToFit()
+                                .clipped()
+                                .cornerRadius(10)
+                                .padding(10)
                         }
-                    }
-                }
-                
-                NewRecipeRowDivider()
-
-                
-                Group {
-                    NewRecipeRow("Ingredients") {
-                        IngredientListEditorView(viewController: ingredientsViewController)
-                            .padding()
+                        
+                        Button() {
+                            showImageLibrary = true
+                        } label: {
+                            if viewController.image == nil {
+                                Text("Add Image")
+                            } else {
+                                Text("Edit Image")
+                            }
+                        }
                     }
                     
                     NewRecipeRowDivider()
                     
-                    NewRecipeRow("Method") {
-                        TextEditorListView(viewController: textEditorListViewController)
-                    }
-                }
-                
-                NewRecipeRowDivider()
-                
-                NewRecipeRow("Location") {
-                    HStack {
-                        NavigationLink {
-                            CoordinatePicker(viewModel: coordinatePickerViewModel)
-                        } label: {
-                            Text("Choose Location (Optional)")
+                    
+                    Group {
+                        NewRecipeRow("Ingredients") {
+                            IngredientListEditorView(viewController: ingredientsViewController)
+                                .padding()
                         }
                         
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(Color.green)
-                            .opacity(viewController.coordinate != nil ? 1 : 0)
+                        NewRecipeRowDivider()
+                        
+                        NewRecipeRow("Method") {
+                            TextEditorListView(viewController: textEditorListViewController)
+                        }
+                    }
+                    
+                    NewRecipeRowDivider()
+                    
+                    NewRecipeRow("Location") {
+                        HStack {
+                            NavigationLink {
+                                CoordinatePicker(viewModel: coordinatePickerViewModel)
+                            } label: {
+                                Text("Choose Location (Optional)")
+                            }
+                            
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(Color.green)
+                                .opacity(viewController.coordinate != nil ? 1 : 0)
+                        }
                     }
                 }
             }
+            .onTapGesture {
+                let resign = #selector(UIResponder.resignFirstResponder)
+                UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
+            }
+            .onAppear {
+                viewController.coordinate = coordinatePickerViewModel.chosenRegion
+            }
+            .onChange(of: inputImage) { _ in
+                guard let inputImage = inputImage else { return }
+                viewController.image = inputImage
+            }
+            .alert(isPresented: $viewController.showEmptyRecipeWarning) {
+                Alert(
+                    title: Text("Please fill out the full recipe!"),
+                    dismissButton: .none
+                )
+            }
+            .navigationTitle(viewController.name != "" ? viewController.name : "New Recipe")
+            .sheet(isPresented: $showImageLibrary) {
+                PhotoPicker(image: $inputImage)
+            }
+            .navigationBarItems(leading:
+                                    Button(action: {
+                presentNewRecipe.showNewRecipe = false
+            }) {
+                Text("Cancel")
+                    .foregroundColor(Color.orange)
+            })
+            .navigationBarItems(trailing:
+                                    Button(action: {
+                viewController.ingredients = ingredientsViewController.ingredientsList
+                
+                viewController.steps = textEditorListViewController.listItemsText
+                
+                viewController.publishRecipe()
+                presentNewRecipe.showNewRecipe = false
+            }) {
+                Text("Publish")
+                    .foregroundColor(Color.orange)
+            })
         }
-        .onTapGesture {
-            let resign = #selector(UIResponder.resignFirstResponder)
-            UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
-        }
-        .onAppear {
-            viewController.coordinate = coordinatePickerViewModel.chosenRegion
-        }
-        .onChange(of: inputImage) { _ in
-            guard let inputImage = inputImage else { return }
-            viewController.image = inputImage
-        }
-        .alert(isPresented: $viewController.showEmptyRecipeWarning) {
-            Alert(
-                title: Text("Please fill out the full recipe!"),
-                dismissButton: .none
-            )
-        }
-        .navigationTitle(viewController.name != "" ? viewController.name : "New Recipe")
-        .sheet(isPresented: $showImageLibrary) {
-            PhotoPicker(image: $inputImage)
-        }
-        .navigationBarItems(leading:
-                                Button(action: {
-            presentNewRecipe.showNewRecipe = false
-        }) {
-            Text("Cancel")
-                .foregroundColor(Color.orange)
-        })
-        .navigationBarItems(trailing:
-                                Button(action: {
-            viewController.ingredients = ingredientsViewController.ingredientsList
-            
-            viewController.steps = textEditorListViewController.listItemsText
-            
-            viewController.publishRecipe()
-            presentNewRecipe.showNewRecipe = false
-        }) {
-            Text("Publish")
-                .foregroundColor(Color.orange)
-        })
     }
 }
 

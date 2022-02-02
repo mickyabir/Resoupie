@@ -11,15 +11,36 @@ struct SearchField: View {
     @State private var searchText = ""
     
     var body: some View {
-        HStack(spacing: 4) {
-            CustomTextField("", text: $searchText)
-            Button {
-                
-            } label: {
+        ZStack(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 10)
+                .foregroundColor(Color.lightGray)
+                .shadow(color: Color.black.opacity(0.12), radius: 4)
+                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 5)
+                .frame(maxWidth: .infinity)
+                .frame(height: 40)
+                .padding()
+            
+            HStack {
                 Image(systemName: "magnifyingglass")
+                    .foregroundColor(.lightText)
+                    .padding(.leading)
+                
+                TextField("", text: $searchText)
+                    .foregroundColor(.lightText)
+                    .padding(.trailing)
             }
+            .padding(.horizontal)
+
         }
-        .padding(.horizontal)
+//        HStack(spacing: 4) {
+//            TextField("", text: $searchText)
+//            Button {
+//
+//            } label: {
+//                Image(systemName: "magnifyingglass")
+//            }
+//        }
+//        .padding(.horizontal)
     }
 }
 
@@ -27,11 +48,50 @@ extension Color {
     static let offWhite = Color(red: 225 / 255, green: 225 / 255, blue: 235 / 255)
     static let lightGray = Color(red: 250 / 255, green: 250 / 255, blue: 250 / 255)
     static let backgroundPeach = Color(red: 255 / 255, green: 247 / 255, blue: 242 / 255)
+    static let navbarPeach = Color(red: 255 / 255, green: 253 / 255, blue: 251 / 255)
+    static let lightText = Color(red: 153 / 255, green: 136 / 255, blue: 124 / 255)
+    static let text = Color(red: 105 / 255, green: 84 / 255, blue: 70 / 255)
+}
+
+struct RecipeGroupRow: View {
+    var title: String
+    var recipes: [Recipe]
+    @AppStorage("favorites") var favorites: [Recipe] = []
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text(title)
+                .font(.title3)
+                .padding(.leading)
+                .foregroundColor(Color.text)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack {
+                    ForEach(recipes) { recipe in
+                        ZStack {
+                            RecipeCard(recipe: recipe, width: 250)
+
+                            let favorited = (favorites.firstIndex(of: recipe) != nil)
+                            Image(systemName: favorited ? "heart.fill" : "heart")
+                                .foregroundColor(favorited ? Color.red : Color.white)
+                                .font(.system(size: 18))
+                                .offset(x: 100, y: -130)
+                        }
+                    }
+                }
+                .padding()
+                .padding(.vertical, 20)
+            }
+        }
+    }
 }
 
 struct RecipesMainView: View {
     @State var recipes: [Recipe] = [Recipe]()
-    @AppStorage("favorites") var favorites: [Recipe] = []
+    
+    init (recipes: [Recipe]) {
+        self.recipes = recipes
+        Theme.navigationBarColors(background: UIColor(Color.navbarPeach), titleColor: UIColor(Color.text))
+    }
     
     var body: some View {
         NavigationView {
@@ -43,38 +103,42 @@ struct RecipesMainView: View {
                     VStack {
                         SearchField()
                         
-                        VStack(alignment: .leading) {
-                            Text("Popular")
-                                .font(.headline)
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack {
-                                    ForEach(recipes) { recipe in
-                                        ZStack {
-                                            PopularRecipeCard(recipe: recipe, width: 250)
-
-                                            let favorited = (favorites.firstIndex(of: recipe) != nil)
-                                            Image(systemName: favorited ? "heart.fill" : "heart")
-                                                .foregroundColor(favorited ? Color.red : Color.white)
-                                                .font(.system(size: 18))
-                                                .offset(x: 100, y: -130)
-                                        }
-                                    }
-                                }
-                                .padding()
-                                .padding(.vertical, 20)
-                            }
+                        Group {
+                            RecipeGroupRow(title: "Popular", recipes: recipes)
+                            
+                            Rectangle()
+                                .foregroundColor(Color.white)
+                                .shadow(color: Color.black.opacity(0.05), radius: 5)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical)
+                            
+                            RecipeGroupRow(title: "For You", recipes: recipes)
+                            
+                            Rectangle()
+                                .foregroundColor(Color.white)
+                                .shadow(color: Color.black.opacity(0.05), radius: 5)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical)
+                            
+                            RecipeGroupRow(title: "Vegan", recipes: recipes)
+                        }
+                        .onTapGesture {
+                            let resign = #selector(UIResponder.resignFirstResponder)
+                            UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
                         }
                     }
                     .navigationTitle("Recipes")
                 }
+                .simultaneousGesture(
+                    DragGesture().onChanged { value in
+                        let resign = #selector(UIResponder.resignFirstResponder)
+                        UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
+                    }
+                )
             }
         }
         .onAppear {
             loadRecipes()
-        }
-        .onTapGesture {
-            let resign = #selector(UIResponder.resignFirstResponder)
-            UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
         }
     }
     
@@ -105,77 +169,21 @@ struct RecipesMainView_Previews: PreviewProvider {
     }
 }
 
-struct PopularRecipeCard: View {
-    var recipe: Recipe
-    var width: CGFloat
+class Theme {
+    static func navigationBarColors(background : UIColor?,
+       titleColor : UIColor? = nil, tintColor : UIColor? = nil ){
+        
+        let navigationAppearance = UINavigationBarAppearance()
+        navigationAppearance.configureWithOpaqueBackground()
+        navigationAppearance.backgroundColor = background ?? .clear
+        
+        navigationAppearance.titleTextAttributes = [.foregroundColor: titleColor ?? .black]
+        navigationAppearance.largeTitleTextAttributes = [.foregroundColor: titleColor ?? .black]
+       
+        UINavigationBar.appearance().standardAppearance = navigationAppearance
+        UINavigationBar.appearance().compactAppearance = navigationAppearance
+        UINavigationBar.appearance().scrollEdgeAppearance = navigationAppearance
 
-    @State var presentRecipe = false
-    @State var image: UIImage?
-    
-    var body: some View {
-        ZStack(alignment: .top) {
-            RoundedRectangle(cornerRadius: 10)
-                .foregroundColor(Color.lightGray)
-                .shadow(color: Color.black.opacity(0.15), radius: 10)
-            VStack(alignment: .leading) {
-                AsyncImage(url: URL(string: BackendController.url + "images/" + recipe.image)) { image in
-                    image
-                        .resizable()
-                        .frame(width: width, height: width)
-                        .aspectRatio(contentMode: .fill)
-                        .cornerRadius(10)
-                        .clipped()
-                } placeholder: {
-                    Color.orange
-                }
-                
-                VStack(spacing: 2) {
-                    Group {
-                        Text(recipe.name)
-                            .font(.headline)
-                        Text(recipe.author)
-                            .font(.subheadline)
-                        HStack {
-                            let starsBound = Int(floor(recipe.rating) - 1) > 0 ? Int(floor(recipe.rating) - 1) : 0
-                            HStack(spacing: 2) {
-                                ForEach(0..<starsBound) { _ in
-                                    Image(systemName: "star.fill")
-                                        .font(.subheadline)
-                                        .foregroundColor(Color.yellow)
-                                        .font(.system(size: 14))
-                                }
-                                ForEach(starsBound..<5) { _ in
-                                    Image(systemName: "star")
-                                        .font(.subheadline)
-                                        .foregroundColor(Color.yellow)
-                                        .font(.system(size: 14))
-                                }
-                            }
-                            Text("(" + String(recipe.rating) + ")")
-                                .opacity(0.5)
-                                .font(.system(size: 14))
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-            }
-        }
-        .frame(width: width, height: width + 50)
-        .onTapGesture {
-            presentRecipe = true
-        }
-        .padding(.horizontal, 5)
-        .popover(isPresented: $presentRecipe, content: {
-            NavigationView {
-                RecipeDetail(recipe: recipe)
-                    .navigationBarItems(leading:
-                                            Button(action: {
-                        presentRecipe = false
-                    }) {
-                        Image(systemName: "chevron.down")
-                            .foregroundColor(Color.orange)
-                    })
-            }
-        })
+        UINavigationBar.appearance().tintColor = tintColor ?? titleColor ?? .black
     }
 }
