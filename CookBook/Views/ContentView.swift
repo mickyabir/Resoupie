@@ -13,8 +13,8 @@ class PresentNewRecipe: ObservableObject {
 
 
 struct ContentView: View {
-    var recipes: [Recipe]
-    @AppStorage("favorites") var favorites: [Recipe] = []
+    var recipes: [RecipeMeta]
+    @AppStorage("favorites") var favorites: [RecipeMeta] = []
     @State private var selection = 1
     @State private var oldSelection = 1
     @StateObject var presentNewRecipe = PresentNewRecipe()
@@ -88,24 +88,5 @@ extension Array: RawRepresentable where Element: Codable {
             return "[]"
         }
         return result
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        let ingredients = [
-            Ingredient(id: "0", name: "milk", quantity: "2", unit: "cup"),
-            Ingredient(id: "1", name: "tea", quantity: "1/2", unit: "cup"),
-            Ingredient(id: "2", name: "sugar", quantity: "2", unit: "tblsp")
-        ]
-        let steps = [
-            "Mix sugar and tea",
-            "Add milk"
-        ]
-        let boba_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09e")!, image: "simple_milk_tea", name: "boba", author: "Micky Abir", rating: 4.5, ingredients: ingredients, steps: steps, emoji: "🧋", favorited: 100, servings: 1)
-        let recipes = [boba_recipe]
-        ContentView(recipes: recipes, favorites: recipes)
-            .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
-            .previewDisplayName("iPhone 12")
     }
 }

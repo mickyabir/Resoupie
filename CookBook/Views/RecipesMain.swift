@@ -37,8 +37,8 @@ struct SearchField: View {
 
 struct RecipeGroupRow: View {
     var title: String
-    var recipes: [Recipe]
-    @AppStorage("favorites") var favorites: [Recipe] = []
+    var recipes: [RecipeMeta]
+    @AppStorage("favorites") var favorites: [RecipeMeta] = []
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -50,7 +50,7 @@ struct RecipeGroupRow: View {
                 HStack {
                     ForEach(recipes) { recipe in
                         ZStack {
-                            RecipeCard(recipe: recipe, width: 250)
+                            RecipeCard(recipeMeta: recipe, width: 250)
 
                             let favorited = (favorites.firstIndex(of: recipe) != nil)
                             Image(systemName: favorited ? "heart.fill" : "heart")
@@ -68,7 +68,7 @@ struct RecipeGroupRow: View {
 }
 
 struct RecipesMainView: View {
-    @State var recipes: [Recipe] = [Recipe]()
+    @State var recipes: [RecipeMeta] = [RecipeMeta]()
     
     var body: some View {
         NavigationView {
@@ -124,24 +124,5 @@ struct RecipesMainView: View {
         let _ = recipeBackendController.loadAllRecipes { allRecipes in
             self.recipes = allRecipes
         }
-    }
-}
-
-struct RecipesMainView_Previews: PreviewProvider {
-    static var previews: some View {
-        let ingredients = [
-            Ingredient(id: "0", name: "milk", quantity: "2", unit: "cup"),
-            Ingredient(id: "1", name: "tea", quantity: "1/2", unit: "cup"),
-            Ingredient(id: "2", name: "sugar", quantity: "2", unit: "tblsp")
-        ]
-        let steps = [
-            "Mix sugar and tea",
-            "Add milk"
-        ]
-        let boba_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09e")!, image: "simple_milk_tea", name: "boba", author: "Micky Abir", rating: 4.5, ingredients: ingredients, steps: steps, emoji: "🧋", favorited: 100, servings: 1)
-        let recipes = [boba_recipe]
-        RecipesMainView(recipes: recipes)
-            .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
-            .previewDisplayName("iPhone 12")
     }
 }

@@ -21,13 +21,25 @@ struct Recipe: Hashable, Codable, Identifiable {
     var image: String
     var name: String
     var author: String
-    var rating: Double
     var ingredients: [Ingredient]
     var steps: [String]
     var coordinate: CLLocationCoordinate2D?
     var emoji: String
-    var favorited: Int
     var servings: Int
+}
+
+struct RecipeMeta: Hashable, Codable, Identifiable {
+    var id: UUID
+    var recipe: Recipe
+    var rating: Double
+    var favorited: Int
+    
+    init(recipe: Recipe, rating: Double, favorited: Int) {
+        self.recipe = recipe
+        self.rating = rating
+        self.favorited = favorited
+        id = recipe.id
+    }
 }
 
 extension CLLocationCoordinate2D: Hashable {

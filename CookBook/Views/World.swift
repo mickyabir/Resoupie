@@ -23,7 +23,7 @@ struct PlaceAnnotationEmojiView: View {
 }
 
 class WorldViewModel: ObservableObject {
-    @Published var recipes: [Recipe] = []
+    @Published var recipes: [RecipeMeta] = []
     
     func loadRecipes() {
         let recipeBackendController = RecipeBackendController()
@@ -37,7 +37,7 @@ class WorldViewModel: ObservableObject {
         
         recipes = recipes
             .filter({
-                $0.coordinate != nil
+                $0.recipe.coordinate != nil
             })
         
         for recipe_i in recipes {
@@ -46,7 +46,7 @@ class WorldViewModel: ObservableObject {
                     continue
                 }
                 
-                if abs(recipe_i.coordinate!.latitude - recipe_j.coordinate!.latitude) < region.span.latitudeDelta * 0.02 && abs(recipe_i.coordinate!.longitude - recipe_j.coordinate!.longitude) < region.span.longitudeDelta * 0.02 {
+                if abs(recipe_i.recipe.coordinate!.latitude - recipe_j.recipe.coordinate!.latitude) < region.span.latitudeDelta * 0.02 && abs(recipe_i.recipe.coordinate!.longitude - recipe_j.recipe.coordinate!.longitude) < region.span.longitudeDelta * 0.02 {
                     if recipe_i.favorited >= recipe_j.favorited {
                         if let index = recipes.firstIndex(of: recipe_j) {
                             recipes.remove(at: index)
@@ -60,10 +60,10 @@ class WorldViewModel: ObservableObject {
             }
             
             recipes = recipes.filter({
-                $0.coordinate!.latitude > region.center.latitude - region.span.latitudeDelta &&
-                $0.coordinate!.latitude < region.center.latitude + region.span.latitudeDelta &&
-                $0.coordinate!.longitude > region.center.longitude - region.span.longitudeDelta &&
-                $0.coordinate!.longitude < region.center.longitude + region.span.longitudeDelta
+                $0.recipe.coordinate!.latitude > region.center.latitude - region.span.latitudeDelta &&
+                $0.recipe.coordinate!.latitude < region.center.latitude + region.span.latitudeDelta &&
+                $0.recipe.coordinate!.longitude > region.center.longitude - region.span.longitudeDelta &&
+                $0.recipe.coordinate!.longitude < region.center.longitude + region.span.longitudeDelta
             })
         }
     }
@@ -82,9 +82,9 @@ struct WorldView: View {
     
     var body: some View {
         let places = viewModel.recipes.filter {
-            $0.coordinate != nil
+            $0.recipe.coordinate != nil
         } .map {
-            Place(id: $0.id, emoji: $0.emoji, coordinate: $0.coordinate!)
+            Place(id: $0.id, emoji: $0.recipe.emoji, coordinate: $0.recipe.coordinate!)
         }
         
         Map(coordinateRegion: $region, annotationItems: places) { place in
@@ -109,7 +109,7 @@ struct WorldView: View {
         .sheet(isPresented: $displayRecipe, onDismiss: {
 //            self.chosenRecipe = nil
         }, content: {
-            RecipeDetail(recipe: viewModel.recipes[chosenRecipeIndex])
+            RecipeDetail(recipeMeta: viewModel.recipes[chosenRecipeIndex])
         })
     }
 }

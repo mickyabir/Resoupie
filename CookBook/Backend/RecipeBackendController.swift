@@ -17,16 +17,21 @@ struct RecipeBackendModel: Codable {
     var steps: [String]
     var emoji: String
     var servings: Int
-    var rating: Double
-    var favorited: Int
     var coordinate_lat: String
     var coordinate_long: String
+}
+
+struct RecipeMetaBackendModel: Codable {
+    var id: String
+    var recipe: RecipeBackendModel
+    var rating: Double
+    var favorited: Int
 }
 
 class RecipeBackendController {
     public static let url = BackendController.url + "recipes/"
     
-    func loadAllRecipes(continuation: @escaping ([Recipe]) -> Void) {
+    func loadAllRecipes(continuation: @escaping ([RecipeMeta]) -> Void) {
         var coordinate: CLLocationCoordinate2D? = nil
         let url = URL(string: RecipeBackendController.url)!
         var request = URLRequest(url: url)
@@ -39,10 +44,10 @@ class RecipeBackendController {
                 return
             }
             
-            var recipes: [RecipeBackendModel]?
+            var recipes: [RecipeMetaBackendModel]?
             
             do {
-                recipes = try JSONDecoder().decode([RecipeBackendModel].self, from: data)
+                recipes = try JSONDecoder().decode([RecipeMetaBackendModel].self, from: data)
             } catch DecodingError.dataCorrupted(let context) {
                 print(context)
             } catch DecodingError.keyNotFound(let key, let context) {
@@ -58,12 +63,13 @@ class RecipeBackendController {
                 print("error: ", error)
             }
             if let recipes = recipes {
-                let recipeModels = recipes.map { recipe -> Recipe in
-                    if let lat = Double(recipe.coordinate_lat), let long = Double(recipe.coordinate_long) {
+                let recipeModels = recipes.map { recipeMeta -> RecipeMeta in
+                    if let lat = Double(recipeMeta.recipe.coordinate_lat), let long = Double(recipeMeta.recipe.coordinate_long) {
                         coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
                     }
                     
-                    return Recipe(id: UUID(uuidString: recipe.id)!, image: recipe.image, name: recipe.name, author: recipe.author, rating: recipe.rating, ingredients: recipe.ingredients, steps: recipe.steps, coordinate: coordinate, emoji: recipe.emoji, favorited: recipe.favorited, servings: recipe.servings)
+                    let recipeObject = Recipe(id: UUID(uuidString: recipeMeta.id)!, image: recipeMeta.recipe.image, name: recipeMeta.recipe.name, author: recipeMeta.recipe.author, ingredients: recipeMeta.recipe.ingredients, steps: recipeMeta.recipe.steps, coordinate: coordinate, emoji: recipeMeta.recipe.emoji, servings: recipeMeta.recipe.servings)
+                    return RecipeMeta(recipe: recipeObject, rating: recipeMeta.rating, favorited: recipeMeta.favorited)
                 }
                 continuation(recipeModels)
             }
@@ -79,7 +85,7 @@ class RecipeBackendController {
             lat = String(coordinate.latitude)
             long = String(coordinate.longitude)
         }
-        let recipeModel = RecipeBackendModel(id: recipe.id.uuidString, image: recipe.image, name: recipe.name, author: recipe.author, ingredients: recipe.ingredients, steps: recipe.steps, emoji: recipe.emoji, servings: recipe.servings, rating: 0, favorited: 0, coordinate_lat: lat, coordinate_long: long)
+        let recipeModel = RecipeBackendModel(id: recipe.id.uuidString, image: recipe.image, name: recipe.name, author: recipe.author, ingredients: recipe.ingredients, steps: recipe.steps, emoji: recipe.emoji, servings: recipe.servings, coordinate_lat: lat, coordinate_long: long)
         var jsonData: Data?
         do {
             jsonData = try JSONEncoder().encode(recipeModel)

@@ -8,22 +8,22 @@
 import SwiftUI
 
 struct SortMethod {
-    static func Alphabetical(lhs: Recipe, rhs: Recipe) -> Bool {
-        return lhs.name < rhs.name
+    static func Alphabetical(lhs: RecipeMeta, rhs: RecipeMeta) -> Bool {
+        return lhs.recipe.name < rhs.recipe.name
     }
     
-    static func Popular(lhs: Recipe, rhs: Recipe) -> Bool {
+    static func Popular(lhs: RecipeMeta, rhs: RecipeMeta) -> Bool {
         return lhs.favorited > rhs.favorited
     }
     
-    static func Rating(lhs: Recipe, rhs: Recipe) -> Bool {
+    static func Rating(lhs: RecipeMeta, rhs: RecipeMeta) -> Bool {
         return lhs.rating > rhs.rating
     }
 
 }
 
 struct FavoritesView: View {
-    @AppStorage("favorites") var favorites: [Recipe] = []
+    @AppStorage("favorites") var favorites: [RecipeMeta] = []
     
     enum Sort {
         case alphabetical
@@ -31,7 +31,7 @@ struct FavoritesView: View {
         case rating
     }
     
-    var sortingMethod: [Sort: (Recipe, Recipe) -> Bool] = [
+    var sortingMethod: [Sort: (RecipeMeta, RecipeMeta) -> Bool] = [
         .alphabetical: SortMethod.Alphabetical,
         .popular: SortMethod.Popular,
         .rating: SortMethod.Rating,
@@ -49,7 +49,7 @@ struct FavoritesView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 50) {
                         ForEach(favorites.sorted(by: sortingMethod[sort]!)) { recipe in
-                            RecipeCard(recipe: recipe, width: 350)
+                            RecipeCard(recipeMeta: recipe, width: 350)
                         }
                     }
                     .padding(.horizontal)

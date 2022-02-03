@@ -9,8 +9,8 @@ import SwiftUI
 
 struct RecipeDetail: View {
     @State private var favorited: Bool = false
-    var recipe: Recipe
-    @AppStorage("favorites") var favorites: [Recipe] = []
+    var recipeMeta: RecipeMeta
+    @AppStorage("favorites") var favorites: [RecipeMeta] = []
     @AppStorage("groceries") var groceries: [GroceryListItem] = []
     
     var body: some View {
@@ -19,22 +19,22 @@ struct RecipeDetail: View {
             
             ScrollView {
                 VStack(alignment: .leading) {
-                    CustomAsyncImage(imageId: recipe.image, width: UIScreen.main.bounds.size.width - 20, height: UIScreen.main.bounds.size.width - 20, cornerRadius: 10)
+                    CustomAsyncImage(imageId: recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 20, height: UIScreen.main.bounds.size.width - 20, cornerRadius: 10)
                         .padding(.leading, 10)
-                    Text(String(recipe.rating))
+                    Text(String(recipeMeta.rating))
                     
                     Spacer()
                     
-                    ForEach (recipe.ingredients) { ingredient in
+                    ForEach (recipeMeta.recipe.ingredients) { ingredient in
                         HStack {
                             AddFillButton() {
-                                let index = groceries.firstIndex(where: {$0.id == (recipe.id.uuidString + "_" + ingredient.id)})
+                                let index = groceries.firstIndex(where: {$0.id == (recipeMeta.id.uuidString + "_" + ingredient.id)})
                                 return index != nil
                             } action: { tapped in
-                                let index = groceries.firstIndex(where: {$0.id == (recipe.id.uuidString + "_" + ingredient.id)})
+                                let index = groceries.firstIndex(where: {$0.id == (recipeMeta.id.uuidString + "_" + ingredient.id)})
                                 if tapped {
                                     if index == nil {
-                                        groceries.append(GroceryListItem(id: recipe.id.uuidString + "_" + ingredient.id, ingredient: ingredient, check: false))
+                                        groceries.append(GroceryListItem(id: recipeMeta.id.uuidString + "_" + ingredient.id, ingredient: ingredient, check: false))
                                     }
                                 } else {
                                     if index != nil {
@@ -53,13 +53,13 @@ struct RecipeDetail: View {
                     }
                     
                     VStack(alignment: .leading) {
-                        ForEach (recipe.steps, id: \.self) { step in
+                        ForEach (recipeMeta.recipe.steps, id: \.self) { step in
                             HStack {
                                 ZStack{
                                     Image(systemName: "circle.fill")
                                         .font(.system(size: 24))
                                         .foregroundColor(Color.orange)
-                                    let index = recipe.steps.firstIndex(of: step)! + 1
+                                    let index = recipeMeta.recipe.steps.firstIndex(of: step)! + 1
                                     Text(String(index))
                                         .foregroundColor(Color.white)
                                 }
@@ -72,7 +72,7 @@ struct RecipeDetail: View {
                 }.frame(maxWidth: .infinity)
             }
             .onAppear {
-                if favorites.firstIndex(where: {$0.id == recipe.id}) != nil {
+                if favorites.firstIndex(where: {$0.id == recipeMeta.id}) != nil {
                     favorited = true
                 } else {
                     favorited = false
@@ -81,8 +81,8 @@ struct RecipeDetail: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     VStack {
-                        Text(recipe.name).font(.headline)
-                        Text(recipe.author).font(.subheadline)
+                        Text(recipeMeta.recipe.name).font(.headline)
+                        Text(recipeMeta.recipe.author).font(.subheadline)
                     }
                 }
             }
@@ -91,9 +91,9 @@ struct RecipeDetail: View {
                 favorited.toggle()
                 
                 if favorited {
-                    favorites.append(recipe)
+                    favorites.append(recipeMeta)
                 } else {
-                    if let offset = favorites.firstIndex(where: {$0.id == recipe.id}) {
+                    if let offset = favorites.firstIndex(where: {$0.id == recipeMeta.id}) {
                         favorites.remove(at: offset)
                     }
                     
@@ -104,23 +104,5 @@ struct RecipeDetail: View {
             })
         }
         
-    }
-}
-
-struct RecipeDetail_Previews: PreviewProvider {
-    static var previews: some View {
-        let ingredients = [
-            Ingredient(id: "0", name: "milk", quantity: "2", unit: "cup"),
-            Ingredient(id: "1", name: "tea", quantity: "1/2", unit: "cup"),
-            Ingredient(id: "2", name: "sugar", quantity: "2", unit: "tblsp")
-        ]
-        let steps = [
-            "Mix sugar and tea",
-            "Add milk"
-        ]
-        let boba_recipe = Recipe(id: UUID(uuidString: "33041937-05b2-464a-98ad-3910cbe0d09e")!, image: "simple_milk_tea", name: "boba", author: "Micky Abir", rating: 4.5, ingredients: ingredients, steps: steps, emoji: "🧋", favorited: 100, servings: 1)
-        RecipeDetail(recipe: boba_recipe)
-            .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
-            .previewDisplayName("iPhone 12")
     }
 }

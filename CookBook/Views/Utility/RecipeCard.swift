@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct RecipeCard: View {
-    var recipe: Recipe
+    var recipeMeta: RecipeMeta
     var width: CGFloat
 
     @State var presentRecipe = false
@@ -21,7 +21,7 @@ struct RecipeCard: View {
                 .shadow(color: Color.black.opacity(0.12), radius: 4)
                 .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
             VStack(alignment: .leading) {
-                AsyncImage(url: URL(string: BackendController.url + "images/" + recipe.image)) { image in
+                AsyncImage(url: URL(string: BackendController.url + "images/" + recipeMeta.recipe.image)) { image in
                     image
                         .resizable()
                         .frame(width: width, height: width)
@@ -34,10 +34,10 @@ struct RecipeCard: View {
                 
                 HStack {
                     VStack(alignment: .leading) {
-                        Text(recipe.name)
+                        Text(recipeMeta.recipe.name)
                             .font(.headline)
                             .foregroundColor(Color.text)
-                        Text(recipe.author)
+                        Text(recipeMeta.recipe.author)
                             .font(.subheadline)
                             .foregroundColor(Color.lightText)
                     }
@@ -46,7 +46,7 @@ struct RecipeCard: View {
                     
                     VStack(alignment: .trailing) {
                         HStack {
-                            Text(String(recipe.rating))
+                            Text(String(recipeMeta.rating))
                                 .font(.subheadline)
                                 .foregroundColor(Color.lightText)
                             Image(systemName: "star.fill")
@@ -54,7 +54,7 @@ struct RecipeCard: View {
                                 .font(.system(size: 12))
                         }
                         HStack {
-                            Text(String(recipe.favorited))
+                            Text(String(recipeMeta.favorited))
                                 .font(.subheadline)
                                 .foregroundColor(Color.lightText)
                             Image(systemName: "heart.fill")
@@ -74,7 +74,7 @@ struct RecipeCard: View {
         .padding(.horizontal, 5)
         .popover(isPresented: $presentRecipe, content: {
             NavigationView {
-                RecipeDetail(recipe: recipe)
+                RecipeDetail(recipeMeta: recipeMeta)
                     .navigationBarItems(leading:
                                             Button(action: {
                         presentRecipe = false

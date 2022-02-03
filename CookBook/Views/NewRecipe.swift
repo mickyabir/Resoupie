@@ -78,7 +78,7 @@ class NewRecipeViewController: ObservableObject {
             imageUploader.uploadImageToServer(image: image) { [self] imageId in
                 guard let imageId = imageId else { return }
                 imageIdString = imageId.uuidString
-                let recipe = Recipe(id: uuid, image: imageIdString, name: name, author: "author", rating: 0, ingredients: ingredients, steps: steps, coordinate: self.coordinate, emoji: emoji, favorited: 0, servings: Int(servings) ?? 0)
+                let recipe = Recipe(id: uuid, image: imageIdString, name: name, author: "author", ingredients: ingredients, steps: steps, coordinate: self.coordinate, emoji: emoji, servings: Int(servings) ?? 0)
                 
                 let recipeUploader = RecipeBackendController()
                 recipeUploader.uploadRecipeToServer(recipe: recipe) { result in
