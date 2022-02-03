@@ -43,7 +43,7 @@ struct FavoritesView: View {
     var body: some View {
         NavigationView {
             ZStack(alignment: .topTrailing) {
-                Color.backgroundPeach
+                Color.background
                     .ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {

@@ -65,7 +65,6 @@ class NewRecipeViewController: ObservableObject {
     @Published var showEmptyRecipeWarning = false
     
     func publishRecipe() {
-        //         Send recipe to backend
         if name == "" || ingredients.isEmpty || steps.isEmpty {
             showEmptyRecipeWarning = true
             return
@@ -110,7 +109,7 @@ struct NewRecipeView: View {
     
     var body: some View {
         ZStack {
-            Color.backgroundPeach
+            Color.background
                 .ignoresSafeArea()
             
             ScrollView {

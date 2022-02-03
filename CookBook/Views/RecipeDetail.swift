@@ -15,11 +15,12 @@ struct RecipeDetail: View {
     
     var body: some View {
         ZStack {
-            Color.backgroundPeach
+            Color.background
             
             ScrollView {
                 VStack(alignment: .leading) {
-                    CustomAsyncImage(imageId: recipe.image, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.width, cornerRadius: 0)
+                    CustomAsyncImage(imageId: recipe.image, width: UIScreen.main.bounds.size.width - 20, height: UIScreen.main.bounds.size.width - 20, cornerRadius: 10)
+                        .padding(.leading, 10)
                     Text(String(recipe.rating))
                     
                     Spacer()

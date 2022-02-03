@@ -19,7 +19,7 @@ struct RecipeCard: View {
             RoundedRectangle(cornerRadius: 10)
                 .foregroundColor(Color.lightGray)
                 .shadow(color: Color.black.opacity(0.12), radius: 4)
-                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 5)
+                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
             VStack(alignment: .leading) {
                 AsyncImage(url: URL(string: BackendController.url + "images/" + recipe.image)) { image in
                     image
@@ -32,35 +32,39 @@ struct RecipeCard: View {
                     Color.orange
                 }
                 
-                VStack(spacing: 2) {
-                    Group {
+                HStack {
+                    VStack(alignment: .leading) {
                         Text(recipe.name)
                             .font(.headline)
+                            .foregroundColor(Color.text)
                         Text(recipe.author)
                             .font(.subheadline)
+                            .foregroundColor(Color.lightText)
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .trailing) {
                         HStack {
-                            let starsBound = Int(floor(recipe.rating) - 1) > 0 ? Int(floor(recipe.rating) - 1) : 0
-                            HStack(spacing: 2) {
-                                ForEach(0..<starsBound) { _ in
-                                    Image(systemName: "star.fill")
-                                        .font(.subheadline)
-                                        .foregroundColor(Color.yellow)
-                                        .font(.system(size: 14))
-                                }
-                                ForEach(starsBound..<5) { _ in
-                                    Image(systemName: "star")
-                                        .font(.subheadline)
-                                        .foregroundColor(Color.yellow)
-                                        .font(.system(size: 14))
-                                }
-                            }
-                            Text("(" + String(recipe.rating) + ")")
-                                .opacity(0.5)
-                                .font(.system(size: 14))
+                            Text(String(recipe.rating))
+                                .font(.subheadline)
+                                .foregroundColor(Color.lightText)
+                            Image(systemName: "star.fill")
+                                .foregroundColor(Color.yellow)
+                                .font(.system(size: 12))
+                        }
+                        HStack {
+                            Text(String(recipe.favorited))
+                                .font(.subheadline)
+                                .foregroundColor(Color.lightText)
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(Color.red)
+                                .font(.system(size: 12))
                         }
                     }
-                    .frame(maxWidth: .infinity)
                 }
+                .padding(.horizontal, 15)
+                .padding(.bottom, 5)
             }
         }
         .frame(width: width, height: width + 50)

@@ -15,7 +15,7 @@ struct SearchField: View {
             RoundedRectangle(cornerRadius: 10)
                 .foregroundColor(Color.lightGray)
                 .shadow(color: Color.black.opacity(0.12), radius: 4)
-                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 5)
+                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
                 .frame(maxWidth: .infinity)
                 .frame(height: 40)
                 .padding()
@@ -32,25 +32,7 @@ struct SearchField: View {
             .padding(.horizontal)
 
         }
-//        HStack(spacing: 4) {
-//            TextField("", text: $searchText)
-//            Button {
-//
-//            } label: {
-//                Image(systemName: "magnifyingglass")
-//            }
-//        }
-//        .padding(.horizontal)
     }
-}
-
-extension Color {
-    static let offWhite = Color(red: 225 / 255, green: 225 / 255, blue: 235 / 255)
-    static let lightGray = Color(red: 250 / 255, green: 250 / 255, blue: 250 / 255)
-    static let backgroundPeach = Color(red: 255 / 255, green: 247 / 255, blue: 242 / 255)
-    static let navbarPeach = Color(red: 255 / 255, green: 253 / 255, blue: 251 / 255)
-    static let lightText = Color(red: 153 / 255, green: 136 / 255, blue: 124 / 255)
-    static let text = Color(red: 105 / 255, green: 84 / 255, blue: 70 / 255)
 }
 
 struct RecipeGroupRow: View {
@@ -63,7 +45,7 @@ struct RecipeGroupRow: View {
             Text(title)
                 .font(.title3)
                 .padding(.leading)
-                .foregroundColor(Color.text)
+                .foregroundColor(Color.title3)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack {
                     ForEach(recipes) { recipe in
@@ -76,10 +58,10 @@ struct RecipeGroupRow: View {
                                 .font(.system(size: 18))
                                 .offset(x: 100, y: -130)
                         }
+                        .padding(.bottom, 5)
                     }
                 }
-                .padding()
-                .padding(.vertical, 20)
+                .padding(.leading)
             }
         }
     }
@@ -88,15 +70,10 @@ struct RecipeGroupRow: View {
 struct RecipesMainView: View {
     @State var recipes: [Recipe] = [Recipe]()
     
-    init (recipes: [Recipe]) {
-        self.recipes = recipes
-        Theme.navigationBarColors(background: UIColor(Color.navbarPeach), titleColor: UIColor(Color.text))
-    }
-    
     var body: some View {
         NavigationView {
             ZStack {
-                Color.backgroundPeach
+                Color.background
                     .ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
@@ -166,24 +143,5 @@ struct RecipesMainView_Previews: PreviewProvider {
         RecipesMainView(recipes: recipes)
             .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
             .previewDisplayName("iPhone 12")
-    }
-}
-
-class Theme {
-    static func navigationBarColors(background : UIColor?,
-       titleColor : UIColor? = nil, tintColor : UIColor? = nil ){
-        
-        let navigationAppearance = UINavigationBarAppearance()
-        navigationAppearance.configureWithOpaqueBackground()
-        navigationAppearance.backgroundColor = background ?? .clear
-        
-        navigationAppearance.titleTextAttributes = [.foregroundColor: titleColor ?? .black]
-        navigationAppearance.largeTitleTextAttributes = [.foregroundColor: titleColor ?? .black]
-       
-        UINavigationBar.appearance().standardAppearance = navigationAppearance
-        UINavigationBar.appearance().compactAppearance = navigationAppearance
-        UINavigationBar.appearance().scrollEdgeAppearance = navigationAppearance
-
-        UINavigationBar.appearance().tintColor = tintColor ?? titleColor ?? .black
     }
 }
