@@ -18,19 +18,10 @@ struct RecipeCard: View {
         ZStack(alignment: .top) {
             RoundedRectangle(cornerRadius: 10)
                 .foregroundColor(Color.lightGray)
-                .shadow(color: Color.black.opacity(0.12), radius: 4)
-                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
+                .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 8)
             VStack(alignment: .leading) {
-                AsyncImage(url: URL(string: BackendController.url + "images/" + recipeMeta.recipe.image)) { image in
-                    image
-                        .resizable()
-                        .frame(width: width, height: width)
-                        .aspectRatio(contentMode: .fill)
-                        .cornerRadius(10)
-                        .clipped()
-                } placeholder: {
-                    Color.orange
-                }
+                CustomAsyncImage(imageId: recipeMeta.recipe.image, width: width)
+                    .cornerRadius(10)
                 
                 HStack {
                     VStack(alignment: .leading) {
@@ -84,5 +75,6 @@ struct RecipeCard: View {
                     })
             }
         })
+        .padding(.bottom)
     }
 }

@@ -19,7 +19,8 @@ struct RecipeDetail: View {
             
             ScrollView {
                 VStack(alignment: .leading) {
-                    CustomAsyncImage(imageId: recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 20, height: UIScreen.main.bounds.size.width - 20, cornerRadius: 10)
+                    CustomAsyncImage(imageId: recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 20, height: UIScreen.main.bounds.size.width - 20)
+                        .cornerRadius(10)
                         .padding(.leading, 10)
                     Text(String(recipeMeta.rating))
                     
@@ -86,6 +87,7 @@ struct RecipeDetail: View {
                     }
                 }
             }
+            .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(trailing:
                                     Button(action: {
                 favorited.toggle()

@@ -116,16 +116,19 @@ struct NewRecipeView: View {
                 VStack {
                     NewRecipeRow {
                         CustomTextField("Recipe name", text: $viewController.name)
+                            .padding([.top, .horizontal])
                         
                         HStack {
                             CustomTextField("Servings", text: $viewController.servings)
                                 .keyboardType(.numberPad)
-                                .frame(width: 150)
-                            
+//                                .frame(width: 150)
+                                                        
                             EmojiPickerView() { emoji in
                                 viewController.emoji = emoji
                             }
+                            .frame(width: 100)
                         }
+                        .padding(.horizontal)
                         
                         if viewController.image != nil {
                             Image(uiImage: viewController.image!)

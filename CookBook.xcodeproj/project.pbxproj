@@ -26,6 +26,7 @@
 		815E82712798CAC800530BA2 /* RecipesMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 815E82702798CAC800530BA2 /* RecipesMain.swift */; };
 		8179715C27AA7F1B00DE1753 /* RecipeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179715B27AA7F1B00DE1753 /* RecipeCard.swift */; };
 		81862D9027AC6C13006C947F /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81862D8F27AC6C13006C947F /* Colors.swift */; };
+		81862D9427ADDD79006C947F /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81862D9327ADDD79006C947F /* SpeechRecognizer.swift */; };
 		81B1BF82279F669300EC85BB /* NewRecipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF81279F669300EC85BB /* NewRecipe.swift */; };
 		81B1BF85279F851A00EC85BB /* EmojiPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF84279F851A00EC85BB /* EmojiPicker.swift */; };
 		81B1BF87279F852200EC85BB /* PhotoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF86279F852200EC85BB /* PhotoPicker.swift */; };
@@ -82,6 +83,7 @@
 		815E82702798CAC800530BA2 /* RecipesMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipesMain.swift; sourceTree = "<group>"; };
 		8179715B27AA7F1B00DE1753 /* RecipeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeCard.swift; sourceTree = "<group>"; };
 		81862D8F27AC6C13006C947F /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		81862D9327ADDD79006C947F /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
 		81B1BF81279F669300EC85BB /* NewRecipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewRecipe.swift; sourceTree = "<group>"; };
 		81B1BF84279F851A00EC85BB /* EmojiPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPicker.swift; sourceTree = "<group>"; };
 		81B1BF86279F852200EC85BB /* PhotoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoPicker.swift; sourceTree = "<group>"; };
@@ -235,6 +237,7 @@
 				8141EA2427A3740E008BE746 /* CustomAsyncImage.swift */,
 				8179715B27AA7F1B00DE1753 /* RecipeCard.swift */,
 				81862D8F27AC6C13006C947F /* Colors.swift */,
+				81862D9327ADDD79006C947F /* SpeechRecognizer.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -382,6 +385,7 @@
 				815E82712798CAC800530BA2 /* RecipesMain.swift in Sources */,
 				81B1BF8E279F97DE00EC85BB /* TextEditorListView.swift in Sources */,
 				813F156627A20F8700214CE0 /* ImageBackendController.swift in Sources */,
+				81862D9427ADDD79006C947F /* SpeechRecognizer.swift in Sources */,
 				81BAF3F6279CB8DB004B0767 /* Profile.swift in Sources */,
 				8141EA2327A3707C008BE746 /* BackendController.swift in Sources */,
 				81BAF3F4279A03E3004B0767 /* GroceryList.swift in Sources */,

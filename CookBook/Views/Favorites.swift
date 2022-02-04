@@ -47,7 +47,7 @@ struct FavoritesView: View {
                     .ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 50) {
+                    LazyVStack(spacing: 50) {
                         ForEach(favorites.sorted(by: sortingMethod[sort]!)) { recipe in
                             RecipeCard(recipeMeta: recipe, width: 350)
                         }

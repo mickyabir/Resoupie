@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct SearchField: View {
-    @State private var searchText = ""
+    @State var searchText = ""
+    var action: (String) -> Void
     
     var body: some View {
         ZStack(alignment: .leading) {
@@ -28,6 +29,9 @@ struct SearchField: View {
                 TextField("", text: $searchText)
                     .foregroundColor(.lightText)
                     .padding(.trailing)
+                    .onSubmit {
+                        action(searchText)
+                    }
             }
             .padding(.horizontal)
 
@@ -39,29 +43,45 @@ struct RecipeGroupRow: View {
     var title: String
     var recipes: [RecipeMeta]
     @AppStorage("favorites") var favorites: [RecipeMeta] = []
+    @State var scrollOffset: CGFloat = 0.0
     
     var body: some View {
         VStack(alignment: .leading) {
             Text(title)
-                .font(.title3)
+                .font(.title2)
+                .fontWeight(.semibold)
                 .padding(.leading)
-                .foregroundColor(Color.title3)
+                .foregroundColor(Color.title2)
+            
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack {
-                    ForEach(recipes) { recipe in
-                        ZStack {
-                            RecipeCard(recipeMeta: recipe, width: 250)
-
-                            let favorited = (favorites.firstIndex(of: recipe) != nil)
-                            Image(systemName: favorited ? "heart.fill" : "heart")
-                                .foregroundColor(favorited ? Color.red : Color.white)
-                                .font(.system(size: 18))
-                                .offset(x: 100, y: -130)
+                ZStack {
+                    LazyHStack {
+                        ForEach(recipes) { recipe in
+                            ZStack(alignment: .topTrailing) {
+                                RecipeCard(recipeMeta: recipe, width: 250)
+                                
+                                let favorited = (favorites.firstIndex(of: recipe) != nil)
+                                Image(systemName: favorited ? "heart.fill" : "heart")
+                                    .foregroundColor(favorited ? Color.red : Color.white)
+                                    .font(.system(size: 18))
+                                    .padding(.top, 10)
+                                    .padding(.trailing, 10)
+                            }
+                            .padding([.top, .bottom], 10)
                         }
-                        .padding(.bottom, 5)
+                    }
+                    .padding(.leading, 20)
+                    
+                    GeometryReader { proxy in
+                        let offset = proxy.frame(in: .named("scroll")).minX
+                        let _ = DispatchQueue.main.async {
+                            self.scrollOffset = offset
+                            print(self.scrollOffset)
+                        }
+                        Color.clear
+                            .frame(width: 0, height: 0)
                     }
                 }
-                .padding(.leading)
             }
         }
     }
@@ -69,33 +89,32 @@ struct RecipeGroupRow: View {
 
 struct RecipesMainView: View {
     @State var recipes: [RecipeMeta] = [RecipeMeta]()
+    @State var temp: String = ""
     
     var body: some View {
         NavigationView {
             ZStack {
                 Color.background
-                    .ignoresSafeArea()
-                
                 ScrollView(showsIndicators: false) {
-                    VStack {
-                        SearchField()
+                    LazyVStack {
+                        SearchField() { searchText in
+                            print(searchText)
+                        }
                         
                         Group {
                             RecipeGroupRow(title: "Popular", recipes: recipes)
                             
                             Rectangle()
                                 .foregroundColor(Color.white)
-                                .shadow(color: Color.black.opacity(0.05), radius: 5)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical)
+                                .frame(maxWidth: .infinity, maxHeight: 6)
                             
                             RecipeGroupRow(title: "For You", recipes: recipes)
                             
                             Rectangle()
                                 .foregroundColor(Color.white)
-                                .shadow(color: Color.black.opacity(0.05), radius: 5)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical)
+                                .shadow(color: Color.black.opacity(0.2), radius: 4)
+                                .frame(maxWidth: .infinity, maxHeight: 6)
+                                .padding(.vertical, 4)
                             
                             RecipeGroupRow(title: "Vegan", recipes: recipes)
                         }
@@ -113,6 +132,7 @@ struct RecipesMainView: View {
                     }
                 )
             }
+//            .navigationBarHidden(true)
         }
         .onAppear {
             loadRecipes()

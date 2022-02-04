@@ -20,14 +20,12 @@ struct CustomTextField: View {
         ZStack(alignment: .leading) {
             RoundedRectangle(cornerRadius: 10)
                 .foregroundColor(Color.lightGray)
-                .shadow(color: Color.black.opacity(0.16), radius: 4)
+                .shadow(color: Color.black.opacity(0.16), radius: 4, x: 0, y: 2)
                 .frame(maxWidth: .infinity)
                 .frame(height: 40)
-                .padding()
             
             TextField(placeholder, text: text)
                 .foregroundColor(.lightText)
-                .padding(.leading)
                 .padding(.horizontal)
         }
     }

@@ -9,12 +9,12 @@ import SwiftUI
 
 class IngredientListEditorViewController: ObservableObject {
     @Published var listItems: [Int] = [0]
-    @Published var ingredients: [String] = ["Ingredient"]
-    @Published var quantities: [String] = ["Quantity"]
-    @Published var units: [String] = ["Unit"]
+    @Published var ingredients: [String] = [""]
+    @Published var quantities: [String] = [""]
+    @Published var units: [String] = [""]
     var isEmpty: Bool {
         for index in listItems {
-            if (ingredients[index] != "Ingredient" || ingredients[index] != "") && (quantities[index] != "Quantity" || quantities[index] != "") && (units[index] != "Unit" || units[index] != "") {
+            if ingredients[index] != "" && quantities[index] != "" && units[index] != "" {
                 return false
             }
         }
@@ -44,7 +44,7 @@ class IngredientListEditorViewController: ObservableObject {
             return true
         }
         
-        if ingredients[index] == "Ingredient" || quantities[index] == "Quantity" || units[index] == "Unit" {
+        if ingredients[index] == "" || quantities[index] == "" || units[index] == "" {
             return true
         }
         
@@ -53,17 +53,17 @@ class IngredientListEditorViewController: ObservableObject {
     
     func addRow() {
         listItems.append(listItems.count)
-        ingredients.append("Ingredient")
-        quantities.append("Quantity")
-        units.append("Unit")
+        ingredients.append("")
+        quantities.append("")
+        units.append("")
     }
     
     func deleteRow(index: Int) {
         if listItems.count <= 1 {
             listItems = [0]
-            ingredients = ["Ingredient"]
-            quantities = ["Quantity"]
-            units = ["Unit"]
+            ingredients = [""]
+            quantities = [""]
+            units = [""]
         } else {
             listItems = Array(0...listItems.count - 2)
             ingredients.remove(at: index)
@@ -83,51 +83,18 @@ struct IngredientListEditorView: View {
                     .opacity(index > 0 ? 1 : 0)
                     .padding(.bottom)
                 HStack {
-                    VStack() {
-                        TextEditor(text: $viewController.ingredients[index])
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.orange, lineWidth: 2))
-                            .frame(minHeight: 40, maxHeight: 80)
-                            .foregroundColor(viewController.ingredients[index] == "Ingredient" ? Color.gray : Color.black)
+                    VStack(spacing: 10) {
+                        CustomTextField("Ingredient", text: $viewController.ingredients[index])
                             .disableAutocorrection(true)
-                            .onTapGesture {
-                                if viewController.ingredients[index] == "Ingredient" {
-                                    viewController.ingredients[index] = ""
-                                }
-                            }
                             .padding(.bottom)
                         
                         HStack {
-
-                            
-                            TextEditor(text: $viewController.quantities[index])
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.orange, lineWidth: 2))
-                                .frame(height: 40)
+                            CustomTextField("Quantity", text: $viewController.quantities[index])
                                 .keyboardType(.numberPad)
-                                .foregroundColor(viewController.quantities[index] == "Quantity" ? Color.gray : Color.black)
-                                .disableAutocorrection(true)
-                                .onTapGesture {
-                                    if viewController.quantities[index] == "Quantity" {
-                                        viewController.quantities[index] = ""
-                                    }
-                                }
                             
-                            TextEditor(text: $viewController.units[index])
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.orange, lineWidth: 2))
-                                .frame(width: 100, height: 40)
-                                .foregroundColor(viewController.units[index] == "Unit" ? Color.gray : Color.black)
+                            CustomTextField("Unit", text: $viewController.units[index])
                                 .disableAutocorrection(true)
-                                .onTapGesture {
-                                    if viewController.units[index] == "Unit" {
-                                        viewController.units[index] = ""
-                                    }
-                                }
-                                .padding(.leading)
+//                                .padding(.leading)
                         }
                     }
                     .padding(.bottom)
