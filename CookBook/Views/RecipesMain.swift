@@ -87,54 +87,30 @@ struct RecipeGroupRow: View {
     }
 }
 
-struct RecipesMainView: View {
+struct RecipeMainDefaultView: View {
     @State var recipes: [RecipeMeta] = [RecipeMeta]()
-    @State var temp: String = ""
-    
+
     var body: some View {
-        NavigationView {
-            ZStack {
-                Color.background
-                ScrollView(showsIndicators: false) {
-                    LazyVStack {
-                        SearchField() { searchText in
-                            print(searchText)
-                        }
-                        
-                        Group {
-                            RecipeGroupRow(title: "Popular", recipes: recipes)
-                            
-                            Rectangle()
-                                .foregroundColor(Color.white)
-                                .frame(maxWidth: .infinity, maxHeight: 6)
-                            
-                            RecipeGroupRow(title: "For You", recipes: recipes)
-                            
-                            Rectangle()
-                                .foregroundColor(Color.white)
-                                .shadow(color: Color.black.opacity(0.2), radius: 4)
-                                .frame(maxWidth: .infinity, maxHeight: 6)
-                                .padding(.vertical, 4)
-                            
-                            RecipeGroupRow(title: "Vegan", recipes: recipes)
-                        }
-                        .onTapGesture {
-                            let resign = #selector(UIResponder.resignFirstResponder)
-                            UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
-                        }
-                    }
-                    .navigationTitle("Recipes")
-                }
-                .simultaneousGesture(
-                    DragGesture().onChanged { value in
-                        let resign = #selector(UIResponder.resignFirstResponder)
-                        UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
-                    }
-                )
+        LazyVStack {
+            Group {
+                RecipeGroupRow(title: "Popular", recipes: recipes)
+                
+                Rectangle()
+                    .foregroundColor(Color.white)
+                    .frame(maxWidth: .infinity, maxHeight: 6)
+                
+                RecipeGroupRow(title: "For You", recipes: recipes)
+                
+                Rectangle()
+                    .foregroundColor(Color.white)
+                    .shadow(color: Color.black.opacity(0.2), radius: 4)
+                    .frame(maxWidth: .infinity, maxHeight: 6)
+                    .padding(.vertical, 4)
+                
+                RecipeGroupRow(title: "Vegan", recipes: recipes)
             }
-//            .navigationBarHidden(true)
         }
-        .onAppear {
+        .onAppear() {
             loadRecipes()
         }
     }
@@ -143,6 +119,91 @@ struct RecipesMainView: View {
         let recipeBackendController = RecipeBackendController()
         let _ = recipeBackendController.loadAllRecipes { allRecipes in
             self.recipes = allRecipes
+        }
+    }
+}
+
+struct RecipeMainContinuousView: View {
+    @State var recipes: [RecipeMeta] = [RecipeMeta]()
+
+    var body: some View {
+        LazyVStack {
+            ForEach(recipes) { recipe in
+                RecipeCard(recipeMeta: recipe, width: UIScreen.main.bounds.size.width - 40)
+            }
+        }
+        .onAppear() {
+            loadRecipes()
+        }
+    }
+    
+    func loadRecipes() {
+        let recipeBackendController = RecipeBackendController()
+        let _ = recipeBackendController.loadAllRecipes { allRecipes in
+            self.recipes = allRecipes
+        }
+    }
+}
+
+struct RecipesMainView: View {
+    @State var temp: String = ""
+    @State var continuous: Bool = false
+    
+    var body: some View {
+        NavigationView {
+            ZStack(alignment: .topTrailing) {
+                Color.background
+                
+                ScrollView(showsIndicators: false) {
+                    VStack {
+                        Spacer()
+                            .padding(.bottom, 80)
+                        
+                        Group {
+                            if continuous {
+                                RecipeMainContinuousView()
+                            } else {
+                                RecipeMainDefaultView()
+                            }
+                        }
+                        .onTapGesture {
+                            let resign = #selector(UIResponder.resignFirstResponder)
+                            UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
+                        }
+
+                    }
+                }
+                .simultaneousGesture(
+                    DragGesture().onChanged { value in
+                        let resign = #selector(UIResponder.resignFirstResponder)
+                        UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
+                    }
+                )
+                .navigationTitle("Recipes")
+                
+                HStack {
+                    SearchField() { searchText in
+                        print(searchText)
+                    }
+                    ZStack {
+                        Rectangle()
+                            .frame(width: 36, height: 36)
+                            .cornerRadius(10)
+                            .foregroundColor(Color.orange)
+                        Button {
+                            withAnimation {
+                                continuous.toggle()
+                            }
+                        } label: {
+                            Image(systemName: continuous ? "infinity.circle.fill" : "infinity.circle")
+                                .font(.system(size: 24))
+                                .foregroundColor(Color.white)
+                        }
+                    }
+                    .padding(.trailing, 15)
+                }
+            }
+            .navigationBarHidden(true)
         }
     }
 }

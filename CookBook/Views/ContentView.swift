@@ -13,7 +13,6 @@ class PresentNewRecipe: ObservableObject {
 
 
 struct ContentView: View {
-    var recipes: [RecipeMeta]
     @AppStorage("favorites") var favorites: [RecipeMeta] = []
     @State private var selection = 1
     @State private var oldSelection = 1
@@ -28,7 +27,7 @@ struct ContentView: View {
                 }
                 .tag(0)
             
-            RecipesMainView(recipes: recipes)
+            RecipesMainView()
                 .tabItem {
                     Label("Recipes", systemImage: "fork.knife")
                 }

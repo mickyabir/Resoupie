@@ -109,7 +109,7 @@ struct WorldView: View {
         .sheet(isPresented: $displayRecipe, onDismiss: {
 //            self.chosenRecipe = nil
         }, content: {
-            RecipeDetail(recipeMeta: viewModel.recipes[chosenRecipeIndex])
+//            RecipeDetail(recipeMeta: viewModel.recipes[chosenRecipeIndex], image: Image())
         })
     }
 }

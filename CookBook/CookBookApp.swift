@@ -12,9 +12,8 @@ import MapKit
 struct CookBookApp: App {
     var body: some Scene {
         WindowGroup {
-            let recipes = [RecipeMeta]()
             let _ = Theme.navigationBarColors(background: nil, titleColor: UIColor(Color.navbarTitle))
-            ContentView(recipes: recipes)
+            ContentView()
                 .preferredColorScheme(.light)
         }
     }

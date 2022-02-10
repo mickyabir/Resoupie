@@ -11,38 +11,23 @@ struct CustomAsyncImage: View {
     var imageId: String
     var width: CGFloat
     var height: CGFloat?
+    @Environment(\.scenePhase) var scenePhase
     
     var body: some View {
-        let url = BackendController.url + "images/" + imageId
-        if let cached = ImageCache[url] {
-            cached
-                .resizable()
-                .frame(width: width, height: width)
-                .aspectRatio(contentMode: .fill)
-                .clipped()
-        } else {
+        Group {
+            let url = BackendController.url + "images/" + imageId
+            
             AsyncImage(url: URL(string: url)) { image in
                 image
                     .resizable()
                     .frame(width: width, height: width)
                     .aspectRatio(contentMode: .fill)
                     .clipped()
-                let _ = (ImageCache[url] = image)
             } placeholder: {
-                Color.orange
+                ProgressView()
+                    .frame(width: width, height: width)
             }
-        }
-    }
-}
-
-fileprivate class ImageCache {
-    static private var cache: [String: Image] = [:]
-    static subscript(url: String) -> Image? {
-        get{
-            ImageCache.cache[url]
-        }
-        set{
-            ImageCache.cache[url] = newValue
+            
         }
     }
 }
