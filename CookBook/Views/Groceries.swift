@@ -54,6 +54,10 @@ struct GroceriesView: View {
                                     .frame(width: editMode == .active ? 30 : 0)
 
                                 TextField("List", text: $groceries[listIndex].name).foregroundColor(Color.title)
+                                    .disableAutocorrection(true)
+                                    .onTapGesture {
+                                        
+                                    }
                             }) {
                                 let listIndex = groceries.firstIndex(of: list)!
                                 ForEach(groceries[listIndex].items) { item in
@@ -64,15 +68,13 @@ struct GroceriesView: View {
                                             if let index = groceries[listIndex].items.firstIndex(of: item) {
                                                 groceries[listIndex].items[index].check.toggle()
                                                 
-                                                withAnimation {
+                                                withAnimation(Animation.easeIn(duration: 20)) {
                                                     let check = groceries[listIndex].items[index].check
-                                                    let editedItem = groceries[listIndex].items[index]
-                                                    groceries[listIndex].items.remove(at: index)
-                                                    
+                                                    let indexSet = NSMutableIndexSet(index: index)
                                                     if check {
-                                                        groceries[listIndex].items.append(editedItem)
+                                                        groceries[listIndex].items.move(fromOffsets: indexSet as IndexSet, toOffset: groceries[listIndex].items.count)
                                                     } else {
-                                                        groceries[listIndex].items.insert(editedItem, at: 0)
+                                                        groceries[listIndex].items.move(fromOffsets: indexSet as IndexSet, toOffset: 0)
                                                     }
                                                 }
                                             }
@@ -80,15 +82,24 @@ struct GroceriesView: View {
                                         
                                         HStack {
                                             let itemIndex = groceries[listIndex].items.firstIndex(of: item)!
-                                            
                                             TextField("Ingredient", text: $groceries[listIndex].items[itemIndex].ingredient)
                                                 .font(.system(size: 16))
                                                 .foregroundColor(item.check ? Color.lightText : Color.text)
                                                 .opacity(item.check ? 0.8 : 1.0)
+                                                .disableAutocorrection(true)
+                                                .disabled(editMode == .active)
+                                            
+                                            Image(systemName: "folder")
+                                                .foregroundColor(Color.text)
+                                                .opacity(editMode == .active ? 1.0 : 0.0)
+                                                .onTapGesture {
+                                                    selectedItem = item
+                                                    selectedItemListIndex = listIndex
+                                                    showingChooseListAlert = true
+                                                }
                                         }
                                         .padding(.trailing)
                                     }
-                                    
                                 }
                                 .onDelete { offsets in
                                     groceries[listIndex].items.remove(atOffsets: offsets)
@@ -128,34 +139,21 @@ struct GroceriesView: View {
                 }
                 
                 HStack {
-                    Button {
-                        for list in groceries {
-                            let checked = list.items.filter({ $0.check })
-                            if checked.count != 0 {
-                                showingDeleteAlert = true
-                                break
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 40))
-                            .foregroundColor(.lightText)
-                    }
-                    
                     Spacer()
                     
                     Button {
                         groceries.append(GroceryList(id: UUID().uuidString, name: "", items: []))
                     } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 40))
+                        Image(systemName: "folder.fill.badge.plus")
+                            .font(.system(size: 30))
                             .foregroundColor(.lightText)
                     }
+                    
+                    Spacer()
                 }
-                .padding(.horizontal, 40)
                 .alert(isPresented: $showingDeleteAlert) {
                     Alert(
-                        title: Text("Delete all marked items?"),
+                        title: Text("Delete all checked items?"),
                         primaryButton: .destructive(Text("Delete")) {
                             for index in 0..<groceries.count {
                                 groceries[index].items = groceries[index].items.filter({ !$0.check })
@@ -181,6 +179,19 @@ struct GroceriesView: View {
                 }                .padding(.bottom)
             }
             .navigationTitle("Groceries")
+            .navigationBarItems(leading:
+                                    Button(action: {
+                for list in groceries {
+                    let checked = list.items.filter({ $0.check })
+                    if checked.count != 0 {
+                        showingDeleteAlert = true
+                        break
+                    }
+                }
+            }) {
+                Text("Clear Checked")
+                    .opacity(editMode == .active ? 1.0 : 0.0)
+            })
             .onAppear {
                 if groceries.count == 0 {
                     groceries.append(GroceryList(id: UUID().uuidString, name: "Main", items: []))

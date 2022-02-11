@@ -26,10 +26,10 @@ class WorldViewModel: ObservableObject {
     @Published var recipes: [RecipeMeta] = []
     
     func loadRecipes() {
-        let recipeBackendController = RecipeBackendController()
-        let _ = recipeBackendController.loadAllRecipes { allRecipes in
-            self.recipes = allRecipes
-        }
+//        let recipeBackendController = RecipeBackendController()
+//        let _ = recipeBackendController.loadAllRecipes { allRecipes in
+//            self.recipes = allRecipes
+//        }
     }
     
     func fetchRecipes(region: MKCoordinateRegion) {
