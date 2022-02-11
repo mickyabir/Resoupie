@@ -126,6 +126,11 @@ struct GroceriesView: View {
                                 Alert(title: Text("Delete list?"),
                                       primaryButton: .destructive(Text("Delete")) {
                                     groceries.remove(at: selectedRemoveListIndex!)
+                                    if groceries.count == 0 {
+                                        withAnimation(.easeOut) {
+                                            editMode = .inactive
+                                        }
+                                    }
                                 },
                                       secondaryButton: .cancel()
                                 )
