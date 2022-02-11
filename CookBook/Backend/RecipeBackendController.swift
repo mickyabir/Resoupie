@@ -32,6 +32,59 @@ struct RecipeMetaBackendModel: Codable {
 class RecipeBackendController {
     public static let url = BackendController.url + "recipes/"
     
+    func loadNextRecipes(skip: Int, limit: Int, continuation: @escaping ([RecipeMeta]) -> Void) {
+        var coordinate: CLLocationCoordinate2D? = nil
+        var url = URLComponents(string: RecipeBackendController.url)!
+        
+        url.queryItems = [
+            URLQueryItem(name: "skip", value: String(skip)),
+            URLQueryItem(name: "limit", value: String(limit))
+        ]
+        
+        var request = URLRequest(url: url.url!)
+        request.httpMethod = "GET"
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                print(error?.localizedDescription ?? "No data")
+                continuation([])
+                return
+            }
+            
+            var recipes: [RecipeMetaBackendModel]?
+            
+            do {
+                recipes = try JSONDecoder().decode([RecipeMetaBackendModel].self, from: data)
+            } catch DecodingError.dataCorrupted(let context) {
+                print(context)
+            } catch DecodingError.keyNotFound(let key, let context) {
+                print("Key '\(key)' not found:", context.debugDescription)
+                print("codingPath:", context.codingPath)
+            } catch DecodingError.valueNotFound(let value, let context) {
+                print("Value '\(value)' not found:", context.debugDescription)
+                print("codingPath:", context.codingPath)
+            } catch DecodingError.typeMismatch(let type, let context) {
+                print("Type '\(type)' mismatch:", context.debugDescription)
+                print("codingPath:", context.codingPath)
+            } catch {
+                print("error: ", error)
+            }
+            if let recipes = recipes {
+                let recipeModels = recipes.map { recipeMeta -> RecipeMeta in
+                    if let lat = Double(recipeMeta.recipe.coordinate_lat), let long = Double(recipeMeta.recipe.coordinate_long) {
+                        coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+                    }
+                    
+                    let recipeObject = Recipe(id: UUID(uuidString: recipeMeta.id)!, image: recipeMeta.recipe.image, name: recipeMeta.recipe.name, author: recipeMeta.recipe.author, ingredients: recipeMeta.recipe.ingredients, steps: recipeMeta.recipe.steps, coordinate: coordinate, emoji: recipeMeta.recipe.emoji, servings: recipeMeta.recipe.servings)
+                    return RecipeMeta(recipe: recipeObject, rating: recipeMeta.rating, favorited: recipeMeta.favorited)
+                }
+                continuation(recipeModels)
+            }
+        }
+        
+        task.resume()
+    }
+    
     func loadAllRecipes(continuation: @escaping ([RecipeMeta]) -> Void) {
         var coordinate: CLLocationCoordinate2D? = nil
         let url = URL(string: RecipeBackendController.url)!

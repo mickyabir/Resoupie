@@ -11,7 +11,8 @@ struct RecipeDetail: View {
     @State private var favorited: Bool = false
     var recipeMeta: RecipeMeta
     @AppStorage("favorites") var favorites: [RecipeMeta] = []
-    @AppStorage("groceries") var groceries: [GroceryListItem] = []
+    @AppStorage("groceryLists") var groceries: [GroceryList] = []
+
     
     var body: some View {
         ZStack {
@@ -21,32 +22,53 @@ struct RecipeDetail: View {
                 VStack(alignment: .leading) {
                     CustomAsyncImage(imageId: recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 20, height: UIScreen.main.bounds.size.width - 20)
                         .cornerRadius(10)
+                    
                         .padding(.leading, 10)
                     Text(String(recipeMeta.rating))
                     
                     Spacer()
                     
+                    Button {
+                        groceries.append(GroceryList(id: UUID().uuidString, name: recipeMeta.recipe.name, items: []))
+                        groceries[groceries.count - 1].items = recipeMeta.recipe.ingredients.map { GroceryListItem(id: recipeMeta.id.uuidString + "_" + $0.id, ingredient: $0.name + " (" + $0.quantity + " " + $0.unit +  ")", check: false) }
+                    } label: {
+                        Text("Add to grocery list")
+                    }
                     ForEach (recipeMeta.recipe.ingredients) { ingredient in
                         HStack {
                             AddFillButton() {
-                                let index = groceries.firstIndex(where: {$0.id == (recipeMeta.id.uuidString + "_" + ingredient.id)})
-                                return index != nil
+                                for listIndex in 0..<groceries.count {
+                                    if let _ = groceries[listIndex].items.firstIndex(where: {$0.id == (recipeMeta.id.uuidString + "_" + ingredient.id)}) {
+                                        return true
+                                    }
+                                }
+                                return false
                             } action: { tapped in
-                                let index = groceries.firstIndex(where: {$0.id == (recipeMeta.id.uuidString + "_" + ingredient.id)})
+                                var index: Int?
+                                var groceryIndex: Int?
+                                for listIndex in 0..<groceries.count {
+                                    index = groceries[listIndex].items.firstIndex(where: {$0.id == (recipeMeta.id.uuidString + "_" + ingredient.id)})
+                                    if index != nil {
+                                        groceryIndex = listIndex
+                                        break
+                                    }
+                                }
+                                                                
                                 if tapped {
                                     if index == nil {
-                                        groceries.append(GroceryListItem(id: recipeMeta.id.uuidString + "_" + ingredient.id, ingredient: ingredient, check: false))
+                                        let ingredientString = ingredient.name + " (" + ingredient.quantity + " " + ingredient.unit +  ")"
+                                        groceries[0].items.append(GroceryListItem(id: recipeMeta.id.uuidString + "_" + ingredient.id, ingredient: ingredientString, check: false))
                                     }
                                 } else {
                                     if index != nil {
-                                        groceries.remove(at: index!)
+                                        groceries[groceryIndex!].items.remove(at: index!)
                                     }
                                 }
                             }
                             
                             Text(ingredient.quantity)
                             Text(ingredient.unit)
-                            Text("of")
+//                            Text("of")
                             Text(ingredient.name)
                         }
                         .padding()

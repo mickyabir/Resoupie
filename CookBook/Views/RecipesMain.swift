@@ -32,6 +32,15 @@ struct SearchField: View {
                     .onSubmit {
                         action(searchText)
                     }
+                
+                Button {
+                    searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.lightText)
+                        .padding(.trailing)
+                        .opacity(searchText != "" ? 1.0 : 0.0)
+                }
             }
             .padding(.horizontal)
 
@@ -76,7 +85,6 @@ struct RecipeGroupRow: View {
                         let offset = proxy.frame(in: .named("scroll")).minX
                         let _ = DispatchQueue.main.async {
                             self.scrollOffset = offset
-                            print(self.scrollOffset)
                         }
                         Color.clear
                             .frame(width: 0, height: 0)
@@ -130,6 +138,10 @@ struct RecipeMainContinuousView: View {
         LazyVStack {
             ForEach(recipes) { recipe in
                 RecipeCard(recipeMeta: recipe, width: UIScreen.main.bounds.size.width - 40)
+                let thresholdIndex = recipes.index(recipes.endIndex, offsetBy: -1)
+                if recipes.firstIndex(where: { $0.id == recipe.id }) == thresholdIndex {
+                    let _ = loadMoreRecipes()
+                }
             }
         }
         .onAppear() {
@@ -139,8 +151,17 @@ struct RecipeMainContinuousView: View {
     
     func loadRecipes() {
         let recipeBackendController = RecipeBackendController()
-        let _ = recipeBackendController.loadAllRecipes { allRecipes in
+        let _ = recipeBackendController.loadNextRecipes(skip: 0, limit: 1) { allRecipes in
             self.recipes = allRecipes
+        }
+    }
+    
+    func loadMoreRecipes() {
+        let recipeBackendController = RecipeBackendController()
+        let _ = recipeBackendController.loadNextRecipes(skip: recipes.count, limit: 1) { allRecipes in
+            print("load more")
+            print(allRecipes)
+            self.recipes.append(contentsOf: allRecipes)
         }
     }
 }
@@ -187,16 +208,17 @@ struct RecipesMainView: View {
                     }
                     ZStack {
                         Rectangle()
-                            .frame(width: 36, height: 36)
+                            .frame(width: 40, height: 40)
                             .cornerRadius(10)
                             .foregroundColor(Color.orange)
+                            .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
                         Button {
                             withAnimation {
                                 continuous.toggle()
                             }
                         } label: {
                             Image(systemName: continuous ? "infinity.circle.fill" : "infinity.circle")
-                                .font(.system(size: 24))
+                                .font(.system(size: 26))
                                 .foregroundColor(Color.white)
                         }
                     }

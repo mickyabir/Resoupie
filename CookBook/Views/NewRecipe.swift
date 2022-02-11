@@ -121,7 +121,6 @@ struct NewRecipeView: View {
                         HStack {
                             CustomTextField("Servings", text: $viewController.servings)
                                 .keyboardType(.numberPad)
-//                                .frame(width: 150)
                                                         
                             EmojiPickerView() { emoji in
                                 viewController.emoji = emoji

@@ -90,11 +90,10 @@ struct IngredientListEditorView: View {
                         
                         HStack {
                             CustomTextField("Quantity", text: $viewController.quantities[index])
-                                .keyboardType(.numberPad)
+                                .keyboardType(.decimalPad)
                             
                             CustomTextField("Unit", text: $viewController.units[index])
                                 .disableAutocorrection(true)
-//                                .padding(.leading)
                         }
                     }
                     .padding(.bottom)

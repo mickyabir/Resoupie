@@ -15,18 +15,6 @@ struct ImageUploadResponse: Codable {
 class ImageBackendController {
     public static let url = BackendController.url + "images/"
     
-//    func loadImageFromServer(imageId: String, continuation: @escaping (UIImage?) -> Void) {
-//        URLSession.shared.dataTask(with: URL(string: url + imageId)!) { data, response, error in
-//            guard let data = data, error == nil else { return }
-//            print("Download Finished")
-//            // always update the UI from the main thread
-//            DispatchQueue.main.async() { [weak self] in
-//                continuation(UIImage(data: data))
-//            }
-//        }.resume()
-//    }
-    
-    
     func uploadImageToServer(image: UIImage, continuation: @escaping (UUID?) -> Void) {
         var uuid: UUID?
         
