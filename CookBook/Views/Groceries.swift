@@ -107,29 +107,28 @@ struct GroceriesView: View {
                                 .onMove { sourceIndexSet, destination in
                                     groceries[listIndex].items.move(fromOffsets: sourceIndexSet, toOffset: destination)
                                 }
-                                .alert(isPresented: $showingRemoveListAlert) {
-                                    Alert(title: Text("Delete list?"),
-                                          primaryButton: .destructive(Text("Delete")) {
-                                        groceries.remove(at: selectedRemoveListIndex!)
-                                    },
-                                          secondaryButton: .cancel()
-                                    )
-                                }
                                 
                                 HStack {
                                     Spacer()
                                     
-                                    Button {
-                                        let uuid = UUID().uuidString
-                                        groceries[listIndex].items.append(GroceryListItem(id: uuid, ingredient: "", check: false))
-                                    } label: {
-                                        Image(systemName: "plus")
-                                            .font(.system(size: 16))
-                                            .foregroundColor(Color.lightText)
-                                    }
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(Color.lightText)
+                                        .onTapGesture {
+                                            groceries[listIndex].items.append(GroceryListItem(id: UUID().uuidString, ingredient: "", check: false))
+                                            
+                                        }
                                     
                                     Spacer()
                                 }
+                            }
+                            .alert(isPresented: $showingRemoveListAlert) {
+                                Alert(title: Text("Delete list?"),
+                                      primaryButton: .destructive(Text("Delete")) {
+                                    groceries.remove(at: selectedRemoveListIndex!)
+                                },
+                                      secondaryButton: .cancel()
+                                )
                             }
                         }
                     }
@@ -151,17 +150,6 @@ struct GroceriesView: View {
                     
                     Spacer()
                 }
-                .alert(isPresented: $showingDeleteAlert) {
-                    Alert(
-                        title: Text("Delete all checked items?"),
-                        primaryButton: .destructive(Text("Delete")) {
-                            for index in 0..<groceries.count {
-                                groceries[index].items = groceries[index].items.filter({ !$0.check })
-                            }
-                        },
-                        secondaryButton: .cancel()
-                    )
-                }
                 .actionSheet(isPresented: $showingChooseListAlert) {
                     let buttons: [Alert.Button] = groceries.enumerated().map { i, list in
                         Alert.Button.default(Text(list.name)) {
@@ -177,6 +165,17 @@ struct GroceriesView: View {
                     }
                     return ActionSheet(title: Text("Move to list"), message: Text(""), buttons: buttons + [Alert.Button.cancel()])
                 }                .padding(.bottom)
+            }
+            .alert(isPresented: $showingDeleteAlert) {
+                Alert(
+                    title: Text("Delete all checked items?"),
+                    primaryButton: .destructive(Text("Delete")) {
+                        for index in 0..<groceries.count {
+                            groceries[index].items = groceries[index].items.filter({ !$0.check })
+                        }
+                    },
+                    secondaryButton: .cancel()
+                )
             }
             .navigationTitle("Groceries")
             .navigationBarItems(leading:

@@ -13,16 +13,16 @@ struct ChecklistButton: View {
     var action: (_: Bool) -> Void
     
     var body: some View {
-        Button {
-            self.didTap = !self.didTap
-            action(didTap)
-        } label: {
-            Image(systemName: didTap ? "checkmark.circle.fill" : "circle")
-                .frame(width: 22, height: 22)
-                .foregroundColor(Color.orange)
-                .font(.system(size: 22))
-        }.onAppear {
-            didTap = initialize()
-        }
+        Image(systemName: didTap ? "checkmark.circle.fill" : "circle")
+            .frame(width: 22, height: 22)
+            .foregroundColor(Color.orange)
+            .font(.system(size: 22))
+            .onTapGesture {
+                self.didTap = !self.didTap
+                action(didTap)
+            }
+            .onAppear {
+                didTap = initialize()
+            }
     }
 }
