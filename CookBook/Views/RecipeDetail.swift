@@ -13,68 +13,103 @@ struct RecipeDetail: View {
     @AppStorage("favorites") var favorites: [RecipeMeta] = []
     @AppStorage("groceryLists") var groceries: [GroceryList] = []
 
+    @State var groceriesAdded = false
+    
+    @State var showLargeImage = false
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .topLeading) {
             Color.background
             
-            ScrollView {
-                VStack(alignment: .leading) {
-                    CustomAsyncImage(imageId: recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 20, height: UIScreen.main.bounds.size.width - 20)
-                        .cornerRadius(10)
-                    
-                        .padding(.leading, 10)
-                    Text(String(recipeMeta.rating))
-                    
+            List {
+                CustomAsyncImage(imageId: recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 70, height: UIScreen.main.bounds.size.width - 70)
+                    .cornerRadius(10)
+                    .onTapGesture {
+                        withAnimation {
+                            showLargeImage = true
+                        }
+                    }
+                
+                HStack {
                     Spacer()
                     
-                    Button {
-                        groceries.append(GroceryList(id: UUID().uuidString, name: recipeMeta.recipe.name, items: []))
-                        groceries[groceries.count - 1].items = recipeMeta.recipe.ingredients.map { GroceryListItem(id: recipeMeta.id.uuidString + "_" + $0.id, ingredient: $0.name + " (" + $0.quantity + " " + $0.unit +  ")", check: false) }
-                    } label: {
-                        Text("Add to grocery list")
+                    let rating = recipeMeta.rating
+                    let stars = Int(floor(rating))
+                    let halfStar = rating.truncatingRemainder(dividingBy: 1) > 0.3
+                    let emptyStars = 5 - stars - (halfStar ? 1 : 0)
+
+                    ForEach(0..<stars) { index in
+                        Image(systemName: "star.fill")
+                            .foregroundColor(Color.yellow)
                     }
+                    
+                    if halfStar {
+                        Image(systemName: "star.leadinghalf.filled")
+                            .foregroundColor(Color.yellow)
+                    }
+                    
+                    ForEach(0..<emptyStars) { index in
+                        Image(systemName: "star")
+                            .foregroundColor(Color.yellow)
+                    }
+                    
+                    Text(String(rating))
+                        .foregroundColor(Color.lightText)
+                    
+                    Spacer()
+                }
+                
+                Section(header:
+                            HStack {
+                    Text("Ingredients")
+                        .foregroundColor(Color.title)
+                    Spacer()
+                    Image(systemName: groceriesAdded ? "folder.fill.badge.plus" : "folder.badge.plus")
+                        .padding(.trailing, 20)
+                        .foregroundColor(Color.orange)
+                        .onTapGesture {
+                            withAnimation {
+                                groceriesAdded.toggle()
+                            }
+                            
+                            if groceriesAdded {
+                                groceries.append(GroceryList(id: recipeMeta.id.uuidString, name: recipeMeta.recipe.name, items: []))
+                                groceries[groceries.count - 1].items = recipeMeta.recipe.ingredients.map { GroceryListItem(id: recipeMeta.id.uuidString + "_" + $0.id, ingredient: $0.name + " (" + $0.quantity + " " + $0.unit +  ")", check: false)}
+                            } else {
+                                groceries.removeAll(where: { $0.id == recipeMeta.id.uuidString })
+                            }
+                            
+                        }
+                }) {
                     ForEach (recipeMeta.recipe.ingredients) { ingredient in
                         HStack {
-                            AddFillButton() {
-                                for listIndex in 0..<groceries.count {
-                                    if let _ = groceries[listIndex].items.firstIndex(where: {$0.id == (recipeMeta.id.uuidString + "_" + ingredient.id)}) {
-                                        return true
-                                    }
-                                }
-                                return false
-                            } action: { tapped in
-                                var index: Int?
-                                var groceryIndex: Int?
-                                for listIndex in 0..<groceries.count {
-                                    index = groceries[listIndex].items.firstIndex(where: {$0.id == (recipeMeta.id.uuidString + "_" + ingredient.id)})
-                                    if index != nil {
-                                        groceryIndex = listIndex
-                                        break
-                                    }
-                                }
-                                                                
-                                if tapped {
+                            let index = groceries.reduce([], { $0 + $1.items }).firstIndex(where: { $0.id == (recipeMeta.id.uuidString + "_" + ingredient.id) })
+                            
+                            Image(systemName: index != nil ? "plus.circle.fill" : "plus.circle")
+                                .onTapGesture {
                                     if index == nil {
                                         let ingredientString = ingredient.name + " (" + ingredient.quantity + " " + ingredient.unit +  ")"
                                         groceries[0].items.append(GroceryListItem(id: recipeMeta.id.uuidString + "_" + ingredient.id, ingredient: ingredientString, check: false))
-                                    }
-                                } else {
-                                    if index != nil {
-                                        groceries[groceryIndex!].items.remove(at: index!)
+                                    } else if index != nil {
+                                        for listIndex in 0..<groceries.count {
+                                            if let itemIndex = groceries[listIndex].items.firstIndex(where: { $0.id == recipeMeta.id.uuidString + "_" + ingredient.id }) {
+                                                groceries[listIndex].items.remove(at: itemIndex)
+                                            }
+                                        }
                                     }
                                 }
-                            }
+                                .foregroundColor(Color.orange)
+                                .font(.system(size: 18))
                             
-                            Text(ingredient.quantity)
-                            Text(ingredient.unit)
-//                            Text("of")
-                            Text(ingredient.name)
+                            let ingredientText = ingredient.quantity + " " + ingredient.unit + " " + ingredient.name
+                            Text(ingredientText)
+                                .foregroundColor(Color.text)
                         }
-                        .padding()
-                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 5)
                     }
-                    
+                }
+                
+                Section(header: Text("Method").foregroundColor(Color.title)) {
                     VStack(alignment: .leading) {
                         ForEach (recipeMeta.recipe.steps, id: \.self) { step in
                             HStack {
@@ -92,7 +127,7 @@ struct RecipeDetail: View {
                             }
                         }
                     }
-                }.frame(maxWidth: .infinity)
+                }
             }
             .onAppear {
                 if favorites.firstIndex(where: {$0.id == recipeMeta.id}) != nil {
@@ -100,12 +135,14 @@ struct RecipeDetail: View {
                 } else {
                     favorited = false
                 }
+                
+                groceriesAdded = groceries.firstIndex(where: { $0.id == recipeMeta.id.uuidString }) != nil
             }
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     VStack {
-                        Text(recipeMeta.recipe.name).font(.headline)
-                        Text(recipeMeta.recipe.author).font(.subheadline)
+                        Text(recipeMeta.recipe.name).font(.headline).foregroundColor(Color.navbarTitle)
+                        Text(recipeMeta.recipe.author).font(.subheadline).foregroundColor(Color.lightText)
                     }
                 }
             }
@@ -126,7 +163,18 @@ struct RecipeDetail: View {
                 Image(systemName: favorited ? "heart.fill" : "heart")
                     .foregroundColor(Color.red)
             })
+            
+            Color.black.opacity(showLargeImage ? 0.7 : 0.0)
+            
+            CustomAsyncImage(imageId: recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.width)
+                .onTapGesture {
+                    withAnimation {
+                        showLargeImage = false
+                    }
+                }
+                .opacity(showLargeImage ? 1.0 : 0.0)
+                .offset(y: 60)
+
         }
-        
     }
 }
