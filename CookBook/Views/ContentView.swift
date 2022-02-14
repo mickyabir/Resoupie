@@ -16,7 +16,6 @@ struct ContentView: View {
     @AppStorage("favorites") var favorites: [RecipeMeta] = []
     @State private var selection = 1
     @State private var oldSelection = 1
-    @StateObject var presentNewRecipe = PresentNewRecipe()
 
 
     var body: some View {
@@ -33,9 +32,9 @@ struct ContentView: View {
                 }
                 .tag(1)
             
-            Text("")
+            ProfileView()
                 .tabItem {
-                    Label("New", systemImage: "plus.circle.fill")
+                    Label("Profile", systemImage: "person.crop.circle")
                 }
                 .tag(2)
             
@@ -53,20 +52,7 @@ struct ContentView: View {
         }
         .accentColor(Color.orange)
         .onChange(of: selection) { selected in
-            if selected == 2 {
-                presentNewRecipe.showNewRecipe = true
-            } else {
-                self.oldSelection = selected
-            }
         }
-        .sheet(isPresented: $presentNewRecipe.showNewRecipe, onDismiss: {
-            self.selection = self.oldSelection
-        }) {
-            NavigationView {
-                NewRecipeView()
-            }
-        }
-        .environmentObject(presentNewRecipe)
     }
 }
 

@@ -16,7 +16,7 @@ struct EmojiPickerView: View {
     
     var body: some View {
         VStack(alignment: .center) {
-            CustomTextField("Emoji", text: $emoji)
+            TextField("Emoji", text: $emoji)
                 .alert("Emoji only!", isPresented: $displayEmojiWarning) {
                     Button("OK", role: .cancel) {}
                 }

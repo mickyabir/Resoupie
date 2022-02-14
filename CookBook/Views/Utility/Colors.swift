@@ -39,8 +39,6 @@ class Theme {
 extension Color {
     static let offWhite = Color(red: 225 / 255, green: 225 / 255, blue: 235 / 255)
     static let lightGray = Color(red: 250 / 255, green: 250 / 255, blue: 250 / 255)
-//    static let background = Color(red: 255 / 255, green: 252 / 255, blue: 248 / 255)
-//    static let background = Color(red: 225 / 255, green: 218 / 255, blue: 211 / 255)
     static let background = Color(red: 249 / 255, green: 251 / 255, blue: 255 / 255)
     static let backgroundGradient1 = Color(red: 255 / 255, green: 179 / 255, blue: 138 / 255)
     static let backgroundGradient2 = Color(red: 255 / 255, green: 209 / 255, blue: 181 / 255)

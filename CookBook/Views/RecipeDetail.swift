@@ -17,6 +17,8 @@ struct RecipeDetail: View {
     
     @State var showLargeImage = false
     
+    @State var stepsCompleted: [Bool] = []
+    
     var body: some View {
         ZStack(alignment: .topLeading) {
             Color.background
@@ -112,18 +114,20 @@ struct RecipeDetail: View {
                 Section(header: Text("Method").foregroundColor(Color.title)) {
                     VStack(alignment: .leading) {
                         ForEach (recipeMeta.recipe.steps, id: \.self) { step in
+                            let index = recipeMeta.recipe.steps.firstIndex(of: step)!
+                            let completed = stepsCompleted[index]
                             HStack {
-                                ZStack{
-                                    Image(systemName: "circle.fill")
-                                        .font(.system(size: 24))
-                                        .foregroundColor(Color.orange)
-                                    let index = recipeMeta.recipe.steps.firstIndex(of: step)! + 1
-                                    Text(String(index))
-                                        .foregroundColor(Color.white)
-                                }
+                                Image(systemName: String(index + 1) + (completed ? ".circle.fill" : ".circle"))
+                                    .foregroundColor(Color.orange)
+                                    .font(.system(size: 24))
                                 
                                 Text(step)
-                                    .padding()
+                                    .strikethrough(completed, color: Color.lightText)
+                                    .foregroundColor(completed ? Color.lightText : Color.text)
+                                    .padding(.vertical, 5)
+                            }
+                            .onTapGesture {
+                                stepsCompleted[index].toggle()
                             }
                         }
                     }
@@ -137,6 +141,8 @@ struct RecipeDetail: View {
                 }
                 
                 groceriesAdded = groceries.firstIndex(where: { $0.id == recipeMeta.id.uuidString }) != nil
+                
+                stepsCompleted = [Bool](repeating: false, count: recipeMeta.recipe.steps.count)
             }
             .toolbar {
                 ToolbarItem(placement: .principal) {

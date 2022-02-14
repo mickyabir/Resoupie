@@ -71,21 +71,21 @@ struct FavoritesView: View {
             ActionSheet(title: Text("Sort by"), message: Text(""), buttons: [
                 .cancel(),
                 .default(
-                    Text("Alphabetical")
+                    Text("Alphabetical" + (sort == .alphabetical ? " ✓" : ""))
                 ) {
                     withAnimation {
                         sort = .alphabetical
                     }
                 },
                 .default(
-                    Text("Popular")
+                    Text("Popular" + (sort == .popular ? " ✓" : ""))
                 ) {
                     withAnimation {
                         sort = .popular
                     }
                 },
                 .default(
-                    Text("Rating")
+                    Text("Rating"  + (sort == .rating ? " ✓" : ""))
                 ) {
                     withAnimation {
                         sort = .rating

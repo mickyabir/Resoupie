@@ -35,6 +35,8 @@ struct GroceriesView: View {
     
     @State private var editMode: EditMode = .inactive
     
+    @FocusState private var isTextFieldFocused: Bool
+    
     var body: some View {
         NavigationView {
             ZStack(alignment: .bottom) {
@@ -53,11 +55,13 @@ struct GroceriesView: View {
                                     .opacity(editMode == .active ? 1.0 : 0.0)
                                     .frame(width: editMode == .active ? 30 : 0)
 
-                                TextField("List", text: $groceries[listIndex].name).foregroundColor(Color.title)
+                                TextField("List", text: $groceries[listIndex].name)
+                                    .foregroundColor(Color.title)
                                     .disableAutocorrection(true)
                                     .onTapGesture {
                                         
                                     }
+                                    .focused($isTextFieldFocused)
                             }) {
                                 let listIndex = groceries.firstIndex(of: list)!
                                 ForEach(groceries[listIndex].items) { item in
@@ -88,6 +92,8 @@ struct GroceriesView: View {
                                                 .opacity(item.check ? 0.8 : 1.0)
                                                 .disableAutocorrection(true)
                                                 .disabled(editMode == .active)
+                                                .focused($isTextFieldFocused)
+
                                             
                                             Image(systemName: "folder")
                                                 .foregroundColor(Color.text)
@@ -151,6 +157,7 @@ struct GroceriesView: View {
                         Image(systemName: "folder.fill.badge.plus")
                             .font(.system(size: 30))
                             .foregroundColor(.lightText)
+                            .opacity(isTextFieldFocused ? 0.0 : 1.0)
                     }
                     
                     Spacer()

@@ -8,20 +8,6 @@
 import SwiftUI
 import PhotosUI
 
-// For reference: delete later
-//struct Recipe: Hashable, Codable, Identifiable {
-//    var id: UUID
-//    var image: String
-//    var name: String
-//    var author: String
-//    var rating: Double
-//    var ingredients: [Ingredient]
-//    var steps: [String]
-//    var coordinate: CLLocationCoordinate2D?
-//    var emoji: String
-//    var favorited: Int
-//}
-
 struct NewRecipeRow<Content: View>: View {
     let content: Content
     let heading: String?
@@ -95,93 +81,166 @@ class NewRecipeViewController: ObservableObject {
 }
 
 struct NewRecipeView: View {
-    @EnvironmentObject var presentNewRecipe: PresentNewRecipe
-    
     @State private var inputImage: UIImage?
     @State private var recipeImage: UIImage?
     @State private var showImageLibrary = false
     
     private let coordinatePickerViewModel = CoordinatePickerViewModel()
-    private let textEditorListViewController = TextEditorListViewController()
-    private let ingredientsViewController = IngredientListEditorViewController()
     
     @ObservedObject var viewController = NewRecipeViewController()
+    
+    @State private var editMode = EditMode.inactive
+    
+    @State var steps: [String] = [""]
+    @State var ingredients: [Ingredient] = [Ingredient(id: "0", name: "", quantity: "", unit: "")]
+    @Environment(\.presentationMode) var presentationMode
+    
+    @State var coordinatePickerActive = false
+    @State var locationEnabled = false
+    
+    @State var country: String?
+    @State var locality: String?
     
     var body: some View {
         ZStack {
             Color.background
                 .ignoresSafeArea()
             
-            ScrollView {
-                VStack {
-                    NewRecipeRow {
-                        CustomTextField("Recipe name", text: $viewController.name)
-                            .padding([.top, .horizontal])
-                        
-                        HStack {
-                            CustomTextField("Servings", text: $viewController.servings)
-                                .keyboardType(.numberPad)
-                                                        
-                            EmojiPickerView() { emoji in
-                                viewController.emoji = emoji
-                            }
-                            .frame(width: 100)
-                        }
-                        .padding(.horizontal)
-                        
-                        if viewController.image != nil {
-                            Image(uiImage: viewController.image!)
-                                .resizable()
-                                .scaledToFit()
-                                .clipped()
-                                .cornerRadius(10)
-                                .padding(10)
-                        }
-                        
-                        Button() {
-                            showImageLibrary = true
-                        } label: {
-                            if viewController.image == nil {
-                                Text("Add Image")
-                            } else {
-                                Text("Edit Image")
-                            }
-                        }
-                    }
+            List {
+                Section(header: Text("About").foregroundColor(Color.title)) {
+                    TextField("Recipe name", text: $viewController.name)
+                        .foregroundColor(Color.text)
                     
-                    NewRecipeRowDivider()
-                    
-                    
-                    Group {
-                        NewRecipeRow("Ingredients") {
-                            IngredientListEditorView(viewController: ingredientsViewController)
-                                .padding()
-                        }
+                    HStack {
+                        TextField("Servings", text: $viewController.servings)
+                            .keyboardType(.numberPad)
+                            .foregroundColor(Color.text)
                         
-                        NewRecipeRowDivider()
-                        
-                        NewRecipeRow("Method") {
-                            TextEditorListView(viewController: textEditorListViewController)
-                        }
-                    }
-                    
-                    NewRecipeRowDivider()
-                    
-                    NewRecipeRow("Location") {
-                        HStack {
-                            NavigationLink {
-                                CoordinatePicker(viewModel: coordinatePickerViewModel)
-                            } label: {
-                                Text("Choose Location (Optional)")
-                            }
-                            
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(Color.green)
-                                .opacity(viewController.coordinate != nil ? 1 : 0)
+                        EmojiPickerView() { emoji in
+                            viewController.emoji = emoji
                         }
                     }
                 }
+                
+                Section(header: Text("")) {
+                    if viewController.image != nil {
+                        Image(uiImage: viewController.image!)
+                            .resizable()
+                            .scaledToFit()
+                            .clipped()
+                            .cornerRadius(10)
+                    }
+                    
+                    HStack {
+                        Spacer()
+                        
+                        Text((viewController.image == nil ? "Add" : "Edit") + " Image")
+                            .foregroundColor(Color.orange)
+                            .onTapGesture {
+                                showImageLibrary = true
+                            }
+                        
+                        Spacer()
+                    }
+                }
+                
+                Section(header: HStack {
+                    Text("Location").foregroundColor(Color.title)
+                    Toggle("", isOn: $locationEnabled)
+                }) {
+                    if locationEnabled {
+                        NavigationLink(destination: CoordinatePicker(viewModel: coordinatePickerViewModel), isActive: $coordinatePickerActive) {
+                            HStack {
+                                Spacer()
+                                                               
+                                if let country = coordinatePickerViewModel.country, let locality = coordinatePickerViewModel.locality {
+                                    Text(locality + ", " + country)
+                                        .foregroundColor(Color.orange)
+                                } else {
+                                    Text("Choose Location")
+                                        .foregroundColor(Color.orange)
+                                }
+                                
+                                Spacer()
+                                
+                            }
+                            .onTapGesture {
+                                coordinatePickerActive = true
+                            }
+                        }
+                    }
+                }
+                
+                
+                Section(header: Text("Ingredients").foregroundColor(Color.title)) {
+                    ForEach(ingredients.indices, id: \.self) { index in
+                        VStack {
+                            TextField("Ingredient " + String(index + 1), text: $ingredients[index].name)
+                                .foregroundColor(Color.text)
+                            
+                            HStack {
+                                TextField("Quantity", text: $ingredients[index].quantity)
+                                    .keyboardType(.decimalPad)
+                                    .foregroundColor(Color.text)
+                                
+                                TextField("Unit", text: $ingredients[index].unit)
+                                    .foregroundColor(Color.text)
+                            }
+                        }
+                    }
+                    
+                    HStack {
+                        Spacer()
+                        
+                        Image(systemName: "plus")
+                            .foregroundColor(Color.orange)
+                            .onTapGesture {
+                                withAnimation {
+                                    ingredients.append(Ingredient(id: String(ingredients.count), name: "", quantity: "", unit: ""))
+                                }
+                            }
+                        
+                        Spacer()
+                    }
+                }
+                
+                
+                Section(header: Text("Method").foregroundColor(Color.title)) {
+                    ForEach(steps.indices, id: \.self) { index in
+                        HStack {
+                            Image(systemName: String(index + 1) + ".circle")
+                                .foregroundColor(Color.orange)
+                                .font(.system(size: 24))
+                            
+                            ZStack(alignment: .leading) {
+                                TextEditor(text: $steps[index])
+                                    .foregroundColor(Color.text)
+                                
+                                Text("Step " + String(index + 1))
+                                    .foregroundColor(Color(UIColor.systemGray3))
+                                    .opacity(steps[index] == "" ? 1.0 : 0.0)
+                                    .padding(.leading, 4)
+                                    .allowsHitTesting(false)
+                            }
+                        }
+                    }
+                    
+                    HStack {
+                        Spacer()
+                        
+                        Image(systemName: "plus")
+                            .foregroundColor(Color.orange)
+                            .onTapGesture {
+                                withAnimation {
+                                    steps.append("")
+                                }
+                            }
+                        
+                        Spacer()
+                    }
+                }
             }
+            .environment(\.editMode, $editMode)
             .onTapGesture {
                 let resign = #selector(UIResponder.resignFirstResponder)
                 UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
@@ -203,33 +262,22 @@ struct NewRecipeView: View {
             .sheet(isPresented: $showImageLibrary) {
                 PhotoPicker(image: $inputImage)
             }
-            .navigationBarItems(leading:
-                                    Button(action: {
-                presentNewRecipe.showNewRecipe = false
+            .navigationBarItems(leading: Button(action: {
+                presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Cancel")
                     .foregroundColor(Color.orange)
-            })
-            .navigationBarItems(trailing:
-                                    Button(action: {
-                viewController.ingredients = ingredientsViewController.ingredientsList
+            }, trailing: Button(action: {
+                viewController.ingredients = ingredients
                 
-                viewController.steps = textEditorListViewController.listItemsText
+                viewController.steps = steps
                 
                 viewController.publishRecipe()
-                presentNewRecipe.showNewRecipe = false
+                presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Publish")
                     .foregroundColor(Color.orange)
             })
         }
-    }
-}
-
-struct NewRecipe_Previews: PreviewProvider {
-    static var previews: some View {
-        NewRecipeView()
-            .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
-            .previewDisplayName("iPhone 12")
     }
 }
