@@ -172,7 +172,20 @@ struct NewRecipeView: View {
                 }
                 
                 
-                Section(header: Text("Ingredients").foregroundColor(Color.title)) {
+                Section(header: HStack {
+                    Text("Ingredients").foregroundColor(Color.title)
+                    
+                    Spacer()
+                    
+                    Button {
+                        withAnimation {
+                            editMode = editMode == .active ? .inactive : .active
+                        }
+                    } label: {
+                        Text(editMode == .active ? "Done" : "Edit")
+                            .foregroundColor(Color.orange)
+                    }
+                }) {
                     ForEach(ingredients.indices, id: \.self) { index in
                         VStack {
                             TextField("Ingredient " + String(index + 1), text: $ingredients[index].name)
@@ -187,6 +200,12 @@ struct NewRecipeView: View {
                                     .foregroundColor(Color.text)
                             }
                         }
+                    }
+                    .onMove { sourceSet, destination in
+                        ingredients.move(fromOffsets: sourceSet, toOffset: destination)
+                    }
+                    .onDelete { index in
+                        ingredients.remove(atOffsets: index)
                     }
                     
                     HStack {
@@ -205,7 +224,20 @@ struct NewRecipeView: View {
                 }
                 
                 
-                Section(header: Text("Method").foregroundColor(Color.title)) {
+                Section(header: HStack {
+                    Text("Method").foregroundColor(Color.title)
+                    
+                    Spacer()
+                    
+                    Button {
+                        withAnimation {
+                            editMode = editMode == .active ? .inactive : .active
+                        }
+                    } label: {
+                        Text(editMode == .active ? "Done" : "Edit")
+                            .foregroundColor(Color.orange)
+                    }
+                }) {
                     ForEach(steps.indices, id: \.self) { index in
                         HStack {
                             Image(systemName: String(index + 1) + ".circle")
@@ -224,6 +256,13 @@ struct NewRecipeView: View {
                             }
                         }
                     }
+                    .onMove { sourceSet, destination in
+                        steps.move(fromOffsets: sourceSet, toOffset: destination)
+                    }
+                    .onDelete { index in
+                        steps.remove(atOffsets: index)
+                    }
+
                     
                     HStack {
                         Spacer()
@@ -240,7 +279,6 @@ struct NewRecipeView: View {
                     }
                 }
             }
-            .environment(\.editMode, $editMode)
             .onTapGesture {
                 let resign = #selector(UIResponder.resignFirstResponder)
                 UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
@@ -269,15 +307,16 @@ struct NewRecipeView: View {
                     .foregroundColor(Color.orange)
             }, trailing: Button(action: {
                 viewController.ingredients = ingredients
-                
+
                 viewController.steps = steps
-                
+
                 viewController.publishRecipe()
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Publish")
                     .foregroundColor(Color.orange)
             })
+            .environment(\.editMode, $editMode)
         }
     }
 }
