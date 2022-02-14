@@ -107,7 +107,7 @@ struct NewRecipeView: View {
                 .ignoresSafeArea()
             
             List {
-                Section(header: Text("About").foregroundColor(Color.title)) {
+                Section(header: Text("About").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
                     TextField("Recipe name", text: $viewController.name)
                         .foregroundColor(Color.text)
                     
@@ -121,6 +121,7 @@ struct NewRecipeView: View {
                         }
                     }
                 }
+                .textCase(nil)
                 
                 Section(header: Text("")) {
                     if viewController.image != nil {
@@ -143,9 +144,10 @@ struct NewRecipeView: View {
                         Spacer()
                     }
                 }
+                .textCase(nil)
                 
                 Section(header: HStack {
-                    Text("Location").foregroundColor(Color.title)
+                    Text("Location").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)
                     Toggle("", isOn: $locationEnabled)
                 }) {
                     if locationEnabled {
@@ -170,10 +172,10 @@ struct NewRecipeView: View {
                         }
                     }
                 }
-                
+                .textCase(nil)
                 
                 Section(header: HStack {
-                    Text("Ingredients").foregroundColor(Color.title)
+                    Text("Ingredients").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)
                     
                     Spacer()
                     
@@ -222,10 +224,10 @@ struct NewRecipeView: View {
                         Spacer()
                     }
                 }
-                
+                .textCase(nil)
                 
                 Section(header: HStack {
-                    Text("Method").foregroundColor(Color.title)
+                    Text("Method").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)
                     
                     Spacer()
                     
@@ -278,6 +280,7 @@ struct NewRecipeView: View {
                         Spacer()
                     }
                 }
+                .textCase(nil)
             }
             .onTapGesture {
                 let resign = #selector(UIResponder.resignFirstResponder)
