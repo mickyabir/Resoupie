@@ -36,13 +36,6 @@ struct ProfileView: View {
                 }
                 .frame(width: 150, height: 150)
                 .padding(.top)
-
-                
-                Button {
-                    presentNewRecipe = true
-                } label: {
-                    Text("New recipe")
-                }
             }
             .sheet(isPresented: $presentNewRecipe) {
                 NavigationView {
@@ -53,9 +46,9 @@ struct ProfileView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        
+                        presentNewRecipe = true
                     } label: {
-                        Text("Test")
+                        Image(systemName: "square.and.pencil")
                     }
                 }
             }

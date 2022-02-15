@@ -119,7 +119,7 @@ struct GroceriesView: View {
                                     
                                     Image(systemName: "plus")
                                         .font(.system(size: 16))
-                                        .foregroundColor(Color.lightText)
+                                        .foregroundColor(Color.orange)
                                         .onTapGesture {
                                             groceries[listIndex].items.append(GroceryListItem(id: UUID().uuidString, ingredient: "", check: false))
                                             
@@ -143,20 +143,21 @@ struct GroceriesView: View {
                             }
                         }
                     }
-                    .toolbar {
-                        EditButton()
-                    }
                 }
                 
                 HStack {
                     Spacer()
                     
-                    Button {
-                        groceries.append(GroceryList(id: UUID().uuidString, name: "", items: []))
-                    } label: {
-                        Image(systemName: "folder.fill.badge.plus")
-                            .font(.system(size: 30))
-                            .foregroundColor(.lightText)
+                    Button(action: {
+                        for list in groceries {
+                            let checked = list.items.filter({ $0.check })
+                            if checked.count != 0 {
+                                showingDeleteAlert = true
+                                break
+                            }
+                        }
+                    }) {
+                        Text("Clear Checked")
                             .opacity(isTextFieldFocused ? 0.0 : 1.0)
                     }
                     
@@ -190,18 +191,13 @@ struct GroceriesView: View {
                 )
             }
             .navigationTitle("Groceries")
-            .navigationBarItems(leading:
-                                    Button(action: {
-                for list in groceries {
-                    let checked = list.items.filter({ $0.check })
-                    if checked.count != 0 {
-                        showingDeleteAlert = true
-                        break
-                    }
-                }
-            }) {
-                Text("Clear Checked")
-                    .opacity(editMode == .active ? 1.0 : 0.0)
+            .navigationBarItems(leading: EditButton())
+            .navigationBarItems(trailing:
+                                    Button {
+                groceries.append(GroceryList(id: UUID().uuidString, name: "", items: []))
+            } label: {
+                Image(systemName: "folder.badge.plus")
+                    .foregroundColor(Color.orange)
             })
             .onAppear {
                 if groceries.count == 0 {

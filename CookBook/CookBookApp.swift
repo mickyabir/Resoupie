@@ -12,7 +12,7 @@ import MapKit
 struct CookBookApp: App {
     var body: some Scene {
         WindowGroup {
-            let _ = Theme.navigationBarColors(background: nil, titleColor: UIColor(Color.navbarTitle))
+            let _ = Theme.navigationBarColors(background: nil, titleColor: UIColor(Color.navbarTitle), tintColor: UIColor.orange)
             ContentView()
                 .preferredColorScheme(.light)
         }

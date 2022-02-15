@@ -26,6 +26,9 @@ struct Recipe: Hashable, Codable, Identifiable {
     var coordinate: CLLocationCoordinate2D?
     var emoji: String
     var servings: Int
+    var tags: [String]
+    var time: String
+    var specialTools: [String]
 }
 
 struct RecipeMeta: Hashable, Codable, Identifiable {

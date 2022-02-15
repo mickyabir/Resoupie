@@ -23,8 +23,10 @@ class CoordinatePickerViewModel: ObservableObject {
     var locations: [PinLocation] = []
     
     func selectCurrentRegion(continuation: @escaping () -> ()) {
-        let latDelta = Double.random(in: -0.03 ..< 0.03)
-        let longDelta = Double.random(in: -0.03 ..< 0.03)
+//        let latDelta = Double.random(in: -0.025 ..< 0.025)
+        let latDelta = Double.random(in: -region!.span.latitudeDelta/4..<region!.span.latitudeDelta/4)
+//        let longDelta = Double.random(in: -0.025 ..< 0.025)
+        let longDelta = Double.random(in: -region!.span.longitudeDelta/8..<region!.span.longitudeDelta/8)
         
         let latitude = region!.center.latitude
         let longitude = region!.center.longitude
@@ -42,19 +44,25 @@ class CoordinatePickerViewModel: ObservableObject {
                 {
                     print("reverse geodcode fail: \(error!.localizedDescription)")
                 }
-                let pm = placemarks! as [CLPlacemark]
-                
-                if pm.count > 0 {
-                    let pm = placemarks![0]
-                    self.country = pm.country
-                    self.locality = pm.locality
-                    self.subLocality = pm.subLocality
+                if let placemarks = placemarks {
+                    let pm = placemarks as [CLPlacemark]
+                    
+                    if pm.count > 0 {
+                        let pm = placemarks[0]
+                        self.country = pm.country
+                        self.locality = pm.locality
+                        self.subLocality = pm.subLocality
+                    }
                 }
                 
                 continuation()
             })
         }
     }
+}
+
+struct RegionLocation: Identifiable {
+    var id: UUID
 }
 
 struct CoordinatePicker: View {
@@ -68,24 +76,31 @@ struct CoordinatePicker: View {
     
     var body: some View {
         ZStack {
-            Map(coordinateRegion: $region, interactionModes: .all, showsUserLocation: true, annotationItems: viewModel.locations) { place in
-                MapPin(coordinate: place.coordinate, tint: Color.red)
+            Map(coordinateRegion: $region, annotationItems: viewModel.locations) { place in
+                MapMarker(coordinate: place.coordinate)
             }
             .onChange(of: region) { newRegion in
                 viewModel.region = region
             }
-            
-            VStack {
-                SearchAreaButton(text: "Use This Approximate Location") {
-                    viewModel.selectCurrentRegion() {
-                        self.presentationMode.wrappedValue.dismiss()
-                    }
-                }
-                .offset(y: 280)
-                .opacity(1)
+            .onTapGesture {
+                
             }
+            Circle()
+                .strokeBorder(Color.white, lineWidth: 4)
+                .background(Circle().foregroundColor(Color.blue).opacity(0.1))
+                .frame(width: 300, height: 300)
         }
         .navigationBarTitle("Location", displayMode: .inline)
+        .toolbar {
+            Button {
+                viewModel.selectCurrentRegion() {
+                    self.presentationMode.wrappedValue.dismiss()
+                }
+            } label: {
+                Text("Select")
+                    .foregroundColor(Color.orange)
+            }
+        }
     }
 }
 

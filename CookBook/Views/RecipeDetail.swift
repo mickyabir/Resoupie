@@ -182,5 +182,6 @@ struct RecipeDetail: View {
                 .offset(y: 60)
 
         }
+        .accentColor(Color.orange)
     }
 }

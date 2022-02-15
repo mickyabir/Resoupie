@@ -43,10 +43,13 @@ class NewRecipeViewController: ObservableObject {
     @Published var uuid = UUID()
     @Published var emoji: String = ""
     @Published var ingredients: [Ingredient] = []
-    @Published var steps: [String] = [] // might need to add one? not sure
+    @Published var steps: [String] = []
     @Published var coordinate: CLLocationCoordinate2D?
     @Published var image: UIImage?
     @Published var servings: String = ""
+    @Published var tags: [String] = []
+    @Published var time: String = ""
+    @Published var specialTools: [String] = []
     
     @Published var showEmptyRecipeWarning = false
     
@@ -64,7 +67,7 @@ class NewRecipeViewController: ObservableObject {
             imageUploader.uploadImageToServer(image: image) { [self] imageId in
                 guard let imageId = imageId else { return }
                 imageIdString = imageId.uuidString
-                let recipe = Recipe(id: uuid, image: imageIdString, name: name, author: "author", ingredients: ingredients, steps: steps, coordinate: self.coordinate, emoji: emoji, servings: Int(servings) ?? 0)
+                let recipe = Recipe(id: uuid, image: imageIdString, name: name, author: "author", ingredients: ingredients, steps: steps, coordinate: self.coordinate, emoji: emoji, servings: Int(servings) ?? 0, tags: tags, time: time, specialTools: specialTools)
                 
                 let recipeUploader = RecipeBackendController()
                 recipeUploader.uploadRecipeToServer(recipe: recipe) { result in
@@ -91,6 +94,7 @@ struct NewRecipeView: View {
     
     @State private var editMode = EditMode.inactive
     
+    @State var specialTools: [String] = [""]
     @State var steps: [String] = [""]
     @State var ingredients: [Ingredient] = [Ingredient(id: "0", name: "", quantity: "", unit: "")]
     @Environment(\.presentationMode) var presentationMode
@@ -100,30 +104,68 @@ struct NewRecipeView: View {
     
     @State var country: String?
     @State var locality: String?
+    @State var tags: [String] = []
+    @State var currentTag: String = ""
     
     var body: some View {
         ZStack {
             Color.background
                 .ignoresSafeArea()
             
-            List {
+            Form {
                 Section(header: Text("About").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
                     TextField("Recipe name", text: $viewController.name)
                         .foregroundColor(Color.text)
                     
-                    HStack {
-                        TextField("Servings", text: $viewController.servings)
-                            .keyboardType(.numberPad)
-                            .foregroundColor(Color.text)
-                        
-                        EmojiPickerView() { emoji in
-                            viewController.emoji = emoji
+                    //                    HStack {
+                    TextField("Servings", text: $viewController.servings)
+                        .keyboardType(.numberPad)
+                        .foregroundColor(Color.text)
+                    
+                    TextField("Time", text: $viewController.time)
+                        .foregroundColor(Color.text)
+                    
+                    EmojiPickerView() { emoji in
+                        viewController.emoji = emoji
+                    }
+                    //                    }
+                }
+                .textCase(nil)
+                
+                Section(header: HStack {
+                    Text("Location").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)
+                    Toggle("", isOn: $locationEnabled.animation())
+                }) {
+                    if locationEnabled {
+                        NavigationLink(destination: CoordinatePicker(viewModel: coordinatePickerViewModel), isActive: $coordinatePickerActive) {
+                            HStack {
+                                Spacer()
+                                
+                                if let country = coordinatePickerViewModel.country {
+                                    if let locality = coordinatePickerViewModel.locality {
+                                        Text(locality + ", " + country)
+                                            .foregroundColor(Color.orange)
+                                    } else {
+                                        Text(country)
+                                            .foregroundColor(Color.orange)
+                                    }
+                                } else {
+                                    Text("Choose Location")
+                                        .foregroundColor(Color.orange)
+                                }
+                                
+                                Spacer()
+                                
+                            }
+                            .onTapGesture {
+                                coordinatePickerActive = true
+                            }
                         }
                     }
                 }
                 .textCase(nil)
                 
-                Section(header: Text("")) {
+                Section(header: Text("Image").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
                     if viewController.image != nil {
                         Image(uiImage: viewController.image!)
                             .resizable()
@@ -146,30 +188,83 @@ struct NewRecipeView: View {
                 }
                 .textCase(nil)
                 
-                Section(header: HStack {
-                    Text("Location").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)
-                    Toggle("", isOn: $locationEnabled)
-                }) {
-                    if locationEnabled {
-                        NavigationLink(destination: CoordinatePicker(viewModel: coordinatePickerViewModel), isActive: $coordinatePickerActive) {
-                            HStack {
-                                Spacer()
-                                                               
-                                if let country = coordinatePickerViewModel.country, let locality = coordinatePickerViewModel.locality {
-                                    Text(locality + ", " + country)
-                                        .foregroundColor(Color.orange)
-                                } else {
-                                    Text("Choose Location")
-                                        .foregroundColor(Color.orange)
+                Section(header: Text("Tags").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
+                    FlexibleView(
+                        data: tags,
+                        spacing: 15,
+                        alignment: .leading
+                    ) { item in
+                        HStack {
+                            Text(verbatim: item)
+                                .foregroundColor(Color.text)
+                            Image(systemName: "x.circle.fill")
+                                .foregroundColor(Color.lightText)
+                                .onTapGesture {
+                                    tags.removeAll(where: { $0 == item })
                                 }
-                                
-                                Spacer()
-                                
-                            }
-                            .onTapGesture {
-                                coordinatePickerActive = true
-                            }
                         }
+                        .padding(8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.gray.opacity(0.1))
+                        )
+                    }
+                    .frame(minHeight: 20)
+                    
+                    TextField("New Tag", text: $currentTag)
+                        .onSubmit {
+                            let componentTags = currentTag
+                                .lowercased()
+                                .components(separatedBy: " ")
+                                .filter({ tags.firstIndex(of: $0) == nil })
+                            tags += componentTags
+                            currentTag = ""
+                        }
+                }
+                .textCase(nil)
+                
+                
+                Section(header: HStack {
+                    Text("Special Tools").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)
+                    
+                    Spacer()
+                    
+                    Button {
+                        withAnimation {
+                            editMode = editMode == .active ? .inactive : .active
+                        }
+                    } label: {
+                        Text(editMode == .active ? "Done" : "Edit")
+                            .foregroundColor(Color.orange)
+                            .font(.system(size: 16))
+                    }
+                }) {
+                    ForEach(specialTools.indices, id: \.self) { index in
+                        HStack {
+                            TextField("Tool " + String(index + 1), text: $specialTools[index])
+                                .foregroundColor(Color.text)
+                        }
+                    }
+                    .onMove { sourceSet, destination in
+                        specialTools.move(fromOffsets: sourceSet, toOffset: destination)
+                    }
+                    .onDelete { index in
+                        specialTools.remove(atOffsets: index)
+                    }
+                    
+                    
+                    HStack {
+                        Spacer()
+                        
+                        Image(systemName: "plus")
+                            .foregroundColor(Color.orange)
+                            .onTapGesture {
+                                withAnimation {
+                                    specialTools.append("")
+                                }
+                            }
+                        
+                        Spacer()
                     }
                 }
                 .textCase(nil)
@@ -186,6 +281,7 @@ struct NewRecipeView: View {
                     } label: {
                         Text(editMode == .active ? "Done" : "Edit")
                             .foregroundColor(Color.orange)
+                            .font(.system(size: 16))
                     }
                 }) {
                     ForEach(ingredients.indices, id: \.self) { index in
@@ -238,6 +334,7 @@ struct NewRecipeView: View {
                     } label: {
                         Text(editMode == .active ? "Done" : "Edit")
                             .foregroundColor(Color.orange)
+                            .font(.system(size: 16))
                     }
                 }) {
                     ForEach(steps.indices, id: \.self) { index in
@@ -249,6 +346,13 @@ struct NewRecipeView: View {
                             ZStack(alignment: .leading) {
                                 TextEditor(text: $steps[index])
                                     .foregroundColor(Color.text)
+                                    .onChange(of: steps[index]) { _ in
+                                        if !steps[index].filter({ $0.isNewline }).isEmpty {
+                                            steps[index] = steps[index].trimmingCharacters(in: .newlines)
+                                            let resign = #selector(UIResponder.resignFirstResponder)
+                                            UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
+                                        }
+                                    }
                                 
                                 Text("Step " + String(index + 1))
                                     .foregroundColor(Color(UIColor.systemGray3))
@@ -264,7 +368,7 @@ struct NewRecipeView: View {
                     .onDelete { index in
                         steps.remove(atOffsets: index)
                     }
-
+                    
                     
                     HStack {
                         Spacer()
@@ -281,10 +385,6 @@ struct NewRecipeView: View {
                     }
                 }
                 .textCase(nil)
-            }
-            .onTapGesture {
-                let resign = #selector(UIResponder.resignFirstResponder)
-                UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
             }
             .onAppear {
                 viewController.coordinate = coordinatePickerViewModel.chosenRegion
@@ -310,9 +410,10 @@ struct NewRecipeView: View {
                     .foregroundColor(Color.orange)
             }, trailing: Button(action: {
                 viewController.ingredients = ingredients
-
                 viewController.steps = steps
-
+                viewController.tags = tags
+                viewController.specialTools = specialTools
+                
                 viewController.publishRecipe()
                 presentationMode.wrappedValue.dismiss()
             }) {
@@ -322,4 +423,94 @@ struct NewRecipeView: View {
             .environment(\.editMode, $editMode)
         }
     }
+}
+
+struct FlexibleView<Data: Collection, Content: View>: View where Data.Element: Hashable {
+    let data: Data
+    let spacing: CGFloat
+    let alignment: HorizontalAlignment
+    let content: (Data.Element) -> Content
+    @State private var availableWidth: CGFloat = 0
+    
+    var body: some View {
+        ZStack(alignment: Alignment(horizontal: alignment, vertical: .center)) {
+            Color.clear
+                .frame(height: 1)
+                .readSize { size in
+                    availableWidth = size.width
+                }
+            
+            _FlexibleView(
+                availableWidth: availableWidth,
+                data: data,
+                spacing: spacing,
+                alignment: alignment,
+                content: content
+            )
+        }
+    }
+}
+
+struct _FlexibleView<Data: Collection, Content: View>: View where Data.Element: Hashable {
+    let availableWidth: CGFloat
+    let data: Data
+    let spacing: CGFloat
+    let alignment: HorizontalAlignment
+    let content: (Data.Element) -> Content
+    @State var elementsSize: [Data.Element: CGSize] = [:]
+    
+    var body : some View {
+        VStack(alignment: alignment, spacing: spacing) {
+            ForEach(computeRows(), id: \.self) { rowElements in
+                HStack(spacing: spacing) {
+                    ForEach(rowElements, id: \.self) { element in
+                        content(element)
+                            .fixedSize()
+                            .readSize { size in
+                                elementsSize[element] = size
+                            }
+                    }
+                }
+            }
+        }
+    }
+    
+    func computeRows() -> [[Data.Element]] {
+        var rows: [[Data.Element]] = [[]]
+        var currentRow = 0
+        var remainingWidth = availableWidth
+        
+        for element in data {
+            let elementSize = elementsSize[element, default: CGSize(width: availableWidth, height: 1)]
+            
+            if remainingWidth - (elementSize.width + spacing) >= 0 {
+                rows[currentRow].append(element)
+            } else {
+                currentRow = currentRow + 1
+                rows.append([element])
+                remainingWidth = availableWidth
+            }
+            
+            remainingWidth = remainingWidth - (elementSize.width + spacing)
+        }
+        
+        return rows
+    }
+}
+
+extension View {
+    func readSize(onChange: @escaping (CGSize) -> Void) -> some View {
+        background(
+            GeometryReader { geometryProxy in
+                Color.clear
+                    .preference(key: SizePreferenceKey.self, value: geometryProxy.size)
+            }
+        )
+            .onPreferenceChange(SizePreferenceKey.self, perform: onChange)
+    }
+}
+
+private struct SizePreferenceKey: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {}
 }
