@@ -66,23 +66,25 @@ struct GroceriesView: View {
                                 let listIndex = groceries.firstIndex(of: list)!
                                 ForEach(groceries[listIndex].items) { item in
                                     HStack {
-                                        ChecklistButton {
-                                            return item.check
-                                        } action: {_ in
-                                            if let index = groceries[listIndex].items.firstIndex(of: item) {
-                                                groceries[listIndex].items[index].check.toggle()
-                                                
-                                                withAnimation(Animation.easeIn(duration: 20)) {
-                                                    let check = groceries[listIndex].items[index].check
-                                                    let indexSet = NSMutableIndexSet(index: index)
-                                                    if check {
-                                                        groceries[listIndex].items.move(fromOffsets: indexSet as IndexSet, toOffset: groceries[listIndex].items.count)
-                                                    } else {
-                                                        groceries[listIndex].items.move(fromOffsets: indexSet as IndexSet, toOffset: 0)
+                                        Image(systemName: item.check ? "checkmark.circle.fill" : "circle")
+                                            .frame(width: 22, height: 22)
+                                            .foregroundColor(Color.orange)
+                                            .font(.system(size: 22))
+                                            .onTapGesture {
+                                                if let index = groceries[listIndex].items.firstIndex(of: item) {
+                                                    groceries[listIndex].items[index].check.toggle()
+                                                    
+                                                    withAnimation(Animation.easeIn(duration: 20)) {
+                                                        let check = groceries[listIndex].items[index].check
+                                                        let indexSet = NSMutableIndexSet(index: index)
+                                                        if check {
+                                                            groceries[listIndex].items.move(fromOffsets: indexSet as IndexSet, toOffset: groceries[listIndex].items.count)
+                                                        } else {
+                                                            groceries[listIndex].items.move(fromOffsets: indexSet as IndexSet, toOffset: 0)
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
                                         
                                         HStack {
                                             let itemIndex = groceries[listIndex].items.firstIndex(of: item)!
