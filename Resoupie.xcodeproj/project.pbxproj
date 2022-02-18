@@ -12,7 +12,7 @@
 		813F156927A2161D00214CE0 /* RecipeBackendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813F156827A2161D00214CE0 /* RecipeBackendController.swift */; };
 		8141EA2327A3707C008BE746 /* BackendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8141EA2227A3707C008BE746 /* BackendController.swift */; };
 		8141EA2527A3740E008BE746 /* CustomAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8141EA2427A3740E008BE746 /* CustomAsyncImage.swift */; };
-		814C8CF72797631E0056A7D2 /* CookBookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814C8CF62797631E0056A7D2 /* CookBookApp.swift */; };
+		814C8CF72797631E0056A7D2 /* ResoupieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814C8CF62797631E0056A7D2 /* ResoupieApp.swift */; };
 		814C8CF92797631E0056A7D2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814C8CF82797631E0056A7D2 /* ContentView.swift */; };
 		814C8CFB2797631F0056A7D2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 814C8CFA2797631F0056A7D2 /* Assets.xcassets */; };
 		814C8CFE2797631F0056A7D2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 814C8CFD2797631F0056A7D2 /* Preview Assets.xcassets */; };
@@ -62,14 +62,14 @@
 		8141EA2227A3707C008BE746 /* BackendController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendController.swift; sourceTree = "<group>"; };
 		8141EA2427A3740E008BE746 /* CustomAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomAsyncImage.swift; sourceTree = "<group>"; };
 		8146B9D927A8C68100A1FF4C /* *.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "*.entitlements"; sourceTree = "<group>"; };
-		814C8CF32797631E0056A7D2 /* CookBook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CookBook.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		814C8CF62797631E0056A7D2 /* CookBookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookBookApp.swift; sourceTree = "<group>"; };
+		814C8CF32797631E0056A7D2 /* Resoupie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Resoupie.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		814C8CF62797631E0056A7D2 /* ResoupieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResoupieApp.swift; sourceTree = "<group>"; };
 		814C8CF82797631E0056A7D2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		814C8CFA2797631F0056A7D2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		814C8CFD2797631F0056A7D2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		814C8D032797631F0056A7D2 /* CookBookTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CookBookTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		814C8D032797631F0056A7D2 /* ResoupieTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ResoupieTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		814C8D072797631F0056A7D2 /* CookBookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookBookTests.swift; sourceTree = "<group>"; };
-		814C8D0D2797631F0056A7D2 /* CookBookUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CookBookUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		814C8D0D2797631F0056A7D2 /* ResoupieUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ResoupieUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		814C8D112797631F0056A7D2 /* CookBookUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookBookUITests.swift; sourceTree = "<group>"; };
 		814C8D132797631F0056A7D2 /* CookBookUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookBookUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		814C8D22279764CE0056A7D2 /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
@@ -132,7 +132,7 @@
 		814C8CEA2797631D0056A7D2 = {
 			isa = PBXGroup;
 			children = (
-				814C8CF52797631E0056A7D2 /* CookBook */,
+				814C8CF52797631E0056A7D2 /* Resoupie */,
 				814C8D062797631F0056A7D2 /* CookBookTests */,
 				814C8D102797631F0056A7D2 /* CookBookUITests */,
 				814C8CF42797631E0056A7D2 /* Products */,
@@ -143,26 +143,26 @@
 		814C8CF42797631E0056A7D2 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				814C8CF32797631E0056A7D2 /* CookBook.app */,
-				814C8D032797631F0056A7D2 /* CookBookTests.xctest */,
-				814C8D0D2797631F0056A7D2 /* CookBookUITests.xctest */,
+				814C8CF32797631E0056A7D2 /* Resoupie.app */,
+				814C8D032797631F0056A7D2 /* ResoupieTests.xctest */,
+				814C8D0D2797631F0056A7D2 /* ResoupieUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		814C8CF52797631E0056A7D2 /* CookBook */ = {
+		814C8CF52797631E0056A7D2 /* Resoupie */ = {
 			isa = PBXGroup;
 			children = (
 				81BAF3EF279A02D0004B0767 /* Info.plist */,
 				814C8D21279764BE0056A7D2 /* Models */,
 				814C8D20279764B50056A7D2 /* Views */,
-				814C8CF62797631E0056A7D2 /* CookBookApp.swift */,
+				814C8CF62797631E0056A7D2 /* ResoupieApp.swift */,
 				813F156727A20F9F00214CE0 /* Backend */,
 				814C8CFA2797631F0056A7D2 /* Assets.xcassets */,
 				814C8CFC2797631F0056A7D2 /* Preview Content */,
 				8146B9D927A8C68100A1FF4C /* *.entitlements */,
 			);
-			path = CookBook;
+			path = Resoupie;
 			sourceTree = "<group>";
 		};
 		814C8CFC2797631F0056A7D2 /* Preview Content */ = {
@@ -241,9 +241,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		814C8CF22797631E0056A7D2 /* CookBook */ = {
+		814C8CF22797631E0056A7D2 /* Resoupie */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 814C8D172797631F0056A7D2 /* Build configuration list for PBXNativeTarget "CookBook" */;
+			buildConfigurationList = 814C8D172797631F0056A7D2 /* Build configuration list for PBXNativeTarget "Resoupie" */;
 			buildPhases = (
 				814C8CEF2797631E0056A7D2 /* Sources */,
 				814C8CF02797631E0056A7D2 /* Frameworks */,
@@ -253,14 +253,14 @@
 			);
 			dependencies = (
 			);
-			name = CookBook;
+			name = Resoupie;
 			productName = CookBook;
-			productReference = 814C8CF32797631E0056A7D2 /* CookBook.app */;
+			productReference = 814C8CF32797631E0056A7D2 /* Resoupie.app */;
 			productType = "com.apple.product-type.application";
 		};
-		814C8D022797631F0056A7D2 /* CookBookTests */ = {
+		814C8D022797631F0056A7D2 /* ResoupieTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 814C8D1A2797631F0056A7D2 /* Build configuration list for PBXNativeTarget "CookBookTests" */;
+			buildConfigurationList = 814C8D1A2797631F0056A7D2 /* Build configuration list for PBXNativeTarget "ResoupieTests" */;
 			buildPhases = (
 				814C8CFF2797631F0056A7D2 /* Sources */,
 				814C8D002797631F0056A7D2 /* Frameworks */,
@@ -271,14 +271,14 @@
 			dependencies = (
 				814C8D052797631F0056A7D2 /* PBXTargetDependency */,
 			);
-			name = CookBookTests;
+			name = ResoupieTests;
 			productName = CookBookTests;
-			productReference = 814C8D032797631F0056A7D2 /* CookBookTests.xctest */;
+			productReference = 814C8D032797631F0056A7D2 /* ResoupieTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		814C8D0C2797631F0056A7D2 /* CookBookUITests */ = {
+		814C8D0C2797631F0056A7D2 /* ResoupieUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 814C8D1D2797631F0056A7D2 /* Build configuration list for PBXNativeTarget "CookBookUITests" */;
+			buildConfigurationList = 814C8D1D2797631F0056A7D2 /* Build configuration list for PBXNativeTarget "ResoupieUITests" */;
 			buildPhases = (
 				814C8D092797631F0056A7D2 /* Sources */,
 				814C8D0A2797631F0056A7D2 /* Frameworks */,
@@ -289,9 +289,9 @@
 			dependencies = (
 				814C8D0F2797631F0056A7D2 /* PBXTargetDependency */,
 			);
-			name = CookBookUITests;
+			name = ResoupieUITests;
 			productName = CookBookUITests;
-			productReference = 814C8D0D2797631F0056A7D2 /* CookBookUITests.xctest */;
+			productReference = 814C8D0D2797631F0056A7D2 /* ResoupieUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -317,7 +317,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 814C8CEE2797631D0056A7D2 /* Build configuration list for PBXProject "CookBook" */;
+			buildConfigurationList = 814C8CEE2797631D0056A7D2 /* Build configuration list for PBXProject "Resoupie" */;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -330,9 +330,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				814C8CF22797631E0056A7D2 /* CookBook */,
-				814C8D022797631F0056A7D2 /* CookBookTests */,
-				814C8D0C2797631F0056A7D2 /* CookBookUITests */,
+				814C8CF22797631E0056A7D2 /* Resoupie */,
+				814C8D022797631F0056A7D2 /* ResoupieTests */,
+				814C8D0C2797631F0056A7D2 /* ResoupieUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -379,7 +379,7 @@
 				814C8CF92797631E0056A7D2 /* ContentView.swift in Sources */,
 				81BAF3EC2798D408004B0767 /* Favorites.swift in Sources */,
 				81B1BF92279FB0B300EC85BB /* SearchAreaButton.swift in Sources */,
-				814C8CF72797631E0056A7D2 /* CookBookApp.swift in Sources */,
+				814C8CF72797631E0056A7D2 /* ResoupieApp.swift in Sources */,
 				813F156927A2161D00214CE0 /* RecipeBackendController.swift in Sources */,
 				8179715C27AA7F1B00DE1753 /* RecipeCard.swift in Sources */,
 				81BAF3EE2799FDBB004B0767 /* World.swift in Sources */,
@@ -416,12 +416,12 @@
 /* Begin PBXTargetDependency section */
 		814C8D052797631F0056A7D2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 814C8CF22797631E0056A7D2 /* CookBook */;
+			target = 814C8CF22797631E0056A7D2 /* Resoupie */;
 			targetProxy = 814C8D042797631F0056A7D2 /* PBXContainerItemProxy */;
 		};
 		814C8D0F2797631F0056A7D2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 814C8CF22797631E0056A7D2 /* CookBook */;
+			target = 814C8CF22797631E0056A7D2 /* Resoupie */;
 			targetProxy = 814C8D0E2797631F0056A7D2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -551,11 +551,11 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"CookBook/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Resoupie/Preview Content\"";
 				DEVELOPMENT_TEAM = WPQ22XTUSF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = CookBook/Info.plist;
+				INFOPLIST_FILE = Resoupie/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -567,7 +567,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "AD-Ventures.CookBook";
+				PRODUCT_BUNDLE_IDENTIFIER = "AD-Ventures.Resoupie";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -584,11 +584,11 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"CookBook/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Resoupie/Preview Content\"";
 				DEVELOPMENT_TEAM = WPQ22XTUSF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = CookBook/Info.plist;
+				INFOPLIST_FILE = Resoupie/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -600,7 +600,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "AD-Ventures.CookBook";
+				PRODUCT_BUNDLE_IDENTIFIER = "AD-Ventures.Resoupie";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -629,7 +629,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CookBook.app/CookBook";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Resoupie.app/Resoupie";
 			};
 			name = Debug;
 		};
@@ -653,7 +653,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CookBook.app/CookBook";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Resoupie.app/Resoupie";
 			};
 			name = Release;
 		};
@@ -704,7 +704,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		814C8CEE2797631D0056A7D2 /* Build configuration list for PBXProject "CookBook" */ = {
+		814C8CEE2797631D0056A7D2 /* Build configuration list for PBXProject "Resoupie" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				814C8D152797631F0056A7D2 /* Debug */,
@@ -713,7 +713,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		814C8D172797631F0056A7D2 /* Build configuration list for PBXNativeTarget "CookBook" */ = {
+		814C8D172797631F0056A7D2 /* Build configuration list for PBXNativeTarget "Resoupie" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				814C8D182797631F0056A7D2 /* Debug */,
@@ -722,7 +722,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		814C8D1A2797631F0056A7D2 /* Build configuration list for PBXNativeTarget "CookBookTests" */ = {
+		814C8D1A2797631F0056A7D2 /* Build configuration list for PBXNativeTarget "ResoupieTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				814C8D1B2797631F0056A7D2 /* Debug */,
@@ -731,7 +731,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		814C8D1D2797631F0056A7D2 /* Build configuration list for PBXNativeTarget "CookBookUITests" */ = {
+		814C8D1D2797631F0056A7D2 /* Build configuration list for PBXNativeTarget "ResoupieUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				814C8D1E2797631F0056A7D2 /* Debug */,

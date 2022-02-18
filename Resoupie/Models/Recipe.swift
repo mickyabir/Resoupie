@@ -17,7 +17,6 @@ struct Ingredient: Hashable, Codable, Identifiable {
 }
 
 struct Recipe: Hashable, Codable {
-//    var id: String
     var image: String
     var name: String
     var author: String

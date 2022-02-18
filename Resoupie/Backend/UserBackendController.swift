@@ -10,18 +10,9 @@ import CoreLocation
 import SwiftUI
 
 struct UserBackendModel: Codable {
-    var image: String
     var name: String
-    var author: String
-    var ingredients: [Ingredient]
-    var steps: [String]
-    var emoji: String
-    var servings: Int
-    var coordinate_lat: String
-    var coordinate_long: String
-    var tags: [String]
-    var time: String
-    var specialTools: [String]
+    var username: String
+    var followers: Int
 }
 
 struct AccessTokenModel: Codable {
@@ -72,10 +63,58 @@ class UserBackendController {
             }
             if let success = success {
                 continuation(success.success)
+            } else {
+                continuation(false)
             }
         }
         
         task.resume()
+    }
+    
+    func getUser(continuation: @escaping (User?) -> Void) {
+        let url = URLComponents(string: UserBackendController.url + "me/")!
+                
+        var request = URLRequest(url: url.url!)
+        request.httpMethod = "GET"
+        
+        let bearer = "Bearer " + token
+        request.setValue(bearer, forHTTPHeaderField: "Authorization")
+
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                print(error?.localizedDescription ?? "No data")
+                continuation(nil)
+                return
+            }
+            
+            var user: UserBackendModel?
+            
+            do {
+                user = try JSONDecoder().decode(UserBackendModel.self, from: data)
+            } catch DecodingError.dataCorrupted(let context) {
+                print(context)
+            } catch DecodingError.keyNotFound(let key, let context) {
+                print("Key '\(key)' not found:", context.debugDescription)
+                print("codingPath:", context.codingPath)
+            } catch DecodingError.valueNotFound(let value, let context) {
+                print("Value '\(value)' not found:", context.debugDescription)
+                print("codingPath:", context.codingPath)
+            } catch DecodingError.typeMismatch(let type, let context) {
+                print("Type '\(type)' mismatch:", context.debugDescription)
+                print("codingPath:", context.codingPath)
+            } catch {
+                print("error: ", error)
+            }
+            if let user = user {
+                continuation(User(name: user.name, username: user.username, followers: user.followers))
+            } else {
+                continuation(nil)
+            }
+        }
+        
+        task.resume()
+
     }
     
     func signIn(username: String, password: String, continuation: @escaping (String?) -> Void) {

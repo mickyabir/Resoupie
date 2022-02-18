@@ -211,6 +211,7 @@ struct NewRecipeView: View {
                     .frame(minHeight: 20)
                     
                     TextField("New Tag", text: $currentTag)
+                        .submitLabel(.next)
                         .onSubmit {
                             let componentTags = currentTag
                                 .lowercased()
@@ -420,6 +421,18 @@ struct NewRecipeView: View {
                 Text("Publish")
                     .foregroundColor(Color.orange)
             })
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    HStack {
+                        Spacer()
+                        Button("Done") {
+                            let resign = #selector(UIResponder.resignFirstResponder)
+                            UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
+                        }
+                        .foregroundColor(Color.orange)
+                    }
+                }
+            }
             .environment(\.editMode, $editMode)
         }
     }

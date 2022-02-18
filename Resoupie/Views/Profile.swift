@@ -7,42 +7,22 @@
 
 import SwiftUI
 
-struct User: RawRepresentable, Codable {
-    typealias RawValue = String
-    
-    init?(rawValue: String) {
-        guard let data = rawValue.data(using: .utf8),
-              let result = try? JSONDecoder().decode(User.self, from: data)
-        else {
-            return nil
-        }
-        self = result
-    }
-    
-    public var rawValue: String {
-        guard let data = try? JSONEncoder().encode(self),
-              let result = String(data: data, encoding: .utf8)
-        else {
-            return "[]"
-        }
-        return result
-    }
-        
+struct User {
     var name: String
     var username: String
     var followers: Int
 }
 
-struct Profile {
-    var image: UIImage?
-}
-
 class UserAccessViewController: ObservableObject {
     @Published var userAccess: Bool = false
+    @Published var submitted: Bool = false
     @Published var name: String = ""
     @Published var username: String = ""
     @Published var password: String = ""
-    @AppStorage("user") var user: User?
+    
+    @AppStorage("username") var stored_username: String?
+    @AppStorage("name") var stored_name: String?
+    
     @AppStorage("token") var token: String?
     let backendController = UserBackendController()
     enum AccessState {
@@ -53,7 +33,7 @@ class UserAccessViewController: ObservableObject {
     @Published var accessState: AccessState = .signIn
     @Published var signinError: Bool = false
     @Published var signupError: Bool = false
-
+    
     func signIn() {
         backendController.signIn(username: self.username, password: self.password) { token in
             if let token = token {
@@ -62,6 +42,7 @@ class UserAccessViewController: ObservableObject {
                         self.token = token
                         self.reset()
                         self.userAccess = false
+                        self.submitted = true
                     }
                 }
             } else {
@@ -80,6 +61,7 @@ class UserAccessViewController: ObservableObject {
                         self.token = token
                         self.reset()
                         self.userAccess = false
+                        self.submitted = true
                     }
                 }
             } else {
@@ -103,6 +85,14 @@ struct UserAccessWindow: View {
     
     @State var emptyWarning: Bool = false
     
+    enum FocusedField: Hashable {
+        case name
+        case username
+        case password
+    }
+    
+    @FocusState var focusedField: FocusedField?
+    
     var body: some View {
         ZStack {
             Rectangle()
@@ -121,6 +111,7 @@ struct UserAccessWindow: View {
                         Button {
                             withAnimation {
                                 viewController.userAccess = false
+                                focusedField = nil
                             }
                         } label: {
                             Image(systemName: "x.square.fill")
@@ -170,6 +161,7 @@ struct UserAccessWindow: View {
                     if viewController.accessState == .signUp {
                         TextField("Name", text: $viewController.name)
                             .padding(.horizontal)
+                            .submitLabel(.next)
                             .autocapitalization(.words)
                             .disableAutocorrection(true)
                             .background(
@@ -178,12 +170,17 @@ struct UserAccessWindow: View {
                                     .opacity(emptyWarning && viewController.name.isEmpty ? 0.4 : 0.0)
                                     .cornerRadius(10)
                             )
+                            .focused($focusedField, equals: .name)
+                            .onSubmit {
+                                focusedField = .username
+                            }
                         
                         Spacer()
                     }
                     
                     TextField("Username", text: $viewController.username)
                         .padding(.horizontal)
+                        .submitLabel(.next)
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                         .background(
@@ -192,13 +189,17 @@ struct UserAccessWindow: View {
                                 .opacity(emptyWarning && viewController.username.isEmpty ? 0.4 : 0.0)
                                 .cornerRadius(10)
                         )
-
-
+                        .focused($focusedField, equals: .username)
+                        .onSubmit {
+                            focusedField = .password
+                        }
+                    
                     Spacer()
                     
                     SecureField("Password", text: $viewController.password)
                         .padding(.horizontal)
                         .autocapitalization(.none)
+                        .submitLabel(.go)
                         .disableAutocorrection(true)
                         .background(
                             Rectangle()
@@ -209,8 +210,9 @@ struct UserAccessWindow: View {
                         .onSubmit {
                             submitForm()
                         }
-                        
-
+                        .focused($focusedField, equals: .password)
+                    
+                    
                     Spacer()
                     
                     Button {
@@ -221,8 +223,18 @@ struct UserAccessWindow: View {
                     .padding(.bottom)
                 }
                 .padding(.horizontal)
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        HStack {
+                            Spacer()
+                            Button("Done") {
+                                focusedField = nil
+                            }
+                        }
+                    }
+                }                
             }
-            .frame(width: 300, height: 400)
+            .frame(width: 300, height: 300)
         }
     }
     
@@ -246,6 +258,8 @@ struct UserAccessWindow: View {
                 }
             }
         } else {
+            focusedField = nil
+            
             if viewController.accessState == .signIn {
                 viewController.signIn()
             } else if viewController.accessState == .signUp {
@@ -257,11 +271,14 @@ struct UserAccessWindow: View {
 
 struct ProfileView: View {
     @State var presentNewRecipe = false
-    @State var profile: Profile?
-    @AppStorage("user") var user: User?
-    @AppStorage("token") var token: String?
+    
+    @AppStorage("username") var stored_username: String = ""
+    @AppStorage("name") var stored_name: String = ""
+    
+    @AppStorage("token") var token: String = ""
     @ObservedObject var userAccessViewController = UserAccessViewController()
-    @State var userAccess: Bool = false
+    
+    @State var recipes: [RecipeMeta]?
     
     var body: some View {
         NavigationView {
@@ -269,23 +286,18 @@ struct ProfileView: View {
                 Color.background
                 
                 ScrollView {
-                    ZStack {
-                        if let image = profile?.image {
-                            Image(uiImage: image)
-                                .frame(width: 150, height: 150)
+                    VStack {
+                        if let recipes = recipes {
+                            
+                            ForEach(recipes) { recipeMeta in
+                                RecipeCard(recipeMeta: recipeMeta, width: UIScreen.main.bounds.width - 40)
+                            }
                         }
-                        
-                        if let user = user {
-                            Text(user.name)
-                        } else {
-
-                        }
-                        
-                        
                     }
-                    .frame(width: 150, height: 150)
                     .padding(.top)
+                    .frame(maxWidth: .infinity)
                 }
+                
                 UserAccessWindow(viewController: userAccessViewController)
                     .opacity(userAccessViewController.userAccess ? 1.0 : 0.0)
             }
@@ -294,7 +306,7 @@ struct ProfileView: View {
                     NewRecipeView()
                 }
             }
-            .navigationTitle(user?.name ?? "Profile")
+            .navigationTitle(stored_name == "" ? "Profile" : stored_name)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     ZStack {
@@ -319,6 +331,9 @@ struct ProfileView: View {
                     Button {
                         withAnimation {
                             token = ""
+                            stored_name = ""
+                            stored_username = ""
+                            recipes = nil
                         }
                     } label: {
                         Text("Sign Out")
@@ -329,17 +344,40 @@ struct ProfileView: View {
             .onAppear {
                 loadProfile()
             }
+            .onChange(of: userAccessViewController.submitted) { submitted in
+                if submitted == true {
+                    loadProfile()
+                    userAccessViewController.submitted = false
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
     
     func loadProfile() {
-        //        user = User(name: "Micky Abir")
-        //        profile = Profile(image: nil)
         let userBackendController = UserBackendController()
         userBackendController.verifyToken { success in
             if !success {
                 DispatchQueue.main.async {
                     self.token = ""
+                    self.stored_name = ""
+                    self.stored_username = ""
+                    self.recipes = []
+                }
+            }
+        }
+        userBackendController.getUser { user in
+            if let user = user {
+                DispatchQueue.main.async {
+                    self.stored_name = user.name
+                    self.stored_username = user.username
+                    
+                    let recipeBackendController = RecipeBackendController()
+                    recipeBackendController.getUserRecipes(username: self.stored_username) { recipes in
+                        DispatchQueue.main.async {
+                            self.recipes = recipes
+                        }
+                    }
                 }
             }
         }

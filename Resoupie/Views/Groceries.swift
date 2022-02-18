@@ -164,8 +164,8 @@ struct GroceriesView: View {
                                 .frame(width: 150, height: 40)
                             
                             Text("Clear Checked")
-                                .opacity(isTextFieldFocused ? 0.0 : 1.0)
                         }
+                        .opacity(isTextFieldFocused ? 0.0 : 1.0)
                     }
                     
                     
@@ -216,6 +216,17 @@ struct GroceriesView: View {
                     let groceriesChecked = groceries[index].items.filter({ $0.check }).sorted(by: { $0.ingredient < $1.ingredient })
                     let groceriesNotChecked = groceries[index].items.filter({ !$0.check }).sorted(by: { $0.ingredient < $1.ingredient })
                     groceries[index].items = groceriesNotChecked + groceriesChecked
+                }
+            }
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    HStack {
+                        Spacer()
+                        Button("Done") {
+                            let resign = #selector(UIResponder.resignFirstResponder)
+                            UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
+                        }
+                    }
                 }
             }
             .environment(\.editMode, self.$editMode)

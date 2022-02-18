@@ -52,7 +52,6 @@ struct RecipeGroupRow: View {
     var title: String
     var recipes: [RecipeMeta]
     @AppStorage("favorites") var favorites: [RecipeMeta] = []
-    @State var scrollOffset: CGFloat = 0.0
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -80,15 +79,6 @@ struct RecipeGroupRow: View {
                         }
                     }
                     .padding(.leading, 20)
-                    
-                    GeometryReader { proxy in
-                        let offset = proxy.frame(in: .named("scroll")).minX
-                        let _ = DispatchQueue.main.async {
-                            self.scrollOffset = offset
-                        }
-                        Color.clear
-                            .frame(width: 0, height: 0)
-                    }
                 }
             }
         }
@@ -169,6 +159,7 @@ struct RecipeMainContinuousView: View {
 struct RecipesMainView: View {
     @State var temp: String = ""
     @State var continuous: Bool = false
+    @State var searchText: String = ""
     
     var body: some View {
         NavigationView {
@@ -177,9 +168,6 @@ struct RecipesMainView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack {
-                        Spacer()
-                            .padding(.bottom, 80)
-                        
                         Group {
                             if continuous {
                                 RecipeMainContinuousView()
@@ -187,6 +175,7 @@ struct RecipesMainView: View {
                                 RecipeMainDefaultView()
                             }
                         }
+                        .padding(.top)
                         .onTapGesture {
                             let resign = #selector(UIResponder.resignFirstResponder)
                             UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
@@ -200,32 +189,25 @@ struct RecipesMainView: View {
                         UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
                     }
                 )
-                .navigationTitle("Recipes")
-                
-                HStack {
-                    SearchField() { searchText in
-                        print(searchText)
-                    }
-                    ZStack {
-                        Rectangle()
-                            .frame(width: 40, height: 40)
-                            .cornerRadius(10)
-                            .foregroundColor(Color.orange)
-                            .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
-                        Button {
-                            withAnimation {
-                                continuous.toggle()
-                            }
-                        } label: {
-                            Image(systemName: continuous ? "infinity.circle.fill" : "infinity.circle")
-                                .font(.system(size: 26))
-                                .foregroundColor(Color.white)
+                .navigationTitle("Resoupies")
+                .navigationBarTitleDisplayMode(.inline)
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        withAnimation {
+                            continuous.toggle()
                         }
+                    } label: {
+                        Image(systemName: continuous ? "infinity.circle.fill" : "infinity.circle")
+                            .font(.system(size: 22))
+                            .foregroundColor(Color.orange)
                     }
-                    .padding(.trailing, 15)
                 }
             }
-            .navigationBarHidden(true)
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always)) {
+                Text("Example search").searchCompletion("Example search")
+            }
         }
     }
 }
