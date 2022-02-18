@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "814C8CF22797631E0056A7D2"
-               BuildableName = "CookBook.app"
+               BuildableName = "Resoupie.app"
                BlueprintName = "Resoupie"
                ReferencedContainer = "container:Resoupie.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "814C8D022797631F0056A7D2"
-               BuildableName = "CookBookTests.xctest"
+               BuildableName = "ResoupieTests.xctest"
                BlueprintName = "ResoupieTests"
                ReferencedContainer = "container:Resoupie.xcodeproj">
             </BuildableReference>
@@ -43,7 +43,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "814C8D0C2797631F0056A7D2"
-               BuildableName = "CookBookUITests.xctest"
+               BuildableName = "ResoupieUITests.xctest"
                BlueprintName = "ResoupieUITests"
                ReferencedContainer = "container:Resoupie.xcodeproj">
             </BuildableReference>
@@ -65,7 +65,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "814C8CF22797631E0056A7D2"
-            BuildableName = "CookBook.app"
+            BuildableName = "Resoupie.app"
             BlueprintName = "Resoupie"
             ReferencedContainer = "container:Resoupie.xcodeproj">
          </BuildableReference>
@@ -82,7 +82,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "814C8CF22797631E0056A7D2"
-            BuildableName = "CookBook.app"
+            BuildableName = "Resoupie.app"
             BlueprintName = "Resoupie"
             ReferencedContainer = "container:Resoupie.xcodeproj">
          </BuildableReference>

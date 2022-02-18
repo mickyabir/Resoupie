@@ -133,8 +133,8 @@
 			isa = PBXGroup;
 			children = (
 				814C8CF52797631E0056A7D2 /* Resoupie */,
-				814C8D062797631F0056A7D2 /* CookBookTests */,
-				814C8D102797631F0056A7D2 /* CookBookUITests */,
+				814C8D062797631F0056A7D2 /* ResoupieTests */,
+				814C8D102797631F0056A7D2 /* ResoupieUITests */,
 				814C8CF42797631E0056A7D2 /* Products */,
 				81BAF3F0279A035B004B0767 /* Frameworks */,
 			);
@@ -173,21 +173,21 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		814C8D062797631F0056A7D2 /* CookBookTests */ = {
+		814C8D062797631F0056A7D2 /* ResoupieTests */ = {
 			isa = PBXGroup;
 			children = (
 				814C8D072797631F0056A7D2 /* CookBookTests.swift */,
 			);
-			path = CookBookTests;
+			path = ResoupieTests;
 			sourceTree = "<group>";
 		};
-		814C8D102797631F0056A7D2 /* CookBookUITests */ = {
+		814C8D102797631F0056A7D2 /* ResoupieUITests */ = {
 			isa = PBXGroup;
 			children = (
 				814C8D112797631F0056A7D2 /* CookBookUITests.swift */,
 				814C8D132797631F0056A7D2 /* CookBookUITestsLaunchTests.swift */,
 			);
-			path = CookBookUITests;
+			path = ResoupieUITests;
 			sourceTree = "<group>";
 		};
 		814C8D20279764B50056A7D2 /* Views */ = {
