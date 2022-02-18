@@ -31,158 +31,48 @@ struct RecipeMetaBackendModel: Codable {
     var favorited: Int
 }
 
-class RecipeBackendController {
-    public static let url = BackendController.url + "recipes/"
-    @AppStorage("token") var token: String = ""
+class RecipeBackendController: BackendControllable {
+    internal let path = "recipes/"
     
     func getUserRecipes(username: String, continuation: @escaping ([RecipeMeta]?) -> Void) {
-        let url = URLComponents(string: RecipeBackendController.url + username)!
-                
-        var request = URLRequest(url: url.url!)
-        request.httpMethod = "GET"
-        
-        let bearer = "Bearer " + token
-        request.setValue(bearer, forHTTPHeaderField: "Authorization")
-
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {
-                print(error?.localizedDescription ?? "No data")
-                continuation(nil)
-                return
-            }
-            
-            var recipes: [RecipeMetaBackendModel]?
-            
-            do {
-                recipes = try JSONDecoder().decode([RecipeMetaBackendModel].self, from: data)
-            } catch DecodingError.dataCorrupted(let context) {
-                print(context)
-            } catch DecodingError.keyNotFound(let key, let context) {
-                print("Key '\(key)' not found:", context.debugDescription)
-                print("codingPath:", context.codingPath)
-            } catch DecodingError.valueNotFound(let value, let context) {
-                print("Value '\(value)' not found:", context.debugDescription)
-                print("codingPath:", context.codingPath)
-            } catch DecodingError.typeMismatch(let type, let context) {
-                print("Type '\(type)' mismatch:", context.debugDescription)
-                print("codingPath:", context.codingPath)
-            } catch {
-                print("error: ", error)
-            }
+        let backendController = BackendController()
+        backendController.authorizedRequest(path: path + username, method: "GET", modelType: [RecipeMetaBackendModel].self) { recipes in
             if let recipes = recipes {
                 continuation(self.mapRecipeMetas(recipes: recipes))
             } else {
                 continuation(nil)
             }
         }
-        
-        task.resume()
-
     }
     
     func loadNextRecipes(skip: Int, limit: Int, continuation: @escaping ([RecipeMeta]) -> Void) {
-        var url = URLComponents(string: RecipeBackendController.url)!
-        
-        url.queryItems = [
+        let backendController = BackendController()
+
+        let queryItems = [
             URLQueryItem(name: "skip", value: String(skip)),
             URLQueryItem(name: "limit", value: String(limit))
         ]
         
-        var request = URLRequest(url: url.url!)
-        request.httpMethod = "GET"
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {
-                print(error?.localizedDescription ?? "No data")
-                continuation([])
-                return
-            }
-            
-            var recipes: [RecipeMetaBackendModel]?
-            
-            do {
-                recipes = try JSONDecoder().decode([RecipeMetaBackendModel].self, from: data)
-            } catch DecodingError.dataCorrupted(let context) {
-                print(context)
-            } catch DecodingError.keyNotFound(let key, let context) {
-                print("Key '\(key)' not found:", context.debugDescription)
-                print("codingPath:", context.codingPath)
-            } catch DecodingError.valueNotFound(let value, let context) {
-                print("Value '\(value)' not found:", context.debugDescription)
-                print("codingPath:", context.codingPath)
-            } catch DecodingError.typeMismatch(let type, let context) {
-                print("Type '\(type)' mismatch:", context.debugDescription)
-                print("codingPath:", context.codingPath)
-            } catch {
-                print("error: ", error)
-            }
+        backendController.authorizedRequest(path: path, method: "GET", modelType: [RecipeMetaBackendModel].self, params: queryItems) { recipes in
             if let recipes = recipes {
                 continuation(self.mapRecipeMetas(recipes: recipes))
+            } else {
+                continuation([])
             }
         }
         
-        task.resume()
-    }
-    
-    func mapRecipeMetas(recipes: [RecipeMetaBackendModel]) -> [RecipeMeta] {
-        var coordinate: CLLocationCoordinate2D? = nil
-        let recipeModels = recipes.map { recipeMeta -> RecipeMeta in
-            if let lat = Double(recipeMeta.recipe.coordinate_lat), let long = Double(recipeMeta.recipe.coordinate_long) {
-                coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
-            }
-            
-            let recipeObject = Recipe(image: recipeMeta.recipe.image, name: recipeMeta.recipe.name, author: recipeMeta.recipe.author, ingredients: recipeMeta.recipe.ingredients, steps: recipeMeta.recipe.steps, coordinate: coordinate, emoji: recipeMeta.recipe.emoji, servings: recipeMeta.recipe.servings, tags: recipeMeta.recipe.tags, time: recipeMeta.recipe.time, specialTools: recipeMeta.recipe.specialTools)
-            return RecipeMeta(id: recipeMeta.id, recipe: recipeObject, rating: recipeMeta.rating, favorited: recipeMeta.favorited)
-        }
-        return recipeModels
     }
     
     func loadAllRecipes(continuation: @escaping ([RecipeMeta]) -> Void) {
-        var coordinate: CLLocationCoordinate2D? = nil
-        let url = URL(string: RecipeBackendController.url)!
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
+        let backendController = BackendController()
         
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {
-                print(error?.localizedDescription ?? "No data")
-                continuation([])
-                return
-            }
-            
-            var recipes: [RecipeMetaBackendModel]?
-            
-            do {
-                recipes = try JSONDecoder().decode([RecipeMetaBackendModel].self, from: data)
-            } catch DecodingError.dataCorrupted(let context) {
-                print(context)
-            } catch DecodingError.keyNotFound(let key, let context) {
-                print("Key '\(key)' not found:", context.debugDescription)
-                print("codingPath:", context.codingPath)
-            } catch DecodingError.valueNotFound(let value, let context) {
-                print("Value '\(value)' not found:", context.debugDescription)
-                print("codingPath:", context.codingPath)
-            } catch DecodingError.typeMismatch(let type, let context) {
-                print("Type '\(type)' mismatch:", context.debugDescription)
-                print("codingPath:", context.codingPath)
-            } catch {
-                print("error: ", error)
-            }
+        backendController.authorizedRequest(path: path, method: "GET", modelType: [RecipeMetaBackendModel].self) { recipes in
             if let recipes = recipes {
-                let recipeModels = recipes.map { recipeMeta -> RecipeMeta in
-                    if let lat = Double(recipeMeta.recipe.coordinate_lat), let long = Double(recipeMeta.recipe.coordinate_long) {
-                        coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
-                    }
-                    
-                    let recipeObject = Recipe(image: recipeMeta.recipe.image, name: recipeMeta.recipe.name, author: recipeMeta.recipe.author, ingredients: recipeMeta.recipe.ingredients, steps: recipeMeta.recipe.steps, coordinate: coordinate, emoji: recipeMeta.recipe.emoji, servings: recipeMeta.recipe.servings, tags: recipeMeta.recipe.tags, time: recipeMeta.recipe.time, specialTools: recipeMeta.recipe.specialTools)
-                    return RecipeMeta(id: recipeMeta.id, recipe: recipeObject, rating: recipeMeta.rating, favorited: recipeMeta.favorited)
-                }
-                continuation(recipeModels)
+                continuation(self.mapRecipeMetas(recipes: recipes))
+            } else {
+                continuation([])
             }
         }
-        
-        task.resume()
     }
     
     func uploadRecipeToServer(recipe: Recipe, continuation: @escaping (Bool) -> Void) {
@@ -193,44 +83,35 @@ class RecipeBackendController {
             long = String(coordinate.longitude)
         }
         let recipeModel = RecipeBackendModel(image: recipe.image, name: recipe.name, author: recipe.author, ingredients: recipe.ingredients, steps: recipe.steps, emoji: recipe.emoji, servings: recipe.servings, coordinate_lat: lat, coordinate_long: long, tags: recipe.tags, time: recipe.time, specialTools: recipe.specialTools)
+        
         var jsonData: Data?
         do {
             jsonData = try JSONEncoder().encode(recipeModel)
         } catch {
             print(error)
         }
-        
+                
         guard let jsonData = jsonData else {
             continuation(false)
             return
         }
         
-        let url = URL(string: RecipeBackendController.url)!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.httpBody = jsonData
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let bearer = "Bearer " + token
-        request.setValue(bearer, forHTTPHeaderField: "Authorization")
-        
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            guard let data = data, error == nil else {
-                print(error?.localizedDescription ?? "No data")
-                continuation(false)
-                return
-            }
-            let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
-            if let responseJSON = responseJSON as? [String: String] {
-                if let responseString = responseJSON["response"] {
-                    continuation(responseString == "success")
-                }
-            } else {
-                continuation(false)
-            }
+        let backendController = BackendController()
+        backendController.authorizedRequest(path: "recipes/", method: "POST", modelType: SuccessResponse.self, body: jsonData, contentType: .json) { response in
+            continuation(response?.success ?? false)
         }
-        
-        task.resume()
+    }
+    
+    private func mapRecipeMetas(recipes: [RecipeMetaBackendModel]) -> [RecipeMeta] {
+        var coordinate: CLLocationCoordinate2D? = nil
+        let recipeModels = recipes.map { recipeMeta -> RecipeMeta in
+            if let lat = Double(recipeMeta.recipe.coordinate_lat), let long = Double(recipeMeta.recipe.coordinate_long) {
+                coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+            }
+            
+            let recipeObject = Recipe(image: recipeMeta.recipe.image, name: recipeMeta.recipe.name, author: recipeMeta.recipe.author, ingredients: recipeMeta.recipe.ingredients, steps: recipeMeta.recipe.steps, coordinate: coordinate, emoji: recipeMeta.recipe.emoji, servings: recipeMeta.recipe.servings, tags: recipeMeta.recipe.tags, time: recipeMeta.recipe.time, specialTools: recipeMeta.recipe.specialTools)
+            return RecipeMeta(id: recipeMeta.id, recipe: recipeObject, rating: recipeMeta.rating, favorited: recipeMeta.favorited)
+        }
+        return recipeModels
     }
 }
