@@ -21,8 +21,18 @@ class BackendController {
     
     @AppStorage("token") var token: String = ""
     
-    enum ContentType: String {
-        case json = "application/json"
+    enum ContentType {
+        case json
+        case multipart(String)
+        
+        var rawValue: String {
+            switch self {
+            case .json:
+                return "application/json"
+            case .multipart(let boundary):
+                return "multipart/form-data; boundary=\(boundary)"
+            }
+        }
     }
     
     func authorizedRequest<T: Codable>(path: String, method: String, modelType: T.Type, params: [URLQueryItem]? = nil, body: Data? = nil, contentType: ContentType? = nil, continuation: @escaping (T?) -> Void) {

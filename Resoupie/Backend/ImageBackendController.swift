@@ -18,41 +18,13 @@ class ImageBackendController {
     @AppStorage("token") var token: String = ""
     
     func uploadImageToServer(image: UIImage, continuation: @escaping (String?) -> Void) {
-        var image_id: String?
-        
-        guard let url = URL(string: ImageBackendController.url) else {
-            continuation(nil)
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        
-        let bearer = "Bearer " + token
-        request.setValue(bearer, forHTTPHeaderField: "Authorization")
-        
-        //create boundary
         let boundary = generateBoundary()
-        //set content type
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        //call createDataBody method
         let dataBody = createDataBody(media: image, boundary: boundary)
-        request.httpBody = dataBody
-        let session = URLSession.shared
-        session.dataTask(with: request) { (data, response, error) in
-            if let _ = response {
-            }
-            if let data = data {
-                do {
-                    let imageUploaderResponse = try JSONDecoder().decode(ImageUploadResponse.self, from: data)
-                    image_id = imageUploaderResponse.image_id
-                    continuation(image_id)
-                } catch {
-                    print(error)
-                    continuation(nil)
-                }
-            }
-        }.resume()
+        
+        let backendController = BackendController()
+        backendController.authorizedRequest(path: "images/", method: "POST", modelType: ImageUploadResponse.self, body: dataBody, contentType: .multipart(boundary)) { response in
+            continuation(response?.image_id ?? nil)
+        }
     }
     
     func createDataBody(media: UIImage?, boundary: String) -> Data {
@@ -84,15 +56,6 @@ class ImageBackendController {
                 completion(UIImage(data: data))
             }
         }).resume()
-    }
-}
-
-extension Recipe {
-    func getMainImage(completion: @escaping (UIImage?) -> Void) {
-        let url = URL(string: ImageBackendController.url + self.image)!
-        ImageBackendController.downloadImage(from: url) { image in
-            completion(image)
-        }
     }
 }
 
