@@ -27,7 +27,7 @@ struct GroceriesView: View {
     @State var showingChooseListAlert = false
     @State var showingRemoveListAlert = false
     @State var selectedRemoveListIndex: Int?
-
+    
     @State var selectedItem: GroceryListItem?
     @State var selectedItemListIndex: Int?
     
@@ -54,7 +54,7 @@ struct GroceriesView: View {
                                     .padding(.trailing)
                                     .opacity(editMode == .active ? 1.0 : 0.0)
                                     .frame(width: editMode == .active ? 30 : 0)
-
+                                
                                 TextField("List", text: $groceries[listIndex].name)
                                     .foregroundColor(Color.title)
                                     .disableAutocorrection(true)
@@ -93,7 +93,7 @@ struct GroceriesView: View {
                                                 .disableAutocorrection(true)
                                                 .disabled(editMode == .active)
                                                 .focused($isTextFieldFocused)
-
+                                            
                                             
                                             Image(systemName: "folder")
                                                 .foregroundColor(Color.text)
@@ -157,9 +157,17 @@ struct GroceriesView: View {
                             }
                         }
                     }) {
-                        Text("Clear Checked")
-                            .opacity(isTextFieldFocused ? 0.0 : 1.0)
+                        ZStack {
+                            Rectangle()
+                                .foregroundColor(Color.background)
+                                .cornerRadius(8)
+                                .frame(width: 150, height: 40)
+                            
+                            Text("Clear Checked")
+                                .opacity(isTextFieldFocused ? 0.0 : 1.0)
+                        }
                     }
+                    
                     
                     Spacer()
                 }

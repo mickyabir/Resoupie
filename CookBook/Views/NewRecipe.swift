@@ -40,7 +40,6 @@ struct NewRecipeRowDivider: View {
 
 class NewRecipeViewController: ObservableObject {
     @Published var name: String = ""
-    @Published var uuid = UUID()
     @Published var emoji: String = ""
     @Published var ingredients: [Ingredient] = []
     @Published var steps: [String] = []
@@ -66,8 +65,8 @@ class NewRecipeViewController: ObservableObject {
         if let image = image {
             imageUploader.uploadImageToServer(image: image) { [self] imageId in
                 guard let imageId = imageId else { return }
-                imageIdString = imageId.uuidString
-                let recipe = Recipe(id: uuid, image: imageIdString, name: name, author: "author", ingredients: ingredients, steps: steps, coordinate: self.coordinate, emoji: emoji, servings: Int(servings) ?? 0, tags: tags, time: time, specialTools: specialTools)
+                imageIdString = imageId
+                let recipe = Recipe(image: imageIdString, name: name, author: "author", ingredients: ingredients, steps: steps, coordinate: self.coordinate, emoji: emoji, servings: Int(servings) ?? 0, tags: tags, time: time, specialTools: specialTools)
                 
                 let recipeUploader = RecipeBackendController()
                 recipeUploader.uploadRecipeToServer(recipe: recipe) { result in
@@ -217,6 +216,7 @@ struct NewRecipeView: View {
                                 .lowercased()
                                 .components(separatedBy: " ")
                                 .filter({ tags.firstIndex(of: $0) == nil })
+                                .filter({ !$0.isEmpty })
                             tags += componentTags
                             currentTag = ""
                         }
@@ -412,7 +412,7 @@ struct NewRecipeView: View {
                 viewController.ingredients = ingredients
                 viewController.steps = steps
                 viewController.tags = tags
-                viewController.specialTools = specialTools
+                viewController.specialTools = specialTools.filter({ !$0.isEmpty })
                 
                 viewController.publishRecipe()
                 presentationMode.wrappedValue.dismiss()

@@ -7,16 +7,18 @@
 
 import Foundation
 import UIKit
+import SwiftUI
 
 struct ImageUploadResponse: Codable {
-    var uuid: UUID
+    var image_id: String
 }
 
 class ImageBackendController {
     public static let url = BackendController.url + "images/"
+    @AppStorage("token") var token: String = ""
     
-    func uploadImageToServer(image: UIImage, continuation: @escaping (UUID?) -> Void) {
-        var uuid: UUID?
+    func uploadImageToServer(image: UIImage, continuation: @escaping (String?) -> Void) {
+        var image_id: String?
         
         guard let url = URL(string: ImageBackendController.url) else {
             continuation(nil)
@@ -25,6 +27,10 @@ class ImageBackendController {
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        
+        let bearer = "Bearer " + token
+        request.setValue(bearer, forHTTPHeaderField: "Authorization")
+        
         //create boundary
         let boundary = generateBoundary()
         //set content type
@@ -39,8 +45,8 @@ class ImageBackendController {
             if let data = data {
                 do {
                     let imageUploaderResponse = try JSONDecoder().decode(ImageUploadResponse.self, from: data)
-                    uuid = imageUploaderResponse.uuid
-                    continuation(uuid)
+                    image_id = imageUploaderResponse.image_id
+                    continuation(image_id)
                 } catch {
                     print(error)
                     continuation(nil)

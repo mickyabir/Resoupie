@@ -10,7 +10,6 @@ import CoreLocation
 import SwiftUI
 
 struct RecipeBackendModel: Codable {
-    var id: String
     var image: String
     var name: String
     var author: String
@@ -34,6 +33,7 @@ struct RecipeMetaBackendModel: Codable {
 
 class RecipeBackendController {
     public static let url = BackendController.url + "recipes/"
+    @AppStorage("token") var token: String = ""
     
     func loadNextRecipes(skip: Int, limit: Int, continuation: @escaping ([RecipeMeta]) -> Void) {
         var coordinate: CLLocationCoordinate2D? = nil
@@ -78,8 +78,8 @@ class RecipeBackendController {
                         coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
                     }
                     
-                    let recipeObject = Recipe(id: UUID(uuidString: recipeMeta.id)!, image: recipeMeta.recipe.image, name: recipeMeta.recipe.name, author: recipeMeta.recipe.author, ingredients: recipeMeta.recipe.ingredients, steps: recipeMeta.recipe.steps, coordinate: coordinate, emoji: recipeMeta.recipe.emoji, servings: recipeMeta.recipe.servings, tags: recipeMeta.recipe.tags, time: recipeMeta.recipe.time, specialTools: recipeMeta.recipe.specialTools)
-                    return RecipeMeta(recipe: recipeObject, rating: recipeMeta.rating, favorited: recipeMeta.favorited)
+                    let recipeObject = Recipe(image: recipeMeta.recipe.image, name: recipeMeta.recipe.name, author: recipeMeta.recipe.author, ingredients: recipeMeta.recipe.ingredients, steps: recipeMeta.recipe.steps, coordinate: coordinate, emoji: recipeMeta.recipe.emoji, servings: recipeMeta.recipe.servings, tags: recipeMeta.recipe.tags, time: recipeMeta.recipe.time, specialTools: recipeMeta.recipe.specialTools)
+                    return RecipeMeta(id: recipeMeta.id, recipe: recipeObject, rating: recipeMeta.rating, favorited: recipeMeta.favorited)
                 }
                 continuation(recipeModels)
             }
@@ -125,8 +125,8 @@ class RecipeBackendController {
                         coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
                     }
                     
-                    let recipeObject = Recipe(id: UUID(uuidString: recipeMeta.id)!, image: recipeMeta.recipe.image, name: recipeMeta.recipe.name, author: recipeMeta.recipe.author, ingredients: recipeMeta.recipe.ingredients, steps: recipeMeta.recipe.steps, coordinate: coordinate, emoji: recipeMeta.recipe.emoji, servings: recipeMeta.recipe.servings, tags: recipeMeta.recipe.tags, time: recipeMeta.recipe.time, specialTools: recipeMeta.recipe.specialTools)
-                    return RecipeMeta(recipe: recipeObject, rating: recipeMeta.rating, favorited: recipeMeta.favorited)
+                    let recipeObject = Recipe(image: recipeMeta.recipe.image, name: recipeMeta.recipe.name, author: recipeMeta.recipe.author, ingredients: recipeMeta.recipe.ingredients, steps: recipeMeta.recipe.steps, coordinate: coordinate, emoji: recipeMeta.recipe.emoji, servings: recipeMeta.recipe.servings, tags: recipeMeta.recipe.tags, time: recipeMeta.recipe.time, specialTools: recipeMeta.recipe.specialTools)
+                    return RecipeMeta(id: recipeMeta.id, recipe: recipeObject, rating: recipeMeta.rating, favorited: recipeMeta.favorited)
                 }
                 continuation(recipeModels)
             }
@@ -142,7 +142,7 @@ class RecipeBackendController {
             lat = String(coordinate.latitude)
             long = String(coordinate.longitude)
         }
-        let recipeModel = RecipeBackendModel(id: recipe.id.uuidString, image: recipe.image, name: recipe.name, author: recipe.author, ingredients: recipe.ingredients, steps: recipe.steps, emoji: recipe.emoji, servings: recipe.servings, coordinate_lat: lat, coordinate_long: long, tags: recipe.tags, time: recipe.time, specialTools: recipe.specialTools)
+        let recipeModel = RecipeBackendModel(image: recipe.image, name: recipe.name, author: recipe.author, ingredients: recipe.ingredients, steps: recipe.steps, emoji: recipe.emoji, servings: recipe.servings, coordinate_lat: lat, coordinate_long: long, tags: recipe.tags, time: recipe.time, specialTools: recipe.specialTools)
         var jsonData: Data?
         do {
             jsonData = try JSONEncoder().encode(recipeModel)
@@ -160,6 +160,8 @@ class RecipeBackendController {
         request.httpMethod = "POST"
         request.httpBody = jsonData
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let bearer = "Bearer " + token
+        request.setValue(bearer, forHTTPHeaderField: "Authorization")
         
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in

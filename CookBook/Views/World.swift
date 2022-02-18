@@ -9,7 +9,7 @@ import SwiftUI
 import MapKit
 
 struct Place: Identifiable {
-    var id: UUID
+    var id: String
     var emoji: String
     var coordinate: CLLocationCoordinate2D
 }

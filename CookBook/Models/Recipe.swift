@@ -16,8 +16,8 @@ struct Ingredient: Hashable, Codable, Identifiable {
     var unit: String
 }
 
-struct Recipe: Hashable, Codable, Identifiable {
-    var id: UUID
+struct Recipe: Hashable, Codable {
+//    var id: String
     var image: String
     var name: String
     var author: String
@@ -32,16 +32,16 @@ struct Recipe: Hashable, Codable, Identifiable {
 }
 
 struct RecipeMeta: Hashable, Codable, Identifiable {
-    var id: UUID
+    var id: String
     var recipe: Recipe
     var rating: Double
     var favorited: Int
     
-    init(recipe: Recipe, rating: Double, favorited: Int) {
+    init(id: String, recipe: Recipe, rating: Double, favorited: Int) {
         self.recipe = recipe
         self.rating = rating
         self.favorited = favorited
-        id = recipe.id
+        self.id = id
     }
 }
 
