@@ -16,6 +16,10 @@ struct RecipeDetail: View {
     @State var groceriesAdded = false
     
     @State var showLargeImage = false
+        
+    let backendController = RecipeBackendController()
+    
+    @State var currentServings: Int?
     
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -41,16 +45,28 @@ struct RecipeDetail: View {
                     ForEach(0..<stars) { index in
                         Image(systemName: "star.fill")
                             .foregroundColor(Color.yellow)
+                            .onTapGesture {
+                                let rating = index + 1
+                                backendController.rateRecipe(recipe_id: recipeMeta.id, rating: rating)
+                            }
                     }
                     
                     if halfStar {
                         Image(systemName: "star.leadinghalf.filled")
                             .foregroundColor(Color.yellow)
+                            .onTapGesture {
+                                let rating = stars + 1
+                                backendController.rateRecipe(recipe_id: recipeMeta.id, rating: rating)
+                            }
                     }
                     
                     ForEach(0..<emptyStars) { index in
                         Image(systemName: "star")
                             .foregroundColor(Color.yellow)
+                            .onTapGesture {
+                                let rating = stars + (halfStar ? 1 : 0) + index + 1
+                                backendController.rateRecipe(recipe_id: recipeMeta.id, rating: rating)
+                            }
                     }
                     
                     Text(String(rating))
@@ -58,29 +74,6 @@ struct RecipeDetail: View {
                     
                     Spacer()
                 }
-                
-                if !recipeMeta.recipe.tags.isEmpty {
-                    Section(header: Text("Tags").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
-                        FlexibleView(
-                            data: recipeMeta.recipe.tags,
-                            spacing: 15,
-                            alignment: .leading
-                        ) { item in
-                            HStack {
-                                Text(verbatim: item)
-                                    .foregroundColor(Color.text)
-                            }
-                            .padding(8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.gray.opacity(0.1))
-                            )
-                        }
-                        .frame(minHeight: 20)
-                    }
-                    .textCase(nil)
-                }
-                
                 
                 if !recipeMeta.recipe.specialTools.isEmpty {
                     Section(header: HStack {
@@ -98,6 +91,41 @@ struct RecipeDetail: View {
                             HStack {
                     Text("Ingredients")
                         .foregroundColor(Color.title)
+                    Spacer()
+                    
+                    VStack {
+                        Text("Servings")
+                            .foregroundColor(Color.lightText)
+                            .font(.system(size: 14))
+                        HStack {
+                            Image(systemName: "minus")
+                                .foregroundColor((currentServings ?? recipeMeta.recipe.servings) > 1 ? Color.orange : Color.lightText)
+                                .onTapGesture {
+                                    if currentServings == nil {
+                                        currentServings = recipeMeta.recipe.servings
+                                    }
+                                    
+                                    if currentServings! > 1 {
+                                        currentServings! -= 1
+                                    }
+                                    
+                                }
+                            
+                            Text(String(currentServings ?? recipeMeta.recipe.servings))
+                                .foregroundColor(Color.lightText)
+                            
+                            Image(systemName: "plus")
+                                .foregroundColor(Color.orange)
+                                .onTapGesture {
+                                    if currentServings == nil {
+                                        currentServings = recipeMeta.recipe.servings
+                                    }
+                                    
+                                    currentServings! += 1
+                                }
+                        }
+                    }
+                    
                     Spacer()
                     Image(systemName: groceriesAdded ? "folder.fill.badge.plus" : "folder.badge.plus")
                         .padding(.trailing, 20)
@@ -123,7 +151,11 @@ struct RecipeDetail: View {
                             Image(systemName: index != nil ? "plus.circle.fill" : "plus.circle")
                                 .onTapGesture {
                                     if index == nil {
-                                        let ingredientString = ingredient.name + " (" + ingredient.quantity + " " + ingredient.unit +  ")"
+                                        var currentQuantity = Double(ingredient.quantity) ?? 0
+                                        if let currentServings = currentServings {
+                                            currentQuantity = currentQuantity / Double(recipeMeta.recipe.servings) * Double(currentServings)
+                                        }
+                                        let ingredientString = ingredient.name + " (" + (currentQuantity > 0 ? String(currentQuantity) : ingredient.quantity) + " " + ingredient.unit +  ")"
                                         groceries[0].items.append(GroceryListItem(id: recipeMeta.id + "_" + ingredient.id, ingredient: ingredientString, check: false))
                                     } else if index != nil {
                                         for listIndex in 0..<groceries.count {
@@ -136,7 +168,11 @@ struct RecipeDetail: View {
                                 .foregroundColor(Color.orange)
                                 .font(.system(size: 18))
                             
-                            let ingredientText = ingredient.quantity + " " + ingredient.unit + " " + ingredient.name
+                            var currentQuantity = Double(ingredient.quantity) ?? 0
+                            if let currentServings = currentServings {
+                                let _ = (currentQuantity = currentQuantity / Double(recipeMeta.recipe.servings) * Double(currentServings))
+                            }
+                            let ingredientText = (currentQuantity > 0 ? String(currentQuantity) : ingredient.quantity) + " " + ingredient.unit + " " + ingredient.name
                             Text(ingredientText)
                                 .foregroundColor(Color.text)
                         }
@@ -157,6 +193,28 @@ struct RecipeDetail: View {
                                 .padding(.vertical, 5)
                         }
                     }
+                }
+                
+                if !recipeMeta.recipe.tags.isEmpty {
+                    Section(header: Text("Tags").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
+                        FlexibleView(
+                            data: recipeMeta.recipe.tags,
+                            spacing: 15,
+                            alignment: .leading
+                        ) { item in
+                            HStack {
+                                Text(verbatim: item)
+                                    .foregroundColor(Color.text)
+                            }
+                            .padding(8)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.gray.opacity(0.1))
+                            )
+                        }
+                        .frame(minHeight: 20)
+                    }
+                    .textCase(nil)
                 }
             }
             .onAppear {
@@ -183,11 +241,12 @@ struct RecipeDetail: View {
                 
                 if favorited {
                     favorites.append(recipeMeta)
+                    backendController.favoriteRecipe(recipe_id: recipeMeta.id)
                 } else {
                     if let offset = favorites.firstIndex(where: {$0.id == recipeMeta.id}) {
                         favorites.remove(at: offset)
                     }
-                    
+                    backendController.unfavoriteRecipe(recipe_id: recipeMeta.id)
                 }
             }) {
                 Image(systemName: favorited ? "heart.fill" : "heart")

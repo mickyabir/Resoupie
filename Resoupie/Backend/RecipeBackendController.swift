@@ -45,15 +45,40 @@ class RecipeBackendController: BackendControllable {
         }
     }
     
+    func rateRecipe(recipe_id: String, rating: Int) {
+        let backendController = BackendController()
+        
+        let params = [
+            URLQueryItem(name: "rating", value: String(rating)),
+        ]
+        
+        backendController.authorizedRequest(path: path + recipe_id, method: "POST", modelType: SuccessResponse.self, params: params) { response in
+        }
+    }
+    
+    func favoriteRecipe(recipe_id: String) {
+        let backendController = BackendController()
+        
+        backendController.authorizedRequest(path: path + recipe_id + "/favorite", method: "POST", modelType: SuccessResponse.self) { response in
+        }
+    }
+    
+    func unfavoriteRecipe(recipe_id: String) {
+        let backendController = BackendController()
+        
+        backendController.authorizedRequest(path: path + recipe_id + "/unfavorite", method: "POST", modelType: SuccessResponse.self) { response in
+        }
+    }
+    
     func loadNextRecipes(skip: Int, limit: Int, continuation: @escaping ([RecipeMeta]) -> Void) {
         let backendController = BackendController()
 
-        let queryItems = [
+        let params = [
             URLQueryItem(name: "skip", value: String(skip)),
             URLQueryItem(name: "limit", value: String(limit))
         ]
         
-        backendController.authorizedRequest(path: path, method: "GET", modelType: [RecipeMetaBackendModel].self, params: queryItems) { recipes in
+        backendController.authorizedRequest(path: path, method: "GET", modelType: [RecipeMetaBackendModel].self, params: params) { recipes in
             if let recipes = recipes {
                 continuation(self.mapRecipeMetas(recipes: recipes))
             } else {
