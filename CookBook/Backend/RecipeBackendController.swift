@@ -8,6 +8,7 @@
 import Foundation
 import CoreLocation
 import SwiftUI
+import Combine
 
 struct RecipeBackendModel: Codable {
     var image: String
@@ -31,18 +32,54 @@ struct RecipeMetaBackendModel: Codable {
     var favorited: Int
 }
 
-class RecipeBackendController: BackendControllable {
-    internal let path = "recipes/"
+enum RecipeError: Error {
     
-    func getUserRecipes(username: String, continuation: @escaping ([RecipeMeta]?) -> Void) {
+}
+
+protocol RecipeBackendController {
+    func getUserRecipesCombine(username: String) -> AnyPublisher<[RecipeMeta], Error>
+    
+    func rateRecipeCombine(recipe_id: String, rating: Int) -> AnyPublisher<Bool, Error>
+    
+    func rateRecipe(recipe_id: String, rating: Int)
+    
+    func favoriteRecipe(recipe_id: String)
+    
+    func unfavoriteRecipe(recipe_id: String)
+    
+    func loadNextRecipes(skip: Int, limit: Int, continuation: @escaping ([RecipeMeta]) -> Void)
+    
+    func loadAllRecipes(continuation: @escaping ([RecipeMeta]) -> Void)
+    
+    func uploadRecipeToServer(recipe: Recipe, continuation: @escaping (Bool) -> Void)
+}
+
+extension BackendController: RecipeBackendController {
+    internal struct RecipeBackend {
+        static let path = "recipes/"
+    }
+    
+    func getUserRecipesCombine(username: String) -> AnyPublisher<[RecipeMeta], Error> {
         let backendController = BackendController()
-        backendController.authorizedRequest(path: path + username, method: "GET", modelType: [RecipeMetaBackendModel].self) { recipes in
-            if let recipes = recipes {
-                continuation(self.mapRecipeMetas(recipes: recipes))
-            } else {
-                continuation(nil)
+        return backendController.authorizedRequestCombine(path: RecipeBackend.path + username, method: "GET", modelType: [RecipeMetaBackendModel].self)
+            .tryMap { recipeModels in
+                return self.mapRecipeMetas(recipes: recipeModels)
             }
-        }
+            .eraseToAnyPublisher()
+    }
+    
+    func rateRecipeCombine(recipe_id: String, rating: Int) -> AnyPublisher<Bool, Error> {
+        let backendController = BackendController()
+        
+        let params = [
+            URLQueryItem(name: "rating", value: String(rating)),
+        ]
+        
+        return backendController.authorizedRequestCombine(path: RecipeBackend.path + recipe_id, method: "POST", modelType: SuccessResponse.self, params: params)
+            .tryMap { response in
+                response.success
+            }
+            .eraseToAnyPublisher()
     }
     
     func rateRecipe(recipe_id: String, rating: Int) {
@@ -52,21 +89,21 @@ class RecipeBackendController: BackendControllable {
             URLQueryItem(name: "rating", value: String(rating)),
         ]
         
-        backendController.authorizedRequest(path: path + recipe_id, method: "POST", modelType: SuccessResponse.self, params: params) { response in
+        backendController.authorizedRequest(path: RecipeBackend.path + recipe_id, method: "POST", modelType: SuccessResponse.self, params: params) { response in
         }
     }
     
     func favoriteRecipe(recipe_id: String) {
         let backendController = BackendController()
         
-        backendController.authorizedRequest(path: path + recipe_id + "/favorite", method: "POST", modelType: SuccessResponse.self) { response in
+        backendController.authorizedRequest(path: RecipeBackend.path + recipe_id + "/favorite", method: "POST", modelType: SuccessResponse.self) { response in
         }
     }
     
     func unfavoriteRecipe(recipe_id: String) {
         let backendController = BackendController()
         
-        backendController.authorizedRequest(path: path + recipe_id + "/unfavorite", method: "POST", modelType: SuccessResponse.self) { response in
+        backendController.authorizedRequest(path: RecipeBackend.path + recipe_id + "/unfavorite", method: "POST", modelType: SuccessResponse.self) { response in
         }
     }
     
@@ -78,7 +115,7 @@ class RecipeBackendController: BackendControllable {
             URLQueryItem(name: "limit", value: String(limit))
         ]
         
-        backendController.authorizedRequest(path: path, method: "GET", modelType: [RecipeMetaBackendModel].self, params: params) { recipes in
+        backendController.authorizedRequest(path: RecipeBackend.path, method: "GET", modelType: [RecipeMetaBackendModel].self, params: params) { recipes in
             if let recipes = recipes {
                 continuation(self.mapRecipeMetas(recipes: recipes))
             } else {
@@ -91,7 +128,7 @@ class RecipeBackendController: BackendControllable {
     func loadAllRecipes(continuation: @escaping ([RecipeMeta]) -> Void) {
         let backendController = BackendController()
         
-        backendController.authorizedRequest(path: path, method: "GET", modelType: [RecipeMetaBackendModel].self) { recipes in
+        backendController.authorizedRequest(path: RecipeBackend.path, method: "GET", modelType: [RecipeMetaBackendModel].self) { recipes in
             if let recipes = recipes {
                 continuation(self.mapRecipeMetas(recipes: recipes))
             } else {

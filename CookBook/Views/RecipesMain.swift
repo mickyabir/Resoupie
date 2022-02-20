@@ -12,6 +12,8 @@ struct RecipeGroupRow: View {
     var recipes: [RecipeMeta]
     @AppStorage("favorites") var favorites: [RecipeMeta] = []
     
+    let backendController: RecipeBackendController
+    
     var body: some View {
         ZStack(alignment: .topLeading) {
             Rectangle()
@@ -30,7 +32,7 @@ struct RecipeGroupRow: View {
                     LazyHStack {
                         ForEach(recipes) { recipe in
                             ZStack(alignment: .topTrailing) {
-                                RecipeCard(recipeMeta: recipe, width: 250)
+                                RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: 250, backendController: backendController))
                                 
                                 let favorited = (favorites.firstIndex(of: recipe) != nil)
                                 Image(systemName: favorited ? "heart.fill" : "heart")
@@ -53,14 +55,15 @@ struct RecipeGroupRow: View {
 
 struct RecipeMainDefaultView: View {
     @State var recipes: [RecipeMeta] = [RecipeMeta]()
+    let backendController: RecipeBackendController
 
     var body: some View {
         LazyVStack {
-            RecipeGroupRow(title: "Popular", recipes: recipes)
+            RecipeGroupRow(title: "Popular", recipes: recipes, backendController: backendController)
             
-            RecipeGroupRow(title: "For You", recipes: recipes)
+            RecipeGroupRow(title: "For You", recipes: recipes, backendController: backendController)
             
-            RecipeGroupRow(title: "Vegan", recipes: recipes)
+            RecipeGroupRow(title: "Vegan", recipes: recipes, backendController: backendController)
         }
         .onAppear() {
             loadRecipes()
@@ -68,8 +71,7 @@ struct RecipeMainDefaultView: View {
     }
     
     func loadRecipes() {
-        let recipeBackendController = RecipeBackendController()
-        let _ = recipeBackendController.loadAllRecipes { allRecipes in
+        let _ = backendController.loadAllRecipes { allRecipes in
             self.recipes = allRecipes
         }
     }
@@ -77,11 +79,12 @@ struct RecipeMainDefaultView: View {
 
 struct RecipeMainContinuousView: View {
     @State var recipes: [RecipeMeta] = [RecipeMeta]()
+    let backendController: RecipeBackendController
 
     var body: some View {
         LazyVStack {
             ForEach(recipes) { recipe in
-                RecipeCard(recipeMeta: recipe, width: UIScreen.main.bounds.size.width - 40)
+                RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: UIScreen.main.bounds.size.width - 40, backendController: backendController))
                 let thresholdIndex = recipes.index(recipes.endIndex, offsetBy: -1)
                 if recipes.firstIndex(where: { $0.id == recipe.id }) == thresholdIndex {
                     let _ = loadMoreRecipes()
@@ -94,15 +97,13 @@ struct RecipeMainContinuousView: View {
     }
     
     func loadRecipes() {
-        let recipeBackendController = RecipeBackendController()
-        let _ = recipeBackendController.loadNextRecipes(skip: 0, limit: 1) { allRecipes in
+        let _ = backendController.loadNextRecipes(skip: 0, limit: 1) { allRecipes in
             self.recipes = allRecipes
         }
     }
     
     func loadMoreRecipes() {
-        let recipeBackendController = RecipeBackendController()
-        let _ = recipeBackendController.loadNextRecipes(skip: recipes.count, limit: 1) { allRecipes in
+        let _ = backendController.loadNextRecipes(skip: recipes.count, limit: 1) { allRecipes in
             print("load more")
             print(allRecipes)
             self.recipes.append(contentsOf: allRecipes)
@@ -115,6 +116,8 @@ struct RecipesMainView: View {
     @State var continuous: Bool = false
     @State var searchText: String = ""
     
+    let backendController: RecipeBackendController
+    
     var body: some View {
         NavigationView {
             ZStack(alignment: .topTrailing) {
@@ -124,9 +127,9 @@ struct RecipesMainView: View {
                     VStack {
                         Group {
                             if continuous {
-                                RecipeMainContinuousView()
+                                RecipeMainContinuousView(backendController: backendController)
                             } else {
-                                RecipeMainDefaultView()
+                                RecipeMainDefaultView(backendController: backendController)
                             }
                         }
                         .onTapGesture {

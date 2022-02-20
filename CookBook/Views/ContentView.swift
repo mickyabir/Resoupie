@@ -17,6 +17,9 @@ struct ContentView: View {
     @State private var selection = 1
     @State private var oldSelection = 1
 
+    let test: BackendController & RecipeBackendController = BackendController()
+    
+    let backendController = BackendController()
 
     var body: some View {
         TabView(selection: $selection) {
@@ -26,19 +29,19 @@ struct ContentView: View {
                 }
                 .tag(0)
             
-            RecipesMainView()
+            RecipesMainView(backendController: backendController)
                 .tabItem {
                     Label("Recipes", systemImage: "fork.knife")
                 }
                 .tag(1)
             
-            ProfileView()
+            ProfileView(viewController: ProfileViewController(backendController: backendController))
                 .tabItem {
                     Label("Profile", systemImage: "person.crop.circle")
                 }
                 .tag(2)
             
-            FavoritesView(favorites: favorites)
+            FavoritesView(favorites: favorites, backendController: backendController)
                 .tabItem {
                     Label("Favorites", systemImage: "heart")
                 }

@@ -6,27 +6,50 @@
 //
 
 import SwiftUI
+import Combine
+
+class RecipeDetailViewController: ObservableObject {
+    private var cancellables: Set<AnyCancellable> = Set()
+    let backendController: RecipeBackendController
+    var recipeMeta: RecipeMeta
+
+    init(recipeMeta: RecipeMeta, backendController: RecipeBackendController) {
+        self.recipeMeta = recipeMeta
+        self.backendController = backendController
+    }
+    
+    func rateRecipe(_ rating: Int) {
+        backendController.rateRecipe(recipe_id: recipeMeta.id, rating: rating)
+    }
+
+    func favoriteRecipe() {
+        backendController.favoriteRecipe(recipe_id: recipeMeta.id)
+    }
+    
+    func unfavoriteRecipe() {
+        backendController.unfavoriteRecipe(recipe_id: recipeMeta.id)
+    }
+}
 
 struct RecipeDetail: View {
     @State private var favorited: Bool = false
-    var recipeMeta: RecipeMeta
     @AppStorage("favorites") var favorites: [RecipeMeta] = []
     @AppStorage("groceryLists") var groceries: [GroceryList] = []
     
     @State var groceriesAdded = false
     
     @State var showLargeImage = false
-        
-    let backendController = RecipeBackendController()
-    
+            
     @State var currentServings: Int?
+    
+    var viewController: RecipeDetailViewController
     
     var body: some View {
         ZStack(alignment: .topLeading) {
             Color.background
             
             List {
-                CustomAsyncImage(imageId: recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 70, height: UIScreen.main.bounds.size.width - 70)
+                CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 70, height: UIScreen.main.bounds.size.width - 70)
                     .cornerRadius(10)
                     .onTapGesture {
                         withAnimation {
@@ -37,7 +60,7 @@ struct RecipeDetail: View {
                 HStack {
                     Spacer()
                     
-                    let rating = recipeMeta.rating
+                    let rating = viewController.recipeMeta.rating
                     let stars = Int(floor(rating))
                     let halfStar = rating.truncatingRemainder(dividingBy: 1) > 0.3
                     let emptyStars = 5 - stars - (halfStar ? 1 : 0)
@@ -47,7 +70,7 @@ struct RecipeDetail: View {
                             .foregroundColor(Color.yellow)
                             .onTapGesture {
                                 let rating = index + 1
-                                backendController.rateRecipe(recipe_id: recipeMeta.id, rating: rating)
+                                viewController.rateRecipe(rating)
                             }
                     }
                     
@@ -56,7 +79,7 @@ struct RecipeDetail: View {
                             .foregroundColor(Color.yellow)
                             .onTapGesture {
                                 let rating = stars + 1
-                                backendController.rateRecipe(recipe_id: recipeMeta.id, rating: rating)
+                                viewController.rateRecipe(rating)
                             }
                     }
                     
@@ -65,7 +88,7 @@ struct RecipeDetail: View {
                             .foregroundColor(Color.yellow)
                             .onTapGesture {
                                 let rating = stars + (halfStar ? 1 : 0) + index + 1
-                                backendController.rateRecipe(recipe_id: recipeMeta.id, rating: rating)
+                                viewController.rateRecipe(rating)
                             }
                     }
                     
@@ -75,12 +98,12 @@ struct RecipeDetail: View {
                     Spacer()
                 }
                 
-                if !recipeMeta.recipe.specialTools.isEmpty {
+                if !viewController.recipeMeta.recipe.specialTools.isEmpty {
                     Section(header: HStack {
                         Text("Special Tools").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)
                     }) {
-                        ForEach(recipeMeta.recipe.specialTools.indices, id: \.self) { index in
-                            Text(recipeMeta.recipe.specialTools[index])
+                        ForEach(viewController.recipeMeta.recipe.specialTools.indices, id: \.self) { index in
+                            Text(viewController.recipeMeta.recipe.specialTools[index])
                                 .foregroundColor(Color.text)
                         }
                     }
@@ -99,10 +122,10 @@ struct RecipeDetail: View {
                             .font(.system(size: 14))
                         HStack {
                             Image(systemName: "minus")
-                                .foregroundColor((currentServings ?? recipeMeta.recipe.servings) > 1 ? Color.orange : Color.lightText)
+                                .foregroundColor((currentServings ?? viewController.recipeMeta.recipe.servings) > 1 ? Color.orange : Color.lightText)
                                 .onTapGesture {
                                     if currentServings == nil {
-                                        currentServings = recipeMeta.recipe.servings
+                                        currentServings = viewController.recipeMeta.recipe.servings
                                     }
                                     
                                     if currentServings! > 1 {
@@ -111,14 +134,14 @@ struct RecipeDetail: View {
                                     
                                 }
                             
-                            Text(String(currentServings ?? recipeMeta.recipe.servings))
+                            Text(String(currentServings ?? viewController.recipeMeta.recipe.servings))
                                 .foregroundColor(Color.lightText)
                             
                             Image(systemName: "plus")
                                 .foregroundColor(Color.orange)
                                 .onTapGesture {
                                     if currentServings == nil {
-                                        currentServings = recipeMeta.recipe.servings
+                                        currentServings = viewController.recipeMeta.recipe.servings
                                     }
                                     
                                     currentServings! += 1
@@ -136,30 +159,30 @@ struct RecipeDetail: View {
                             }
                             
                             if groceriesAdded {
-                                groceries.append(GroceryList(id: recipeMeta.id, name: recipeMeta.recipe.name, items: []))
-                                groceries[groceries.count - 1].items = recipeMeta.recipe.ingredients.map { GroceryListItem(id: recipeMeta.id + "_" + $0.id, ingredient: $0.name + " (" + $0.quantity + " " + $0.unit +  ")", check: false)}
+                                groceries.append(GroceryList(id: viewController.recipeMeta.id, name: viewController.recipeMeta.recipe.name, items: []))
+                                groceries[groceries.count - 1].items = viewController.recipeMeta.recipe.ingredients.map { GroceryListItem(id: viewController.recipeMeta.id + "_" + $0.id, ingredient: $0.name + " (" + $0.quantity + " " + $0.unit +  ")", check: false)}
                             } else {
-                                groceries.removeAll(where: { $0.id == recipeMeta.id })
+                                groceries.removeAll(where: { $0.id == viewController.recipeMeta.id })
                             }
                             
                         }
                 }) {
-                    ForEach (recipeMeta.recipe.ingredients) { ingredient in
+                    ForEach (viewController.recipeMeta.recipe.ingredients) { ingredient in
                         HStack {
-                            let index = groceries.reduce([], { $0 + $1.items }).firstIndex(where: { $0.id == (recipeMeta.id + "_" + ingredient.id) })
+                            let index = groceries.reduce([], { $0 + $1.items }).firstIndex(where: { $0.id == (viewController.recipeMeta.id + "_" + ingredient.id) })
                             
                             Image(systemName: index != nil ? "plus.circle.fill" : "plus.circle")
                                 .onTapGesture {
                                     if index == nil {
                                         var currentQuantity = Double(ingredient.quantity) ?? 0
                                         if let currentServings = currentServings {
-                                            currentQuantity = currentQuantity / Double(recipeMeta.recipe.servings) * Double(currentServings)
+                                            currentQuantity = currentQuantity / Double(viewController.recipeMeta.recipe.servings) * Double(currentServings)
                                         }
                                         let ingredientString = ingredient.name + " (" + (currentQuantity > 0 ? String(currentQuantity) : ingredient.quantity) + " " + ingredient.unit +  ")"
-                                        groceries[0].items.append(GroceryListItem(id: recipeMeta.id + "_" + ingredient.id, ingredient: ingredientString, check: false))
+                                        groceries[0].items.append(GroceryListItem(id: viewController.recipeMeta.id + "_" + ingredient.id, ingredient: ingredientString, check: false))
                                     } else if index != nil {
                                         for listIndex in 0..<groceries.count {
-                                            if let itemIndex = groceries[listIndex].items.firstIndex(where: { $0.id == recipeMeta.id + "_" + ingredient.id }) {
+                                            if let itemIndex = groceries[listIndex].items.firstIndex(where: { $0.id == viewController.recipeMeta.id + "_" + ingredient.id }) {
                                                 groceries[listIndex].items.remove(at: itemIndex)
                                             }
                                         }
@@ -170,7 +193,7 @@ struct RecipeDetail: View {
                             
                             var currentQuantity = Double(ingredient.quantity) ?? 0
                             if let currentServings = currentServings {
-                                let _ = (currentQuantity = currentQuantity / Double(recipeMeta.recipe.servings) * Double(currentServings))
+                                let _ = (currentQuantity = currentQuantity / Double(viewController.recipeMeta.recipe.servings) * Double(currentServings))
                             }
                             let ingredientText = (currentQuantity > 0 ? String(currentQuantity) : ingredient.quantity) + " " + ingredient.unit + " " + ingredient.name
                             Text(ingredientText)
@@ -181,8 +204,8 @@ struct RecipeDetail: View {
                 }
                 
                 Section(header: Text("Method").foregroundColor(Color.title)) {
-                    ForEach (recipeMeta.recipe.steps, id: \.self) { step in
-                        let index = recipeMeta.recipe.steps.firstIndex(of: step)!
+                    ForEach (viewController.recipeMeta.recipe.steps, id: \.self) { step in
+                        let index = viewController.recipeMeta.recipe.steps.firstIndex(of: step)!
                         HStack {
                             Image(systemName: String(index + 1) + ".circle.fill")
                                 .foregroundColor(Color.orange)
@@ -195,10 +218,10 @@ struct RecipeDetail: View {
                     }
                 }
                 
-                if !recipeMeta.recipe.tags.isEmpty {
+                if !viewController.recipeMeta.recipe.tags.isEmpty {
                     Section(header: Text("Tags").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
                         FlexibleView(
-                            data: recipeMeta.recipe.tags,
+                            data: viewController.recipeMeta.recipe.tags,
                             spacing: 15,
                             alignment: .leading
                         ) { item in
@@ -218,19 +241,19 @@ struct RecipeDetail: View {
                 }
             }
             .onAppear {
-                if favorites.firstIndex(where: {$0.id == recipeMeta.id}) != nil {
+                if favorites.firstIndex(where: {$0.id == viewController.recipeMeta.id}) != nil {
                     favorited = true
                 } else {
                     favorited = false
                 }
                 
-                groceriesAdded = groceries.firstIndex(where: { $0.id == recipeMeta.id }) != nil
+                groceriesAdded = groceries.firstIndex(where: { $0.id == viewController.recipeMeta.id }) != nil
             }
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     VStack {
-                        Text(recipeMeta.recipe.name).font(.headline).foregroundColor(Color.navbarTitle)
-                        Text(recipeMeta.recipe.author).font(.subheadline).foregroundColor(Color.lightText)
+                        Text(viewController.recipeMeta.recipe.name).font(.headline).foregroundColor(Color.navbarTitle)
+                        Text(viewController.recipeMeta.recipe.author).font(.subheadline).foregroundColor(Color.lightText)
                     }
                 }
             }
@@ -240,13 +263,13 @@ struct RecipeDetail: View {
                 favorited.toggle()
                 
                 if favorited {
-                    favorites.append(recipeMeta)
-                    backendController.favoriteRecipe(recipe_id: recipeMeta.id)
+                    favorites.append(viewController.recipeMeta)
+                    viewController.favoriteRecipe()
                 } else {
-                    if let offset = favorites.firstIndex(where: {$0.id == recipeMeta.id}) {
+                    if let offset = favorites.firstIndex(where: {$0.id == viewController.recipeMeta.id}) {
                         favorites.remove(at: offset)
                     }
-                    backendController.unfavoriteRecipe(recipe_id: recipeMeta.id)
+                    viewController.unfavoriteRecipe()
                 }
             }) {
                 Image(systemName: favorited ? "heart.fill" : "heart")
@@ -255,7 +278,7 @@ struct RecipeDetail: View {
             
             Color.black.opacity(showLargeImage ? 0.7 : 0.0)
             
-            CustomAsyncImage(imageId: recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.width)
+            CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.width)
                 .onTapGesture {
                     withAnimation {
                         showLargeImage = false

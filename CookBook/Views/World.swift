@@ -26,8 +26,8 @@ class WorldViewModel: ObservableObject {
     @Published var recipes: [RecipeMeta] = []
     
     func loadRecipes() {
-//        let recipeBackendController = RecipeBackendController()
-//        let _ = recipeBackendController.loadAllRecipes { allRecipes in
+//        let backendController = RecipeBackendController()
+//        let _ = backendController.loadAllRecipes { allRecipes in
 //            self.recipes = allRecipes
 //        }
     }

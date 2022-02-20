@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct User {
     var name: String
@@ -13,75 +14,28 @@ struct User {
     var followers: Int
 }
 
-class UserAccessViewController: ObservableObject {
-    @Published var userAccess: Bool = false
-    @Published var submitted: Bool = false
-    @Published var name: String = ""
-    @Published var username: String = ""
-    @Published var password: String = ""
-    
-    @AppStorage("username") var stored_username: String?
-    @AppStorage("name") var stored_name: String?
-    
-    @AppStorage("token") var token: String?
-    let backendController = UserBackendController()
-    enum AccessState {
-        case signIn
-        case signUp
-    }
-    
-    @Published var accessState: AccessState = .signIn
-    @Published var signinError: Bool = false
-    @Published var signupError: Bool = false
-    
-    func signIn() {
-        backendController.signIn(username: self.username, password: self.password) { token in
-            if let token = token {
-                DispatchQueue.main.async {
-                    withAnimation {
-                        self.token = token
-                        self.reset()
-                        self.userAccess = false
-                        self.submitted = true
-                    }
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self.signinError = true
-                }
-            }
-        }
-    }
-    
-    func signUp() {
-        backendController.signUp(name: self.name, username: self.username, password: self.password) { token in
-            if let token = token {
-                DispatchQueue.main.async {
-                    withAnimation {
-                        self.token = token
-                        self.reset()
-                        self.userAccess = false
-                        self.submitted = true
-                    }
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self.signupError = true
-                }
-            }
-        }
-    }
-    
-    func reset() {
-        name = ""
-        username = ""
-        password = ""
-        accessState = .signIn
-    }
+enum AccessState {
+    case signIn
+    case signUp
 }
 
-struct UserAccessWindow: View {
-    @ObservedObject var viewController: UserAccessViewController
+protocol UserAccessViewController: ObservableObject {
+    var userAccess: Bool { get set }
+    
+    var name: String { get set }
+    var username: String { get set }
+    var password: String { get set }
+    
+    var accessState: AccessState { get set }
+    var signinError: Bool { get set }
+    var signupError: Bool { get set }
+    
+    func signIn()
+    func signUp()
+}
+
+struct UserAccessWindow<ViewController>: View where ViewController: UserAccessViewController {
+    @ObservedObject var viewController: ViewController
     
     @State var emptyWarning: Bool = false
     
@@ -232,7 +186,7 @@ struct UserAccessWindow: View {
                             }
                         }
                     }
-                }                
+                }
             }
             .frame(width: 300, height: 300)
         }
@@ -269,17 +223,125 @@ struct UserAccessWindow: View {
     }
 }
 
-struct ProfileView: View {
-    @State var presentNewRecipe = false
+class ProfileViewController: UserAccessViewController {
+    @AppStorage("token") var token: String = ""
     
     @AppStorage("username") var stored_username: String = ""
     @AppStorage("name") var stored_name: String = ""
     
-    @AppStorage("token") var token: String = ""
-    @ObservedObject var userAccessViewController = UserAccessViewController()
+    @Published var recipes: [RecipeMeta] = []
     
-    @State var recipes: [RecipeMeta]?
+    @Published var signedIn: Bool = true
     
+    @Published var userAccess: Bool = false
+    @Published var name: String = ""
+    @Published var username: String = ""
+    @Published var password: String = ""
+    
+    @Published var accessState: AccessState = .signIn
+    @Published var signinError: Bool = false
+    @Published var signupError: Bool = false
+    
+    @Published var presentNewRecipe = false
+
+    
+    var cancellables: Set<AnyCancellable> = Set()
+    let backendController: RecipeBackendController & UserBackendController
+    
+    init(backendController: RecipeBackendController & UserBackendController) {
+        self.backendController = backendController
+    }
+    
+    func signIn() {
+        backendController.signIn(username: self.username, password: self.password) { token in
+            if let token = token {
+                DispatchQueue.main.async {
+                    withAnimation {
+                        self.token = token
+                        self.reset()
+                        self.userAccess = false
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.signinError = true
+                }
+            }
+        }
+    }
+    
+    func signUp() {
+        backendController.signUp(name: self.name, username: self.username, password: self.password) { token in
+            if let token = token {
+                DispatchQueue.main.async {
+                    withAnimation {
+                        self.token = token
+                        self.reset()
+                        self.userAccess = false
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.signupError = true
+                }
+            }
+        }
+    }
+    
+    func reset() {
+        name = ""
+        username = ""
+        password = ""
+        accessState = .signIn
+    }
+    
+    func loadProfile() {
+        backendController.verifyToken { success in
+            if !success {
+                DispatchQueue.main.async {
+                    self.token = ""
+                    self.stored_name = ""
+                    self.stored_username = ""
+                    self.recipes = []
+                    self.signedIn = false
+                }
+            }
+        }
+        
+        backendController.getUserCombine()
+            .receive(on: DispatchQueue.main)
+            .map { user -> AnyPublisher<[RecipeMeta], Error> in
+                self.stored_name = user.name
+                self.stored_username = user.username
+                self.signedIn = true
+                
+                return self.backendController.getUserRecipesCombine(username: user.username)
+            }
+            .sink(receiveCompletion: {_ in
+            }, receiveValue: { publisher in
+                publisher
+                    .receive(on: DispatchQueue.main)
+                    .sink(receiveCompletion: {_ in
+                    }, receiveValue: { recipes in
+                        self.recipes = recipes
+                    })
+                    .store(in: &self.cancellables)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    func signOut() {
+        token = ""
+        stored_name = ""
+        stored_username = ""
+        recipes = []
+        signedIn = false
+    }
+}
+
+struct ProfileView: View {
+    @ObservedObject var viewController: ProfileViewController
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -287,99 +349,58 @@ struct ProfileView: View {
                 
                 ScrollView {
                     VStack {
-                        if let recipes = recipes {
-                            
-                            ForEach(recipes) { recipeMeta in
-                                RecipeCard(recipeMeta: recipeMeta, width: UIScreen.main.bounds.width - 40)
-                            }
+                        ForEach(viewController.recipes) { recipeMeta in
+                            RecipeCard(RecipeCardViewController(recipeMeta: recipeMeta, width: UIScreen.main.bounds.width - 40, backendController: viewController.backendController))
                         }
                     }
                     .padding(.top)
                     .frame(maxWidth: .infinity)
                 }
                 
-                UserAccessWindow(viewController: userAccessViewController)
-                    .opacity(userAccessViewController.userAccess ? 1.0 : 0.0)
+                UserAccessWindow(viewController: viewController)
+                    .opacity(viewController.userAccess ? 1.0 : 0.0)
             }
-            .sheet(isPresented: $presentNewRecipe) {
+            .sheet(isPresented: $viewController.presentNewRecipe) {
                 NavigationView {
-                    NewRecipeView()
+                    NewRecipeView(viewController: NewRecipeViewController(viewController.backendController))
                 }
             }
-            .navigationTitle(stored_name == "" ? "Profile" : stored_name)
+            .navigationTitle(viewController.stored_name == "" ? "Profile" : viewController.stored_name)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     ZStack {
                         Button {
                             withAnimation {
-                                userAccessViewController.userAccess = true
+                                viewController.userAccess = true
                             }
                         } label: {
                             Text("Sign In")
                         }
-                        .opacity(token == "" ? 1.0 : 0.0)
+                        .opacity(!viewController.signedIn ? 1.0 : 0.0)
                         
                         Button {
-                            presentNewRecipe = true
+                            viewController.presentNewRecipe = true
                         } label: {
                             Image(systemName: "square.and.pencil")
                         }
-                        .opacity(token != "" ? 1.0 : 0.0)
+                        .opacity(viewController.signedIn ? 1.0 : 0.0)
                     }
                 }
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
                         withAnimation {
-                            token = ""
-                            stored_name = ""
-                            stored_username = ""
-                            recipes = nil
+                            viewController.signOut()
                         }
                     } label: {
                         Text("Sign Out")
                     }
-                    .opacity(token != "" ? 1.0 : 0.0)
+                    .opacity(viewController.signedIn ? 1.0 : 0.0)
                 }
             }
             .onAppear {
-                loadProfile()
-            }
-            .onChange(of: userAccessViewController.submitted) { submitted in
-                if submitted == true {
-                    loadProfile()
-                    userAccessViewController.submitted = false
-                }
+                viewController.loadProfile()
             }
             .navigationBarTitleDisplayMode(.inline)
-        }
-    }
-    
-    func loadProfile() {
-        let userBackendController = UserBackendController()
-        userBackendController.verifyToken { success in
-            if !success {
-                DispatchQueue.main.async {
-                    self.token = ""
-                    self.stored_name = ""
-                    self.stored_username = ""
-                    self.recipes = []
-                }
-            }
-        }
-        userBackendController.getUser { user in
-            if let user = user {
-                DispatchQueue.main.async {
-                    self.stored_name = user.name
-                    self.stored_username = user.username
-                    
-                    let recipeBackendController = RecipeBackendController()
-                    recipeBackendController.getUserRecipes(username: self.stored_username) { recipes in
-                        DispatchQueue.main.async {
-                            self.recipes = recipes
-                        }
-                    }
-                }
-            }
         }
     }
 }

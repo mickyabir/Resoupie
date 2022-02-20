@@ -40,16 +40,17 @@ struct FavoritesView: View {
     @State var sort: Sort = .popular
     @State var displaySortOptions = false
     
+    let backendController: RecipeBackendController
+    
     var body: some View {
         NavigationView {
             ZStack(alignment: .topTrailing) {
                 Color.background
-//                    .ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 20) {
                         ForEach(favorites.sorted(by: sortingMethod[sort]!)) { recipe in
-                            RecipeCard(recipeMeta: recipe, width: UIScreen.main.bounds.width - 20)
+                            RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: UIScreen.main.bounds.width - 20, backendController: backendController))
                         }
                     }
                     .padding(.horizontal)
@@ -94,13 +95,5 @@ struct FavoritesView: View {
                 }
             ])
         }
-    }
-}
-
-struct Favorites_Previews: PreviewProvider {
-    static var previews: some View {
-        FavoritesView()
-            .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
-            .previewDisplayName("iPhone 12")
     }
 }

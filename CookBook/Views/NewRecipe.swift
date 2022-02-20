@@ -52,6 +52,12 @@ class NewRecipeViewController: ObservableObject {
     
     @Published var showEmptyRecipeWarning = false
     
+    let backendController: RecipeBackendController
+    
+    init(_ backendController: RecipeBackendController) {
+        self.backendController = backendController
+    }
+    
     func publishRecipe() {
         if name == "" || ingredients.isEmpty || steps.isEmpty {
             showEmptyRecipeWarning = true
@@ -68,13 +74,12 @@ class NewRecipeViewController: ObservableObject {
                 imageIdString = imageId
                 let recipe = Recipe(image: imageIdString, name: name, author: "author", ingredients: ingredients, steps: steps, coordinate: self.coordinate, emoji: emoji, servings: Int(servings) ?? 0, tags: tags, time: time, specialTools: specialTools)
                 
-                let recipeUploader = RecipeBackendController()
-                recipeUploader.uploadRecipeToServer(recipe: recipe) { result in
+                backendController.uploadRecipeToServer(recipe: recipe) { result in
                     print(result)
                 }
                 print(imageId)
                 
-                recipeUploader.loadAllRecipes { recipes in
+                backendController.loadAllRecipes { recipes in
                     print(recipes)
                 }
             }
@@ -89,7 +94,7 @@ struct NewRecipeView: View {
     
     private let coordinatePickerViewModel = CoordinatePickerViewModel()
     
-    @ObservedObject var viewController = NewRecipeViewController()
+    @ObservedObject var viewController: NewRecipeViewController
     
     @State private var editMode = EditMode.inactive
     

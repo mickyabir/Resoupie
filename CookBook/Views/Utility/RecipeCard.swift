@@ -7,12 +7,27 @@
 
 import SwiftUI
 
-struct RecipeCard: View {
-    var recipeMeta: RecipeMeta
-    var width: CGFloat
+class RecipeCardViewController: ObservableObject {
+    var backendController: RecipeBackendController
+    @Published var recipeMeta: RecipeMeta
+    @Published var width: CGFloat
 
+    init(recipeMeta: RecipeMeta, width: CGFloat, backendController: RecipeBackendController) {
+        self.recipeMeta = recipeMeta
+        self.width = width
+        self.backendController = backendController
+    }
+}
+
+struct RecipeCard: View {
     @State var presentRecipe = false
     @State var image: UIImage?
+    
+    let viewController: RecipeCardViewController
+    
+    init(_ viewController: RecipeCardViewController) {
+        self.viewController = viewController
+    }
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -20,15 +35,15 @@ struct RecipeCard: View {
                 .foregroundColor(Color.white)
                 .shadow(color: Color.black.opacity(0.2), radius: 8)
             VStack(alignment: .leading) {
-                CustomAsyncImage(imageId: recipeMeta.recipe.image, width: width)
+                CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: viewController.width)
                     .cornerRadius(10)
                 
                 HStack {
                     VStack(alignment: .leading) {
-                        Text(recipeMeta.recipe.name)
+                        Text(viewController.recipeMeta.recipe.name)
                             .font(.headline)
                             .foregroundColor(Color.text)
-                        Text(recipeMeta.recipe.author)
+                        Text(viewController.recipeMeta.recipe.author)
                             .font(.subheadline)
                             .foregroundColor(Color.lightText)
                     }
@@ -37,7 +52,7 @@ struct RecipeCard: View {
                     
                     VStack(alignment: .trailing) {
                         HStack {
-                            Text(String(recipeMeta.rating))
+                            Text(String(viewController.recipeMeta.rating))
                                 .font(.subheadline)
                                 .foregroundColor(Color.lightText)
                             Image(systemName: "star.fill")
@@ -45,7 +60,7 @@ struct RecipeCard: View {
                                 .font(.system(size: 12))
                         }
                         HStack {
-                            Text(String(recipeMeta.favorited))
+                            Text(String(viewController.recipeMeta.favorited))
                                 .font(.subheadline)
                                 .foregroundColor(Color.lightText)
                             Image(systemName: "heart.fill")
@@ -58,14 +73,14 @@ struct RecipeCard: View {
                 .padding(.bottom, 5)
             }
         }
-        .frame(width: width, height: width + 50)
+        .frame(width: viewController.width, height: viewController.width + 50)
         .onTapGesture {
             presentRecipe = true
         }
         .padding(.horizontal, 5)
         .popover(isPresented: $presentRecipe, content: {
             NavigationView {
-                RecipeDetail(recipeMeta: recipeMeta)
+                RecipeDetail(viewController: RecipeDetailViewController(recipeMeta: viewController.recipeMeta, backendController: viewController.backendController))
                     .navigationBarItems(leading:
                                             Button(action: {
                         presentRecipe = false
