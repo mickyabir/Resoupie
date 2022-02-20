@@ -9,7 +9,7 @@ import SwiftUI
 import MapKit
 
 @main
-struct ResoupieApp: App {
+struct CookBookApp: App {
     var body: some Scene {
         WindowGroup {
             let _ = Theme.navigationBarColors(background: nil, titleColor: UIColor(Color.navbarTitle), tintColor: UIColor.orange)

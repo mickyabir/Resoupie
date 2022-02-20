@@ -44,19 +44,20 @@ struct FavoritesView: View {
         NavigationView {
             ZStack(alignment: .topTrailing) {
                 Color.background
-                    .ignoresSafeArea()
+//                    .ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: 50) {
+                    LazyVStack(spacing: 20) {
                         ForEach(favorites.sorted(by: sortingMethod[sort]!)) { recipe in
-                            RecipeCard(recipeMeta: recipe, width: 350)
+                            RecipeCard(recipeMeta: recipe, width: UIScreen.main.bounds.width - 20)
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.vertical, 40)
+                    .padding(.vertical, 20)
                     .frame(maxWidth: .infinity)
                 }
             }
+            .navigationBarTitleDisplayMode(.inline)
             .navigationTitle("Favorites")
             .navigationBarItems(trailing:
                                     Button(action: {

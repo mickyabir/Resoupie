@@ -189,7 +189,7 @@ struct RecipesMainView: View {
                         UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
                     }
                 )
-                .navigationTitle("Resoupies")
+                .navigationTitle("CookBooks")
                 .navigationBarTitleDisplayMode(.inline)
             }
             .toolbar {

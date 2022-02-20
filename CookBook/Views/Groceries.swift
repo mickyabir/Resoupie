@@ -167,7 +167,7 @@ struct GroceriesView: View {
                             
                             Text("Clear Checked")
                         }
-                        .opacity(isTextFieldFocused ? 0.0 : 1.0)
+                        .opacity(isTextFieldFocused || groceries.filter({ list in !list.items.filter({$0.check}).isEmpty }).isEmpty ? 0.0 : 1.0)
                     }
                     
                     
@@ -201,6 +201,7 @@ struct GroceriesView: View {
                 )
             }
             .navigationTitle("Groceries")
+            .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(leading: EditButton())
             .navigationBarItems(trailing:
                                     Button {
