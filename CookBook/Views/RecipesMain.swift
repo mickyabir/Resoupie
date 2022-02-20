@@ -7,59 +7,23 @@
 
 import SwiftUI
 
-struct SearchField: View {
-    @State var searchText = ""
-    var action: (String) -> Void
-    
-    var body: some View {
-        ZStack(alignment: .leading) {
-            RoundedRectangle(cornerRadius: 10)
-                .foregroundColor(Color.lightGray)
-                .shadow(color: Color.black.opacity(0.12), radius: 4)
-                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
-                .frame(maxWidth: .infinity)
-                .frame(height: 40)
-                .padding()
-            
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.lightText)
-                    .padding(.leading)
-                
-                TextField("", text: $searchText)
-                    .foregroundColor(.lightText)
-                    .padding(.trailing)
-                    .onSubmit {
-                        action(searchText)
-                    }
-                
-                Button {
-                    searchText = ""
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.lightText)
-                        .padding(.trailing)
-                        .opacity(searchText != "" ? 1.0 : 0.0)
-                }
-            }
-            .padding(.horizontal)
-
-        }
-    }
-}
-
 struct RecipeGroupRow: View {
     var title: String
     var recipes: [RecipeMeta]
     @AppStorage("favorites") var favorites: [RecipeMeta] = []
     
     var body: some View {
-        VStack(alignment: .leading) {
+        ZStack(alignment: .topLeading) {
+            Rectangle()
+                .foregroundColor(Color.background)
+
             Text(title)
                 .font(.title2)
                 .fontWeight(.semibold)
                 .padding(.leading)
+                .padding(.top, 10)
                 .foregroundColor(Color.title2)
+            
             
             ScrollView(.horizontal, showsIndicators: false) {
                 ZStack {
@@ -75,13 +39,15 @@ struct RecipeGroupRow: View {
                                     .padding(.top, 10)
                                     .padding(.trailing, 10)
                             }
-                            .padding([.top, .bottom], 10)
+                            .padding(.top, 50)
                         }
                     }
                     .padding(.leading, 20)
                 }
+                
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: 500)
     }
 }
 
@@ -90,23 +56,11 @@ struct RecipeMainDefaultView: View {
 
     var body: some View {
         LazyVStack {
-            Group {
-                RecipeGroupRow(title: "Popular", recipes: recipes)
-                
-                Rectangle()
-                    .foregroundColor(Color.white)
-                    .frame(maxWidth: .infinity, maxHeight: 6)
-                
-                RecipeGroupRow(title: "For You", recipes: recipes)
-                
-                Rectangle()
-                    .foregroundColor(Color.white)
-                    .shadow(color: Color.black.opacity(0.2), radius: 4)
-                    .frame(maxWidth: .infinity, maxHeight: 6)
-                    .padding(.vertical, 4)
-                
-                RecipeGroupRow(title: "Vegan", recipes: recipes)
-            }
+            RecipeGroupRow(title: "Popular", recipes: recipes)
+            
+            RecipeGroupRow(title: "For You", recipes: recipes)
+            
+            RecipeGroupRow(title: "Vegan", recipes: recipes)
         }
         .onAppear() {
             loadRecipes()
@@ -164,7 +118,7 @@ struct RecipesMainView: View {
     var body: some View {
         NavigationView {
             ZStack(alignment: .topTrailing) {
-                Color.background
+                Color.white
                 
                 ScrollView(showsIndicators: false) {
                     VStack {
@@ -175,7 +129,6 @@ struct RecipesMainView: View {
                                 RecipeMainDefaultView()
                             }
                         }
-                        .padding(.top)
                         .onTapGesture {
                             let resign = #selector(UIResponder.resignFirstResponder)
                             UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
@@ -189,7 +142,7 @@ struct RecipesMainView: View {
                         UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
                     }
                 )
-                .navigationTitle("CookBooks")
+                .navigationTitle("Recipes")
                 .navigationBarTitleDisplayMode(.inline)
             }
             .toolbar {

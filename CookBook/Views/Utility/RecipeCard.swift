@@ -18,7 +18,7 @@ struct RecipeCard: View {
         ZStack(alignment: .top) {
             RoundedRectangle(cornerRadius: 10)
                 .foregroundColor(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 0)
+                .shadow(color: Color.black.opacity(0.2), radius: 8)
             VStack(alignment: .leading) {
                 CustomAsyncImage(imageId: recipeMeta.recipe.image, width: width)
                     .cornerRadius(10)
