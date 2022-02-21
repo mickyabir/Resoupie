@@ -26,11 +26,10 @@ enum UserError: Error {
 
 
 protocol UserBackendController {
-    func verifyToken(continuation: @escaping (Bool) -> Void)
+    func verifyTokenCombine() -> AnyPublisher<Bool, Error>
     func getUserCombine() -> AnyPublisher<User, Error>
-    func getUser(continuation: @escaping (User?) -> Void)
-    func signIn(username: String, password: String, continuation: @escaping (String?) -> Void)
-    func signUp(name: String, username: String, password: String, continuation: @escaping (String?) -> Void)
+    func signInCombine(username: String, password: String) -> AnyPublisher<String, Error>
+    func signUpCombine(name: String, username: String, password: String) -> AnyPublisher<String, Error>
 }
 
 
@@ -39,34 +38,23 @@ extension BackendController: UserBackendController {
         static let path = "users/"
     }
     
-    func verifyToken(continuation: @escaping (Bool) -> Void) {
-        let backendController = BackendController()
-        backendController.authorizedRequest(path: "auth/verify", method: "GET", modelType: SuccessResponse.self) { response in
-            continuation(response?.success ?? false)
-        }
+    func verifyTokenCombine() -> AnyPublisher<Bool, Error> {
+        authorizedRequestCombine(path: "auth/verify", method: "GET", modelType: SuccessResponse.self)
+            .tryMap { response in
+                return response.success
+            }
+            .eraseToAnyPublisher()
     }
     
     func getUserCombine() -> AnyPublisher<User, Error> {
-        let backendController = BackendController()
-        return backendController.authorizedRequestCombine(path: UserBackend.path + "me/", method: "GET", modelType: UserBackendModel.self)
+        return authorizedRequestCombine(path: UserBackend.path + "me/", method: "GET", modelType: UserBackendModel.self)
             .tryMap { user in
                 return User(name: user.name, username: user.username, followers: user.followers)
             }
             .eraseToAnyPublisher()
     }
     
-    func getUser(continuation: @escaping (User?) -> Void) {
-        let backendController = BackendController()
-        backendController.authorizedRequest(path: UserBackend.path + "me/", method: "GET", modelType: UserBackendModel.self) { user in
-            if let user = user {
-                continuation(User(name: user.name, username: user.username, followers: user.followers))
-            } else {
-                continuation(nil)
-            }
-        }
-    }
-    
-    func signIn(username: String, password: String, continuation: @escaping (String?) -> Void) {
+    func signInCombine(username: String, password: String) -> AnyPublisher<String, Error> {
         let parameters: [String: String] = [
             "username": username,
             "password": password
@@ -80,17 +68,19 @@ extension BackendController: UserBackendController {
         }
         
         guard let jsonData = jsonData else {
-            continuation(nil)
-            return
+            return Empty<String, Error>(completeImmediately: true).eraseToAnyPublisher()
         }
         
-        let backendController = BackendController()
-        backendController.authorizedRequest(path: UserBackend.path + "signin", method: "POST", modelType: AccessTokenModel.self, body: jsonData, contentType: .json) { token in
-            continuation(token?.access_token ?? "")
-        }
+        return authorizedRequestCombine(path: UserBackend.path + "signin", method: "POST", modelType: AccessTokenModel.self, body: jsonData, contentType: .json)
+            .receive(on: DispatchQueue.main)
+            .tryMap { token in
+                self.token = token.access_token
+                return token.access_token
+            }
+            .eraseToAnyPublisher()        
     }
     
-    func signUp(name: String, username: String, password: String, continuation: @escaping (String?) -> Void) {
+    func signUpCombine(name: String, username: String, password: String) -> AnyPublisher<String, Error> {
         let parameters: [String: String] = [
             "name": name,
             "username": username,
@@ -105,13 +95,15 @@ extension BackendController: UserBackendController {
         }
         
         guard let jsonData = jsonData else {
-            continuation(nil)
-            return
+            return Empty<String, Error>(completeImmediately: true).eraseToAnyPublisher()
         }
         
-        let backendController = BackendController()
-        backendController.authorizedRequest(path: UserBackend.path + "signup", method: "POST", modelType: AccessTokenModel.self, body: jsonData, contentType: .json) { token in
-            continuation(token?.access_token ?? "")
-        }
+        return authorizedRequestCombine(path: UserBackend.path + "signup", method: "POST", modelType: AccessTokenModel.self, body: jsonData, contentType: .json)
+            .receive(on: DispatchQueue.main)
+            .tryMap { token in
+                self.token = token.access_token
+                return token.access_token
+            }
+            .eraseToAnyPublisher()
     }
 }

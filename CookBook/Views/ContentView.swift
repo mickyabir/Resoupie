@@ -11,52 +11,55 @@ class PresentNewRecipe: ObservableObject {
     @Published var showNewRecipe = false
 }
 
-
 struct ContentView: View {
     @AppStorage("favorites") var favorites: [RecipeMeta] = []
     @State private var selection = 1
-    @State private var oldSelection = 1
-
-    let test: BackendController & RecipeBackendController = BackendController()
     
-    let backendController = BackendController()
+    let backendController: BackendController
+    let profileViewController: ProfileViewController
+    let recipeMainViewController: RecipeMainViewController
 
+    init() {
+        backendController = BackendController()
+        profileViewController = ProfileViewController(backendController: backendController)
+        recipeMainViewController = RecipeMainViewController(backendController: backendController)
+    }
+    
     var body: some View {
-        TabView(selection: $selection) {
-            WorldView()
-                .tabItem {
-                    Label("World", systemImage: "globe")
-                }
-                .tag(0)
-            
-            RecipesMainView(backendController: backendController)
-                .tabItem {
-                    Label("Recipes", systemImage: "fork.knife")
-                }
-                .tag(1)
-            
-            ProfileView(viewController: ProfileViewController(backendController: backendController))
-                .tabItem {
-                    Label("Profile", systemImage: "person.crop.circle")
-                }
-                .tag(2)
-            
-            FavoritesView(favorites: favorites, backendController: backendController)
-                .tabItem {
-                    Label("Favorites", systemImage: "heart")
-                }
-                .tag(3)
-
-            GroceriesView()
-                .tabItem {
-                    Label("Groceries", systemImage: "checklist")
-                }
-                .tag(4)
+        ZStack {
+            TabView(selection: $selection) {
+                WorldView()
+                    .tabItem {
+                        Label("World", systemImage: "globe")
+                    }
+                    .tag(0)
+                
+                RecipesMainView(viewController: recipeMainViewController)
+                    .tabItem {
+                        Label("Recipes", systemImage: "fork.knife")
+                    }
+                    .tag(1)
+                
+                ProfileView(viewController: profileViewController)
+                    .tabItem {
+                        Label("Profile", systemImage: "person.crop.circle")
+                    }
+                    .tag(2)
+                
+                FavoritesView(favorites: favorites, backendController: backendController)
+                    .tabItem {
+                        Label("Favorites", systemImage: "heart")
+                    }
+                    .tag(3)
+                
+                GroceriesView()
+                    .tabItem {
+                        Label("Groceries", systemImage: "checklist")
+                    }
+                    .tag(4)
+            }
         }
         .accentColor(Color.orange)
-        .onChange(of: selection) { selected in
-        }
-        
     }
 }
 

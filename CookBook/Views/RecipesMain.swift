@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct RecipeGroupRow: View {
     var title: String
@@ -53,60 +54,79 @@ struct RecipeGroupRow: View {
     }
 }
 
-struct RecipeMainDefaultView: View {
-    @State var recipes: [RecipeMeta] = [RecipeMeta]()
-    let backendController: RecipeBackendController
+class RecipeMainViewController: ObservableObject {
+    @Published var recipes: [RecipeMeta] = [RecipeMeta]()
 
-    var body: some View {
-        LazyVStack {
-            RecipeGroupRow(title: "Popular", recipes: recipes, backendController: backendController)
-            
-            RecipeGroupRow(title: "For You", recipes: recipes, backendController: backendController)
-            
-            RecipeGroupRow(title: "Vegan", recipes: recipes, backendController: backendController)
-        }
-        .onAppear() {
-            loadRecipes()
-        }
+    let backendController: RecipeBackendController
+    var cancellables: Set<AnyCancellable> = Set<AnyCancellable>()
+
+    init(backendController: RecipeBackendController) {
+        self.backendController = backendController
+    }
+    
+    func loadAllRecipes() {
+        backendController.loadAllRecipesCombine()
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { recipes in
+                self.recipes = recipes
+            })
+            .store(in: &cancellables)
     }
     
     func loadRecipes() {
-        let _ = backendController.loadAllRecipes { allRecipes in
-            self.recipes = allRecipes
+        backendController.loadNextRecipesCombine(skip: 0, limit: 10)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { recipes in
+                self.recipes = recipes
+            })
+            .store(in: &cancellables)
+    }
+    
+    func loadMoreRecipes() {
+        backendController.loadNextRecipesCombine(skip: recipes.count, limit: 10)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { recipes in
+                self.recipes.append(contentsOf: recipes)
+            })
+            .store(in: &cancellables)
+    }
+}
+
+struct RecipeMainDefaultView: View {
+    @ObservedObject var viewController: RecipeMainViewController
+
+    var body: some View {
+        LazyVStack {
+            RecipeGroupRow(title: "Popular", recipes: viewController.recipes, backendController: viewController.backendController)
+            
+            RecipeGroupRow(title: "For You", recipes: viewController.recipes, backendController: viewController.backendController)
+            
+            RecipeGroupRow(title: "Vegan", recipes: viewController.recipes, backendController: viewController.backendController)
+        }
+        .onAppear() {
+            viewController.loadAllRecipes()
         }
     }
 }
 
 struct RecipeMainContinuousView: View {
-    @State var recipes: [RecipeMeta] = [RecipeMeta]()
-    let backendController: RecipeBackendController
+    @ObservedObject var viewController: RecipeMainViewController
 
     var body: some View {
         LazyVStack {
-            ForEach(recipes) { recipe in
-                RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: UIScreen.main.bounds.size.width - 40, backendController: backendController))
-                let thresholdIndex = recipes.index(recipes.endIndex, offsetBy: -1)
-                if recipes.firstIndex(where: { $0.id == recipe.id }) == thresholdIndex {
-                    let _ = loadMoreRecipes()
+            ForEach(viewController.recipes) { recipe in
+                RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: UIScreen.main.bounds.size.width - 40, backendController: viewController.backendController))
+                let thresholdIndex = viewController.recipes.index(viewController.recipes.endIndex, offsetBy: -1)
+                if viewController.recipes.firstIndex(where: { $0.id == recipe.id }) == thresholdIndex {
+                    let _ = viewController.loadMoreRecipes()
                 }
             }
         }
         .onAppear() {
-            loadRecipes()
-        }
-    }
-    
-    func loadRecipes() {
-        let _ = backendController.loadNextRecipes(skip: 0, limit: 1) { allRecipes in
-            self.recipes = allRecipes
-        }
-    }
-    
-    func loadMoreRecipes() {
-        let _ = backendController.loadNextRecipes(skip: recipes.count, limit: 1) { allRecipes in
-            print("load more")
-            print(allRecipes)
-            self.recipes.append(contentsOf: allRecipes)
+            viewController.loadRecipes()
         }
     }
 }
@@ -116,7 +136,7 @@ struct RecipesMainView: View {
     @State var continuous: Bool = false
     @State var searchText: String = ""
     
-    let backendController: RecipeBackendController
+    let viewController: RecipeMainViewController
     
     var body: some View {
         NavigationView {
@@ -127,9 +147,9 @@ struct RecipesMainView: View {
                     VStack {
                         Group {
                             if continuous {
-                                RecipeMainContinuousView(backendController: backendController)
+                                RecipeMainContinuousView(viewController: viewController)
                             } else {
-                                RecipeMainDefaultView(backendController: backendController)
+                                RecipeMainDefaultView(viewController: viewController)
                             }
                         }
                         .onTapGesture {

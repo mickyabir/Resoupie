@@ -8,23 +8,31 @@
 import Foundation
 import UIKit
 import SwiftUI
+import Combine
 
 struct ImageUploadResponse: Codable {
     var image_id: String
 }
 
-class ImageBackendController {
-    public static let url = BackendController.url + "images/"
-    @AppStorage("token") var token: String = ""
-    
-    func uploadImageToServer(image: UIImage, continuation: @escaping (String?) -> Void) {
+protocol ImageBackendController {
+    func uploadImageToServerCombine(image: UIImage) -> AnyPublisher<String, Error>
+
+}
+
+extension BackendController: ImageBackendController {
+    internal struct ImageBackend {
+        static let path = "images/"
+    }
+
+    func uploadImageToServerCombine(image: UIImage) -> AnyPublisher<String, Error> {
         let boundary = generateBoundary()
         let dataBody = createDataBody(media: image, boundary: boundary)
         
-        let backendController = BackendController()
-        backendController.authorizedRequest(path: "images/", method: "POST", modelType: ImageUploadResponse.self, body: dataBody, contentType: .multipart(boundary)) { response in
-            continuation(response?.image_id ?? nil)
-        }
+        return authorizedRequestCombine(path: ImageBackend.path, method: "POST", modelType: ImageUploadResponse.self, body: dataBody, contentType: .multipart(boundary))
+            .tryMap { response in
+                return response.image_id
+            }
+            .eraseToAnyPublisher()
     }
     
     func createDataBody(media: UIImage?, boundary: String) -> Data {
@@ -44,18 +52,6 @@ class ImageBackendController {
     
     func generateBoundary() -> String {
         return "Boundary-\(NSUUID().uuidString)"
-    }
-    
-    static func downloadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
-        print("Download Started")
-        URLSession.shared.dataTask(with: url, completionHandler: { data, response, error in
-            guard let data = data, error == nil else { return }
-            print("Download Finished")
-            // always update the UI from the main thread
-            DispatchQueue.main.async() {
-                completion(UIImage(data: data))
-            }
-        }).resume()
     }
 }
 

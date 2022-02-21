@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PhotosUI
+import Combine
 
 struct NewRecipeRow<Content: View>: View {
     let content: Content
@@ -39,6 +40,8 @@ struct NewRecipeRowDivider: View {
 }
 
 class NewRecipeViewController: ObservableObject {
+    typealias NewRecipeBackendController = RecipeBackendController & ImageBackendController
+
     @Published var name: String = ""
     @Published var emoji: String = ""
     @Published var ingredients: [Ingredient] = []
@@ -49,12 +52,13 @@ class NewRecipeViewController: ObservableObject {
     @Published var tags: [String] = []
     @Published var time: String = ""
     @Published var specialTools: [String] = []
-    
     @Published var showEmptyRecipeWarning = false
     
-    let backendController: RecipeBackendController
+    var cancellables: Set<AnyCancellable> = Set<AnyCancellable>()
     
-    init(_ backendController: RecipeBackendController) {
+    let backendController: NewRecipeBackendController
+    
+    init(_ backendController: NewRecipeBackendController) {
         self.backendController = backendController
     }
     
@@ -64,25 +68,19 @@ class NewRecipeViewController: ObservableObject {
             return
         }
         
-        let imageUploader = ImageBackendController()
-        
-        var imageIdString: String = ""
-        
         if let image = image {
-            imageUploader.uploadImageToServer(image: image) { [self] imageId in
-                guard let imageId = imageId else { return }
-                imageIdString = imageId
-                let recipe = Recipe(image: imageIdString, name: name, author: "author", ingredients: ingredients, steps: steps, coordinate: self.coordinate, emoji: emoji, servings: Int(servings) ?? 0, tags: tags, time: time, specialTools: specialTools)
-                
-                backendController.uploadRecipeToServer(recipe: recipe) { result in
-                    print(result)
+            backendController.uploadImageToServerCombine(image: image)
+                .tryMap { image_id -> Recipe in
+                    return Recipe(image: image_id, name: self.name, author: "author", ingredients: self.ingredients, steps: self.steps, coordinate: self.coordinate, emoji: self.emoji, servings: Int(self.servings) ?? 0, tags: self.tags, time: self.time, specialTools: self.specialTools)
                 }
-                print(imageId)
-                
-                backendController.loadAllRecipes { recipes in
-                    print(recipes)
-                }
-            }
+                .flatMap(backendController.uploadRecipeToServerCombine)
+                .eraseToAnyPublisher()
+                .receive(on: DispatchQueue.main)
+                .sink(receiveCompletion: { _ in
+                }, receiveValue: { success in
+                })
+                .store(in: &cancellables)
+            
         }
     }
 }

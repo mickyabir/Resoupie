@@ -38,20 +38,12 @@ enum RecipeError: Error {
 
 protocol RecipeBackendController {
     func getUserRecipesCombine(username: String) -> AnyPublisher<[RecipeMeta], Error>
-    
     func rateRecipeCombine(recipe_id: String, rating: Int) -> AnyPublisher<Bool, Error>
-    
-    func rateRecipe(recipe_id: String, rating: Int)
-    
-    func favoriteRecipe(recipe_id: String)
-    
-    func unfavoriteRecipe(recipe_id: String)
-    
-    func loadNextRecipes(skip: Int, limit: Int, continuation: @escaping ([RecipeMeta]) -> Void)
-    
-    func loadAllRecipes(continuation: @escaping ([RecipeMeta]) -> Void)
-    
-    func uploadRecipeToServer(recipe: Recipe, continuation: @escaping (Bool) -> Void)
+    func favoriteRecipeCombine(recipe_id: String) -> AnyPublisher<Bool, Error>
+    func unfavoriteRecipeCombine(recipe_id: String) -> AnyPublisher<Bool, Error>
+    func loadNextRecipesCombine(skip: Int, limit: Int) -> AnyPublisher<[RecipeMeta], Error>
+    func loadAllRecipesCombine() -> AnyPublisher<[RecipeMeta], Error>
+    func uploadRecipeToServerCombine(recipe: Recipe) -> AnyPublisher<Bool, Error>
 }
 
 extension BackendController: RecipeBackendController {
@@ -60,8 +52,7 @@ extension BackendController: RecipeBackendController {
     }
     
     func getUserRecipesCombine(username: String) -> AnyPublisher<[RecipeMeta], Error> {
-        let backendController = BackendController()
-        return backendController.authorizedRequestCombine(path: RecipeBackend.path + username, method: "GET", modelType: [RecipeMetaBackendModel].self)
+        return authorizedRequestCombine(path: RecipeBackend.path + username, method: "GET", modelType: [RecipeMetaBackendModel].self)
             .tryMap { recipeModels in
                 return self.mapRecipeMetas(recipes: recipeModels)
             }
@@ -69,75 +60,55 @@ extension BackendController: RecipeBackendController {
     }
     
     func rateRecipeCombine(recipe_id: String, rating: Int) -> AnyPublisher<Bool, Error> {
-        let backendController = BackendController()
-        
         let params = [
             URLQueryItem(name: "rating", value: String(rating)),
         ]
         
-        return backendController.authorizedRequestCombine(path: RecipeBackend.path + recipe_id, method: "POST", modelType: SuccessResponse.self, params: params)
+        return authorizedRequestCombine(path: RecipeBackend.path + recipe_id, method: "POST", modelType: SuccessResponse.self, params: params)
             .tryMap { response in
                 response.success
             }
             .eraseToAnyPublisher()
     }
-    
-    func rateRecipe(recipe_id: String, rating: Int) {
-        let backendController = BackendController()
-        
-        let params = [
-            URLQueryItem(name: "rating", value: String(rating)),
-        ]
-        
-        backendController.authorizedRequest(path: RecipeBackend.path + recipe_id, method: "POST", modelType: SuccessResponse.self, params: params) { response in
-        }
-    }
-    
-    func favoriteRecipe(recipe_id: String) {
-        let backendController = BackendController()
-        
-        backendController.authorizedRequest(path: RecipeBackend.path + recipe_id + "/favorite", method: "POST", modelType: SuccessResponse.self) { response in
-        }
-    }
-    
-    func unfavoriteRecipe(recipe_id: String) {
-        let backendController = BackendController()
-        
-        backendController.authorizedRequest(path: RecipeBackend.path + recipe_id + "/unfavorite", method: "POST", modelType: SuccessResponse.self) { response in
-        }
-    }
-    
-    func loadNextRecipes(skip: Int, limit: Int, continuation: @escaping ([RecipeMeta]) -> Void) {
-        let backendController = BackendController()
 
+    func favoriteRecipeCombine(recipe_id: String) -> AnyPublisher<Bool, Error> {
+        return authorizedRequestCombine(path: RecipeBackend.path + recipe_id + "/favorite", method: "POST", modelType: SuccessResponse.self)
+            .tryMap { response in
+                return response.success
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func unfavoriteRecipeCombine(recipe_id: String) -> AnyPublisher<Bool, Error> {
+        return authorizedRequestCombine(path: RecipeBackend.path + recipe_id + "/unfavorite", method: "POST", modelType: SuccessResponse.self)
+            .tryMap { response in
+                return response.success
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func loadNextRecipesCombine(skip: Int, limit: Int) -> AnyPublisher<[RecipeMeta], Error> {
         let params = [
             URLQueryItem(name: "skip", value: String(skip)),
             URLQueryItem(name: "limit", value: String(limit))
         ]
         
-        backendController.authorizedRequest(path: RecipeBackend.path, method: "GET", modelType: [RecipeMetaBackendModel].self, params: params) { recipes in
-            if let recipes = recipes {
-                continuation(self.mapRecipeMetas(recipes: recipes))
-            } else {
-                continuation([])
+        return authorizedRequestCombine(path: RecipeBackend.path, method: "GET", modelType: [RecipeMetaBackendModel].self, params: params)
+            .tryMap { recipes in
+                return self.mapRecipeMetas(recipes: recipes)
             }
-        }
-        
+            .eraseToAnyPublisher()
     }
     
-    func loadAllRecipes(continuation: @escaping ([RecipeMeta]) -> Void) {
-        let backendController = BackendController()
-        
-        backendController.authorizedRequest(path: RecipeBackend.path, method: "GET", modelType: [RecipeMetaBackendModel].self) { recipes in
-            if let recipes = recipes {
-                continuation(self.mapRecipeMetas(recipes: recipes))
-            } else {
-                continuation([])
+    func loadAllRecipesCombine() -> AnyPublisher<[RecipeMeta], Error> {
+        return authorizedRequestCombine(path: RecipeBackend.path, method: "GET", modelType: [RecipeMetaBackendModel].self)
+            .tryMap { recipes in
+                return self.mapRecipeMetas(recipes: recipes)
             }
-        }
+            .eraseToAnyPublisher()
     }
     
-    func uploadRecipeToServer(recipe: Recipe, continuation: @escaping (Bool) -> Void) {
+    func uploadRecipeToServerCombine(recipe: Recipe) -> AnyPublisher<Bool, Error> {
         var lat = ""
         var long = ""
         if let coordinate = recipe.coordinate {
@@ -154,14 +125,14 @@ extension BackendController: RecipeBackendController {
         }
                 
         guard let jsonData = jsonData else {
-            continuation(false)
-            return
+            return Empty<Bool, Error>(completeImmediately: true).eraseToAnyPublisher()
         }
         
-        let backendController = BackendController()
-        backendController.authorizedRequest(path: "recipes/", method: "POST", modelType: SuccessResponse.self, body: jsonData, contentType: .json) { response in
-            continuation(response?.success ?? false)
-        }
+        return authorizedRequestCombine(path: RecipeBackend.path, method: "POST", modelType: SuccessResponse.self, body: jsonData, contentType: .json)
+            .tryMap { response in
+                response.success
+            }
+            .eraseToAnyPublisher()
     }
     
     private func mapRecipeMetas(recipes: [RecipeMetaBackendModel]) -> [RecipeMeta] {
