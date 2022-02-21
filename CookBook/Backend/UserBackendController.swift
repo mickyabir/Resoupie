@@ -16,22 +16,22 @@ struct UserBackendModel: Codable {
     var followers: Int
 }
 
-struct AccessTokenModel: Codable {
+struct SignInTokenModel: Codable {
     var access_token: String
+    var refresh_token: String
 }
 
 enum UserError: Error {
     case invalid
 }
 
-
 protocol UserBackendController {
     func verifyToken() -> AnyPublisher<Bool, Error>
     func getUser() -> AnyPublisher<User, Error>
-    func signIn(username: String, password: String) -> AnyPublisher<String, Error>
-    func signUp(name: String, username: String, password: String) -> AnyPublisher<String, Error>
+    func signIn(username: String, password: String) -> AnyPublisher<Bool, Error>
+    func signUp(name: String, username: String, password: String) -> AnyPublisher<Bool, Error>
+    func signOut() -> AnyPublisher<Bool, Error>
 }
-
 
 extension BackendController: UserBackendController {
     internal struct UserBackend {
@@ -54,7 +54,7 @@ extension BackendController: UserBackendController {
             .eraseToAnyPublisher()
     }
     
-    func signIn(username: String, password: String) -> AnyPublisher<String, Error> {
+    func signIn(username: String, password: String) -> AnyPublisher<Bool, Error> {
         let parameters: [String: String] = [
             "username": username,
             "password": password
@@ -68,19 +68,21 @@ extension BackendController: UserBackendController {
         }
         
         guard let jsonData = jsonData else {
-            return Empty<String, Error>(completeImmediately: true).eraseToAnyPublisher()
+            return Empty<Bool, Error>(completeImmediately: true).eraseToAnyPublisher()
         }
         
-        return authorizedRequest(path: UserBackend.path + "signin", method: "POST", modelType: AccessTokenModel.self, body: jsonData, contentType: .json)
+        return request(path: UserBackend.path + "signin/", method: "POST", modelType: SignInTokenModel.self, body: jsonData, contentType: .json)
             .receive(on: DispatchQueue.main)
-            .tryMap { token in
-                self.token = token.access_token
-                return token.access_token
+            .tryMap { response in
+                KeychainBackend.main.saveAccessToken(accessToken: response.access_token)
+                KeychainBackend.main.saveRefreshToken(refreshToken: response.refresh_token)
+                self.username = username
+                return true
             }
             .eraseToAnyPublisher()        
     }
     
-    func signUp(name: String, username: String, password: String) -> AnyPublisher<String, Error> {
+    func signUp(name: String, username: String, password: String) -> AnyPublisher<Bool, Error> {
         let parameters: [String: String] = [
             "name": name,
             "username": username,
@@ -95,14 +97,26 @@ extension BackendController: UserBackendController {
         }
         
         guard let jsonData = jsonData else {
-            return Empty<String, Error>(completeImmediately: true).eraseToAnyPublisher()
+            return Empty<Bool, Error>(completeImmediately: true).eraseToAnyPublisher()
         }
         
-        return authorizedRequest(path: UserBackend.path + "signup", method: "POST", modelType: AccessTokenModel.self, body: jsonData, contentType: .json)
+        return request(path: UserBackend.path + "signup/", method: "POST", modelType: SignInTokenModel.self, body: jsonData, contentType: .json)
             .receive(on: DispatchQueue.main)
-            .tryMap { token in
-                self.token = token.access_token
-                return token.access_token
+            .tryMap { response in
+                KeychainBackend.main.saveAccessToken(accessToken: response.access_token)
+                KeychainBackend.main.saveRefreshToken(refreshToken: response.refresh_token)
+                self.username = username
+                return true
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func signOut() -> AnyPublisher<Bool, Error> {
+        return authorizedRequest(path: UserBackend.path + "signout/", method: "POST", modelType: SuccessResponse.self)
+            .receive(on: DispatchQueue.main)
+            .tryMap { response in
+                KeychainBackend.main.deleteTokens()
+                return response.success
             }
             .eraseToAnyPublisher()
     }

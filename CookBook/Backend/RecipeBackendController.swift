@@ -93,7 +93,7 @@ extension BackendController: RecipeBackendController {
             URLQueryItem(name: "limit", value: String(limit))
         ]
         
-        return authorizedRequest(path: RecipeBackend.path, method: "GET", modelType: [RecipeMetaBackendModel].self, params: params)
+        return request(path: RecipeBackend.path, method: "GET", modelType: [RecipeMetaBackendModel].self, params: params)
             .tryMap { recipes in
                 return self.mapRecipeMetas(recipes: recipes)
             }
@@ -101,7 +101,7 @@ extension BackendController: RecipeBackendController {
     }
     
     func loadAllRecipes() -> AnyPublisher<[RecipeMeta], Error> {
-        return authorizedRequest(path: RecipeBackend.path, method: "GET", modelType: [RecipeMetaBackendModel].self)
+        return request(path: RecipeBackend.path, method: "GET", modelType: [RecipeMetaBackendModel].self)
             .tryMap { recipes in
                 return self.mapRecipeMetas(recipes: recipes)
             }

@@ -13,6 +13,10 @@ struct SuccessResponse: Codable {
     var success: Bool
 }
 
+struct AccessTokenModel: Codable {
+    var access_token: String
+}
+
 protocol BackendControllable {
     var path: String { get }
 }
@@ -31,8 +35,6 @@ enum ServerError: Error {
 class BackendController {
     public static let url = "http://44.201.79.172/"
     
-    @AppStorage("token") var token: String = ""
-    
     enum ContentType {
         case json
         case multipart(String)
@@ -47,63 +49,143 @@ class BackendController {
         }
     }
     
+    @AppStorage("username") var username: String = ""
+    
     static var cancellables: Set<AnyCancellable> = Set()
     
-    // Modify to use refresh token along with JWT
-    func verifyJWT() -> Bool {
-        if token == "" {
+    func verifyJWT(_ accessToken: String) -> Bool {
+        if accessToken == "" {
             return false
         }
         
-        let jwt = token
+        let jwt = accessToken
 
-        // get the payload part of it
         var payload64 = jwt.components(separatedBy: ".")[1]
 
-        // need to pad the string with = to make it divisible by 4,
-        // otherwise Data won't be able to decode it
         while payload64.count % 4 != 0 {
             payload64 += "="
         }
 
-        print("base64 encoded payload: \(payload64)")
         let payloadData = Data(base64Encoded: payload64,
                                options:.ignoreUnknownCharacters)!
-        let payload = String(data: payloadData, encoding: .utf8)!
-        print(payload)
         
         let json = try! JSONSerialization.jsonObject(with: payloadData, options: []) as! [String:Any]
-        let exp = json["expires"] as! Double
+        let exp = json["exp"] as! Double
         let expDate = Date(timeIntervalSince1970: TimeInterval(exp))
         let valid = expDate.compare(Date()) == .orderedDescending
         
         return valid
     }
     
-    func authorizedRequest<T: Codable>(path: String, method: String, modelType: T.Type, params: [URLQueryItem]? = nil, body: Data? = nil, contentType: ContentType? = nil) -> AnyPublisher<T, ServerError> {
-        if !verifyJWT() {
-            print("Refresh")
-        } else {
-            print("Still good")
-        }
-        var url = URLComponents(string: BackendController.url + path)!
+    func refreshToken() -> AnyPublisher<String, Error> {
+        let refreshToken = KeychainBackend.main.getRefreshToken()
+        let requestObject = AuthorizedRequestObject(accessToken: refreshToken, path: "auth/refresh", method: "POST")
+        return _authorizedRequest(requestObject: requestObject)
+            .decode(type: AccessTokenModel.self, decoder: JSONDecoder())
+            .tryMap { response in
+                return response.access_token
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    struct RequestObject {
+        var path: String
+        var method: String
+        var params: [URLQueryItem]? = nil
+        var body: Data? = nil
+        var contentType: ContentType? = nil
+    }
+    
+    struct AuthorizedRequestObject {
+        var accessToken: String
+        var path: String
+        var method: String
+        var params: [URLQueryItem]? = nil
+        var body: Data? = nil
+        var contentType: ContentType? = nil
+    }
+    
+    func request<T: Codable>(path: String, method: String, modelType: T.Type, params: [URLQueryItem]? = nil, body: Data? = nil, contentType: ContentType? = nil) -> AnyPublisher<T, Error> {
         
-        if let params = params {
+        let requestObject = RequestObject(path: path, method: method, params: params, body: body, contentType: contentType)
+        
+        return _request(requestObject: requestObject)
+            .decode(type: modelType, decoder: JSONDecoder())
+            .eraseToAnyPublisher()
+    }
+    
+        
+    func _request(requestObject: RequestObject) -> AnyPublisher<Data, Error> {
+        var url = URLComponents(string: BackendController.url + requestObject.path)!
+        
+        if let params = requestObject.params {
+            url.queryItems = params
+        }
+        
+        var request = URLRequest(url: url.url!)
+        request.httpMethod = requestObject.method
+        
+        if let body = requestObject.body {
+            request.httpBody = body
+        }
+        
+        if let contentType = requestObject.contentType {
+            request.setValue(contentType.rawValue, forHTTPHeaderField: "Content-Type")
+        }
+        
+        return URLSession.shared.dataTaskPublisher(for: request)
+            .tryMap { response -> Data in
+                guard let httpURLResponse = response.response as? HTTPURLResponse, httpURLResponse.statusCode == 200
+                else {
+                    throw ServerError.statusCode
+                }
+                return response.data
+            }
+            .mapError { ServerError.map($0) }
+            .eraseToAnyPublisher()
+    }
+
+    
+    func authorizedRequest<T: Codable>(path: String, method: String, modelType: T.Type, params: [URLQueryItem]? = nil, body: Data? = nil, contentType: ContentType? = nil) -> AnyPublisher<T, Error> {
+        let accessToken = KeychainBackend.main.getAccessToken()
+        var requestObject = AuthorizedRequestObject(accessToken: accessToken, path: path, method: method, params: params, body: body, contentType: contentType)
+
+        
+        if !verifyJWT(accessToken) {
+            return refreshToken()
+                .map { newToken in
+                    requestObject.accessToken = newToken
+                    return requestObject
+                }
+                .flatMap(self._authorizedRequest)
+                .decode(type: modelType, decoder: JSONDecoder())
+                .eraseToAnyPublisher()
+        }
+        
+        return _authorizedRequest(requestObject: requestObject)
+            .decode(type: modelType, decoder: JSONDecoder())
+            .eraseToAnyPublisher()
+    }
+
+    func _authorizedRequest(requestObject: AuthorizedRequestObject) -> AnyPublisher<Data, Error> {
+        var url = URLComponents(string: BackendController.url + requestObject.path)!
+        
+        if let params = requestObject.params {
             url.queryItems = params
         }
 
         var request = URLRequest(url: url.url!)
-        request.httpMethod = method
+        request.httpMethod = requestObject.method
         
-        if let body = body {
+        if let body = requestObject.body {
             request.httpBody = body
         }
                 
-        if let contentType = contentType {
+        if let contentType = requestObject.contentType {
             request.setValue(contentType.rawValue, forHTTPHeaderField: "Content-Type")
         }
         
-        let bearer = "Bearer " + token
+        let bearer = "Bearer " + requestObject.accessToken
         request.setValue(bearer, forHTTPHeaderField: "Authorization")
         
         return URLSession.shared.dataTaskPublisher(for: request)
@@ -114,7 +196,6 @@ class BackendController {
                 }
                 return response.data
             }
-            .decode(type: T.self, decoder: JSONDecoder())
             .mapError { ServerError.map($0) }
             .eraseToAnyPublisher()
     }

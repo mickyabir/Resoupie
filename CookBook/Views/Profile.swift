@@ -17,7 +17,6 @@ struct User {
 class ProfileViewController: UserSignInViewController {
     typealias ProfileBackendController = RecipeBackendController & UserBackendController & ImageBackendController
 
-    @AppStorage("token") var token: String = ""
     @AppStorage("username") var stored_username: String = ""
     @AppStorage("name") var stored_name: String = ""
 
@@ -76,8 +75,7 @@ class ProfileViewController: UserSignInViewController {
         backendController.signIn(username: self.username, password: self.password)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
-            }, receiveValue: { token in
-                self.token = token
+            }, receiveValue: { success in
                 self.reset()
                 self.userAccess = false
                 self.reloadProfile()
@@ -89,8 +87,7 @@ class ProfileViewController: UserSignInViewController {
         backendController.signUp(name: self.name, username: self.username, password: self.password)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
-            }, receiveValue: { token in
-                self.token = token
+            }, receiveValue: { success in
                 self.reset()
                 self.userAccess = false
                 self.reloadProfile()
@@ -110,7 +107,6 @@ class ProfileViewController: UserSignInViewController {
             .receive(on: DispatchQueue.main)
             .filter { $0 == true }
             .tryMap { success in
-                self.token = ""
                 self.stored_name = ""
                 self.stored_username = ""
                 self.recipes = []
@@ -144,11 +140,18 @@ class ProfileViewController: UserSignInViewController {
     }
     
     func signOut() {
-        token = ""
         stored_name = ""
         stored_username = ""
         recipes = []
         signedIn = false
+        
+        backendController.signOut()
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { success in
+                print(success)
+            })
+            .store(in: &cancellables)
     }
 }
 
