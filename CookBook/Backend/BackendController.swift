@@ -80,7 +80,7 @@ class BackendController {
         return valid
     }
     
-    func authorizedRequestCombine<T: Codable>(path: String, method: String, modelType: T.Type, params: [URLQueryItem]? = nil, body: Data? = nil, contentType: ContentType? = nil) -> AnyPublisher<T, ServerError> {
+    func authorizedRequest<T: Codable>(path: String, method: String, modelType: T.Type, params: [URLQueryItem]? = nil, body: Data? = nil, contentType: ContentType? = nil) -> AnyPublisher<T, ServerError> {
         if !verifyJWT() {
             print("Refresh")
         } else {

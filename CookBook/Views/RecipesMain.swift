@@ -65,7 +65,7 @@ class RecipeMainViewController: ObservableObject {
     }
     
     func loadAllRecipes() {
-        backendController.loadAllRecipesCombine()
+        backendController.loadAllRecipes()
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { recipes in
@@ -75,7 +75,7 @@ class RecipeMainViewController: ObservableObject {
     }
     
     func loadRecipes() {
-        backendController.loadNextRecipesCombine(skip: 0, limit: 10)
+        backendController.loadNextRecipes(skip: 0, limit: 10)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { recipes in
@@ -85,7 +85,7 @@ class RecipeMainViewController: ObservableObject {
     }
     
     func loadMoreRecipes() {
-        backendController.loadNextRecipesCombine(skip: recipes.count, limit: 10)
+        backendController.loadNextRecipes(skip: recipes.count, limit: 10)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { recipes in

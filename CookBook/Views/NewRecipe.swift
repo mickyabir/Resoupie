@@ -69,11 +69,11 @@ class NewRecipeViewController: ObservableObject {
         }
         
         if let image = image {
-            backendController.uploadImageToServerCombine(image: image)
+            backendController.uploadImageToServer(image: image)
                 .tryMap { image_id -> Recipe in
                     return Recipe(image: image_id, name: self.name, author: "author", ingredients: self.ingredients, steps: self.steps, coordinate: self.coordinate, emoji: self.emoji, servings: Int(self.servings) ?? 0, tags: self.tags, time: self.time, specialTools: self.specialTools)
                 }
-                .flatMap(backendController.uploadRecipeToServerCombine)
+                .flatMap(backendController.uploadRecipeToServer)
                 .eraseToAnyPublisher()
                 .receive(on: DispatchQueue.main)
                 .sink(receiveCompletion: { _ in

@@ -15,7 +15,7 @@ struct ImageUploadResponse: Codable {
 }
 
 protocol ImageBackendController {
-    func uploadImageToServerCombine(image: UIImage) -> AnyPublisher<String, Error>
+    func uploadImageToServer(image: UIImage) -> AnyPublisher<String, Error>
 
 }
 
@@ -24,11 +24,11 @@ extension BackendController: ImageBackendController {
         static let path = "images/"
     }
 
-    func uploadImageToServerCombine(image: UIImage) -> AnyPublisher<String, Error> {
+    func uploadImageToServer(image: UIImage) -> AnyPublisher<String, Error> {
         let boundary = generateBoundary()
         let dataBody = createDataBody(media: image, boundary: boundary)
         
-        return authorizedRequestCombine(path: ImageBackend.path, method: "POST", modelType: ImageUploadResponse.self, body: dataBody, contentType: .multipart(boundary))
+        return authorizedRequest(path: ImageBackend.path, method: "POST", modelType: ImageUploadResponse.self, body: dataBody, contentType: .multipart(boundary))
             .tryMap { response in
                 return response.image_id
             }

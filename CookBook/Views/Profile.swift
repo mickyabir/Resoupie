@@ -73,7 +73,7 @@ class ProfileViewController: UserSignInViewController {
     }
     
     func signIn() {
-        backendController.signInCombine(username: self.username, password: self.password)
+        backendController.signIn(username: self.username, password: self.password)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { token in
@@ -86,7 +86,7 @@ class ProfileViewController: UserSignInViewController {
     }
     
     func signUp() {
-        backendController.signUpCombine(name: self.name, username: self.username, password: self.password)
+        backendController.signUp(name: self.name, username: self.username, password: self.password)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { token in
@@ -106,7 +106,7 @@ class ProfileViewController: UserSignInViewController {
     }
     
     func reloadProfile() {
-        backendController.verifyTokenCombine()
+        backendController.verifyToken()
             .receive(on: DispatchQueue.main)
             .filter { $0 == true }
             .tryMap { success in
@@ -118,7 +118,7 @@ class ProfileViewController: UserSignInViewController {
 
                 return ()
             }
-            .flatMap(backendController.getUserCombine)
+            .flatMap(backendController.getUser)
             .receive(on: DispatchQueue.main)
             .map { user in
                 self.stored_name = user.name
@@ -127,7 +127,7 @@ class ProfileViewController: UserSignInViewController {
                 
                 return user.username
             }
-            .flatMap(backendController.getUserRecipesCombine)
+            .flatMap(backendController.getUserRecipes)
             .eraseToAnyPublisher()
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in

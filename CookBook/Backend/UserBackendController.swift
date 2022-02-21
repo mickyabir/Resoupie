@@ -26,10 +26,10 @@ enum UserError: Error {
 
 
 protocol UserBackendController {
-    func verifyTokenCombine() -> AnyPublisher<Bool, Error>
-    func getUserCombine() -> AnyPublisher<User, Error>
-    func signInCombine(username: String, password: String) -> AnyPublisher<String, Error>
-    func signUpCombine(name: String, username: String, password: String) -> AnyPublisher<String, Error>
+    func verifyToken() -> AnyPublisher<Bool, Error>
+    func getUser() -> AnyPublisher<User, Error>
+    func signIn(username: String, password: String) -> AnyPublisher<String, Error>
+    func signUp(name: String, username: String, password: String) -> AnyPublisher<String, Error>
 }
 
 
@@ -38,23 +38,23 @@ extension BackendController: UserBackendController {
         static let path = "users/"
     }
     
-    func verifyTokenCombine() -> AnyPublisher<Bool, Error> {
-        authorizedRequestCombine(path: "auth/verify", method: "GET", modelType: SuccessResponse.self)
+    func verifyToken() -> AnyPublisher<Bool, Error> {
+        authorizedRequest(path: "auth/verify", method: "GET", modelType: SuccessResponse.self)
             .tryMap { response in
                 return response.success
             }
             .eraseToAnyPublisher()
     }
     
-    func getUserCombine() -> AnyPublisher<User, Error> {
-        return authorizedRequestCombine(path: UserBackend.path + "me/", method: "GET", modelType: UserBackendModel.self)
+    func getUser() -> AnyPublisher<User, Error> {
+        return authorizedRequest(path: UserBackend.path + "me/", method: "GET", modelType: UserBackendModel.self)
             .tryMap { user in
                 return User(name: user.name, username: user.username, followers: user.followers)
             }
             .eraseToAnyPublisher()
     }
     
-    func signInCombine(username: String, password: String) -> AnyPublisher<String, Error> {
+    func signIn(username: String, password: String) -> AnyPublisher<String, Error> {
         let parameters: [String: String] = [
             "username": username,
             "password": password
@@ -71,7 +71,7 @@ extension BackendController: UserBackendController {
             return Empty<String, Error>(completeImmediately: true).eraseToAnyPublisher()
         }
         
-        return authorizedRequestCombine(path: UserBackend.path + "signin", method: "POST", modelType: AccessTokenModel.self, body: jsonData, contentType: .json)
+        return authorizedRequest(path: UserBackend.path + "signin", method: "POST", modelType: AccessTokenModel.self, body: jsonData, contentType: .json)
             .receive(on: DispatchQueue.main)
             .tryMap { token in
                 self.token = token.access_token
@@ -80,7 +80,7 @@ extension BackendController: UserBackendController {
             .eraseToAnyPublisher()        
     }
     
-    func signUpCombine(name: String, username: String, password: String) -> AnyPublisher<String, Error> {
+    func signUp(name: String, username: String, password: String) -> AnyPublisher<String, Error> {
         let parameters: [String: String] = [
             "name": name,
             "username": username,
@@ -98,7 +98,7 @@ extension BackendController: UserBackendController {
             return Empty<String, Error>(completeImmediately: true).eraseToAnyPublisher()
         }
         
-        return authorizedRequestCombine(path: UserBackend.path + "signup", method: "POST", modelType: AccessTokenModel.self, body: jsonData, contentType: .json)
+        return authorizedRequest(path: UserBackend.path + "signup", method: "POST", modelType: AccessTokenModel.self, body: jsonData, contentType: .json)
             .receive(on: DispatchQueue.main)
             .tryMap { token in
                 self.token = token.access_token

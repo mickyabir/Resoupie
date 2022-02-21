@@ -19,7 +19,7 @@ class RecipeDetailViewController: ObservableObject {
     }
     
     func rateRecipe(_ rating: Int) {
-        backendController.rateRecipeCombine(recipe_id: recipeMeta.id, rating: rating)
+        backendController.rateRecipe(recipe_id: recipeMeta.id, rating: rating)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { success in
                 
@@ -28,7 +28,7 @@ class RecipeDetailViewController: ObservableObject {
     }
 
     func favoriteRecipe() {
-        backendController.favoriteRecipeCombine(recipe_id: recipeMeta.id)
+        backendController.favoriteRecipe(recipe_id: recipeMeta.id)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { success in
                 
@@ -37,7 +37,7 @@ class RecipeDetailViewController: ObservableObject {
     }
     
     func unfavoriteRecipe() {
-        backendController.unfavoriteRecipeCombine(recipe_id: recipeMeta.id)
+        backendController.unfavoriteRecipe(recipe_id: recipeMeta.id)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { success in
                 
