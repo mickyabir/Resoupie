@@ -80,7 +80,6 @@ class NewRecipeViewController: ObservableObject {
                 }, receiveValue: { success in
                 })
                 .store(in: &cancellables)
-            
         }
     }
 }

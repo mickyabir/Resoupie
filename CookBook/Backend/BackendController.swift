@@ -49,8 +49,6 @@ class BackendController {
         }
     }
     
-    @AppStorage("username") var username: String = ""
-    
     static var cancellables: Set<AnyCancellable> = Set()
     
     func verifyJWT(_ accessToken: String) -> Bool {
@@ -83,6 +81,7 @@ class BackendController {
         return _authorizedRequest(requestObject: requestObject)
             .decode(type: AccessTokenModel.self, decoder: JSONDecoder())
             .tryMap { response in
+                KeychainBackend.main.saveAccessToken(accessToken: response.access_token)
                 return response.access_token
             }
             .eraseToAnyPublisher()

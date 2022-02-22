@@ -42,7 +42,7 @@ extension BackendController: ImageBackendController {
             body.append("--\(boundary + lineBreak)")
             body.append("Content-Disposition: form-data; name=\"file\"; filename=\"filename\"\(lineBreak)")
             body.append("Content-Type: image/jpeg\(lineBreak + lineBreak)")
-            body.append(media.jpegImageData(maxSize: 4000000, minSize: 0, times: 10)!)
+            body.append(media.jpegImageData(maxSize: 1000000, minSize: 0, times: 10)!)
             body.append(lineBreak)
         }
         

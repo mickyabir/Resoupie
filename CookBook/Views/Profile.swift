@@ -16,10 +16,7 @@ struct User {
 
 class ProfileViewController: UserSignInViewController {
     typealias ProfileBackendController = RecipeBackendController & UserBackendController & ImageBackendController
-
-    @AppStorage("username") var stored_username: String = ""
-    @AppStorage("name") var stored_name: String = ""
-
+    
     @Published var emptyWarning: Bool = false
     @Published var recipes: [RecipeMeta] = []
     @Published var signedIn: Bool = false
@@ -107,8 +104,8 @@ class ProfileViewController: UserSignInViewController {
             .receive(on: DispatchQueue.main)
             .filter { $0 == true }
             .tryMap { success in
-                self.stored_name = ""
-                self.stored_username = ""
+                self.name = ""
+                self.username = ""
                 self.recipes = []
                 self.signedIn = false
 
@@ -117,8 +114,8 @@ class ProfileViewController: UserSignInViewController {
             .flatMap(backendController.getUser)
             .receive(on: DispatchQueue.main)
             .map { user in
-                self.stored_name = user.name
-                self.stored_username = user.username
+                self.name = user.name
+                self.username = user.username
                 self.signedIn = true
                 
                 return user.username
@@ -140,8 +137,8 @@ class ProfileViewController: UserSignInViewController {
     }
     
     func signOut() {
-        stored_name = ""
-        stored_username = ""
+        name = ""
+        username = ""
         recipes = []
         signedIn = false
         
@@ -157,6 +154,7 @@ class ProfileViewController: UserSignInViewController {
 
 struct ProfileView: View {
     @ObservedObject var viewController: ProfileViewController
+    @ObservedObject var newRecipeViewController: NewRecipeViewController
     @State var isPresenting = false
 
     var body: some View {
@@ -179,10 +177,10 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $viewController.presentNewRecipe) {
                 NavigationView {
-                    NewRecipeView(viewController: NewRecipeViewController(viewController.backendController))
+                    NewRecipeView(viewController: newRecipeViewController)
                 }
             }
-            .navigationTitle(viewController.stored_name == "" ? "Profile" : viewController.stored_name)
+            .navigationTitle(viewController.name == "" ? "Profile" : viewController.name)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     ZStack {

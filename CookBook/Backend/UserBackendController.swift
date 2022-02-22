@@ -76,7 +76,6 @@ extension BackendController: UserBackendController {
             .tryMap { response in
                 KeychainBackend.main.saveAccessToken(accessToken: response.access_token)
                 KeychainBackend.main.saveRefreshToken(refreshToken: response.refresh_token)
-                self.username = username
                 return true
             }
             .eraseToAnyPublisher()        
@@ -105,7 +104,6 @@ extension BackendController: UserBackendController {
             .tryMap { response in
                 KeychainBackend.main.saveAccessToken(accessToken: response.access_token)
                 KeychainBackend.main.saveRefreshToken(refreshToken: response.refresh_token)
-                self.username = username
                 return true
             }
             .eraseToAnyPublisher()

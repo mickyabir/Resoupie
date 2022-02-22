@@ -59,37 +59,48 @@ class RecipeMainViewController: ObservableObject {
 
     let backendController: RecipeBackendController
     var cancellables: Set<AnyCancellable> = Set<AnyCancellable>()
+    
+    @Published var isLoading: Bool = false
 
     init(backendController: RecipeBackendController) {
         self.backendController = backendController
     }
     
     func loadAllRecipes() {
+        isLoading = true
+        
         backendController.loadAllRecipes()
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { recipes in
                 self.recipes = recipes
+                self.isLoading = false
             })
             .store(in: &cancellables)
     }
     
     func loadRecipes() {
+        isLoading = true
+
         backendController.loadNextRecipes(skip: 0, limit: 10)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { recipes in
                 self.recipes = recipes
+                self.isLoading = false
             })
             .store(in: &cancellables)
     }
     
     func loadMoreRecipes() {
+        isLoading = true
+
         backendController.loadNextRecipes(skip: recipes.count, limit: 10)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { recipes in
                 self.recipes.append(contentsOf: recipes)
+                self.isLoading = false
             })
             .store(in: &cancellables)
     }
@@ -143,6 +154,18 @@ struct RecipesMainView: View {
             ZStack(alignment: .topTrailing) {
                 Color.white
                 
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                            .scaleEffect(1.5)
+                        Spacer()
+                    }
+                    Spacer()
+                }
+                .opacity(viewController.isLoading ? 1.0 : 0.0)
+                
                 ScrollView(showsIndicators: false) {
                     VStack {
                         Group {
@@ -159,6 +182,7 @@ struct RecipesMainView: View {
 
                     }
                 }
+                .opacity(viewController.isLoading ? 0.0 : 1.0)
                 .simultaneousGesture(
                     DragGesture().onChanged { value in
                         let resign = #selector(UIResponder.resignFirstResponder)

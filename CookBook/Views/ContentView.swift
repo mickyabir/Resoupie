@@ -18,11 +18,13 @@ struct ContentView: View {
     let backendController: BackendController
     let profileViewController: ProfileViewController
     let recipeMainViewController: RecipeMainViewController
+    let newRecipeViewController: NewRecipeViewController
 
     init() {
         backendController = BackendController()
         profileViewController = ProfileViewController(backendController: backendController)
         recipeMainViewController = RecipeMainViewController(backendController: backendController)
+        newRecipeViewController = NewRecipeViewController(backendController)
     }
     
     var body: some View {
@@ -40,7 +42,7 @@ struct ContentView: View {
                     }
                     .tag(1)
                 
-                ProfileView(viewController: profileViewController)
+                ProfileView(viewController: profileViewController, newRecipeViewController: newRecipeViewController)
                     .tabItem {
                         Label("Profile", systemImage: "person.crop.circle")
                     }
