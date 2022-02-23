@@ -43,7 +43,7 @@ class NewRecipeViewController: ObservableObject {
     typealias NewRecipeBackendController = RecipeBackendController & ImageBackendController
 
     @Published var name: String = ""
-    @Published var emoji: String = ""
+    var emoji: String = ""
     @Published var ingredients: [Ingredient] = []
     @Published var steps: [String] = []
     @Published var coordinate: CLLocationCoordinate2D?
@@ -123,6 +123,9 @@ struct NewRecipeView: View {
     @State var tags: [String] = []
     @State var currentTag: String = ""
     
+    @State var emoji: String = ""
+    @State var displayEmojiWarning: Bool = false
+
     var body: some View {
         ZStack {
             Color.background
@@ -133,7 +136,6 @@ struct NewRecipeView: View {
                     TextField("Recipe name", text: $viewController.name)
                         .foregroundColor(Color.text)
                     
-                    //                    HStack {
                     TextField("Servings", text: $viewController.servings)
                         .keyboardType(.numberPad)
                         .foregroundColor(Color.text)
@@ -141,10 +143,25 @@ struct NewRecipeView: View {
                     TextField("Time", text: $viewController.time)
                         .foregroundColor(Color.text)
                     
-                    EmojiPickerView() { emoji in
-                        viewController.emoji = emoji
-                    }
-                    //                    }
+                    TextField("Emoji", text: $emoji)
+                        .alert("Emoji only!", isPresented: $displayEmojiWarning) {
+                            Button("OK", role: .cancel) {}
+                        }
+                        .onReceive(Just(emoji), perform: { _ in
+                            if self.emoji != self.emoji.onlyEmoji() {
+                                withAnimation {
+                                    displayEmojiWarning = true
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.25) {
+                                    withAnimation {
+                                        displayEmojiWarning.toggle()
+                                    }
+                                }
+                                
+                            }
+                            self.emoji = String(self.emoji.onlyEmoji().prefix(1))
+                            viewController.emoji = self.emoji
+                        })
                 }
                 .textCase(nil)
                 

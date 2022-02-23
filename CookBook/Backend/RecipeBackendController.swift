@@ -37,7 +37,9 @@ enum RecipeError: Error {
 }
 
 protocol RecipeBackendController {
+    func getUserFavorites() -> AnyPublisher<[RecipeMeta], Error>
     func getUserRecipes(username: String) -> AnyPublisher<[RecipeMeta], Error>
+    func getRecipeById(recipe_id: String) -> AnyPublisher<RecipeMeta, Error>
     func rateRecipe(recipe_id: String, rating: Int) -> AnyPublisher<Bool, Error>
     func favoriteRecipe(recipe_id: String) -> AnyPublisher<Bool, Error>
     func unfavoriteRecipe(recipe_id: String) -> AnyPublisher<Bool, Error>
@@ -52,9 +54,28 @@ extension BackendController: RecipeBackendController {
     }
     
     func getUserRecipes(username: String) -> AnyPublisher<[RecipeMeta], Error> {
-        return authorizedRequest(path: RecipeBackend.path + username, method: "GET", modelType: [RecipeMetaBackendModel].self)
+        let params = [
+            URLQueryItem(name: "username", value: String(username)),
+        ]
+        return authorizedRequest(path: RecipeBackend.path, method: "GET", modelType: [RecipeMetaBackendModel].self, params: params)
             .tryMap { recipeModels in
-                return self.mapRecipeMetas(recipes: recipeModels)
+                return self.mapRecipeMetas(recipeModels: recipeModels)
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func getRecipeById(recipe_id: String) -> AnyPublisher<RecipeMeta, Error> {
+        return authorizedRequest(path: RecipeBackend.path + recipe_id, method: "GET", modelType: RecipeMetaBackendModel.self)
+            .tryMap { recipeModel in
+                return self.mapRecipeMeta(recipeModel: recipeModel)
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func getUserFavorites() -> AnyPublisher<[RecipeMeta], Error> {
+        return authorizedRequest(path: RecipeBackend.path + "favorites", method: "GET", modelType: [RecipeMetaBackendModel].self)
+            .tryMap { recipeModels in
+                return self.mapRecipeMetas(recipeModels: recipeModels)
             }
             .eraseToAnyPublisher()
     }
@@ -95,7 +116,7 @@ extension BackendController: RecipeBackendController {
         
         return request(path: RecipeBackend.path, method: "GET", modelType: [RecipeMetaBackendModel].self, params: params)
             .tryMap { recipes in
-                return self.mapRecipeMetas(recipes: recipes)
+                return self.mapRecipeMetas(recipeModels: recipes)
             }
             .eraseToAnyPublisher()
     }
@@ -103,7 +124,7 @@ extension BackendController: RecipeBackendController {
     func loadAllRecipes() -> AnyPublisher<[RecipeMeta], Error> {
         return request(path: RecipeBackend.path, method: "GET", modelType: [RecipeMetaBackendModel].self)
             .tryMap { recipes in
-                return self.mapRecipeMetas(recipes: recipes)
+                return self.mapRecipeMetas(recipeModels: recipes)
             }
             .eraseToAnyPublisher()
     }
@@ -135,16 +156,19 @@ extension BackendController: RecipeBackendController {
             .eraseToAnyPublisher()
     }
     
-    private func mapRecipeMetas(recipes: [RecipeMetaBackendModel]) -> [RecipeMeta] {
+    private func mapRecipeMeta(recipeModel: RecipeMetaBackendModel) -> RecipeMeta {
         var coordinate: CLLocationCoordinate2D? = nil
-        let recipeModels = recipes.map { recipeMeta -> RecipeMeta in
-            if let lat = Double(recipeMeta.recipe.coordinate_lat), let long = Double(recipeMeta.recipe.coordinate_long) {
-                coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
-            }
-            
-            let recipeObject = Recipe(image: recipeMeta.recipe.image, name: recipeMeta.recipe.name, author: recipeMeta.recipe.author, ingredients: recipeMeta.recipe.ingredients, steps: recipeMeta.recipe.steps, coordinate: coordinate, emoji: recipeMeta.recipe.emoji, servings: recipeMeta.recipe.servings, tags: recipeMeta.recipe.tags, time: recipeMeta.recipe.time, specialTools: recipeMeta.recipe.specialTools)
-            return RecipeMeta(id: recipeMeta.id, recipe: recipeObject, rating: recipeMeta.rating, favorited: recipeMeta.favorited)
+                if let lat = Double(recipeModel.recipe.coordinate_lat), let long = Double(recipeModel.recipe.coordinate_long) {
+            coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
         }
+        
+        let recipeObject = Recipe(image: recipeModel.recipe.image, name: recipeModel.recipe.name, author: recipeModel.recipe.author, ingredients: recipeModel.recipe.ingredients, steps: recipeModel.recipe.steps, coordinate: coordinate, emoji: recipeModel.recipe.emoji, servings: recipeModel.recipe.servings, tags: recipeModel.recipe.tags, time: recipeModel.recipe.time, specialTools: recipeModel.recipe.specialTools)
+        return RecipeMeta(id: recipeModel.id, recipe: recipeObject, rating: recipeModel.rating, favorited: recipeModel.favorited)
+
+    }
+    
+    private func mapRecipeMetas(recipeModels: [RecipeMetaBackendModel]) -> [RecipeMeta] {
+        let recipeModels = recipeModels.map(mapRecipeMeta)
         return recipeModels
     }
 }

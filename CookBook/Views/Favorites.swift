@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct SortMethod {
     static func Alphabetical(lhs: RecipeMeta, rhs: RecipeMeta) -> Bool {
@@ -22,8 +23,45 @@ struct SortMethod {
 
 }
 
+class FavoritesViewController: ObservableObject {
+//    @AppStorage("favorites") var favorites: [RecipeMeta] = []
+    @Published var favorites: [RecipeMeta]
+
+    let backendController: RecipeBackendController
+    
+    private var cancellables = Set<AnyCancellable>()
+
+    init(_ backendController: RecipeBackendController) {
+        self.backendController = backendController
+        self.favorites = []
+    }
+    
+    func reloadRecipes() {
+        for recipe in favorites {
+            backendController.getRecipeById(recipe_id: recipe.id)
+                .receive(on: DispatchQueue.main)
+                .sink(receiveCompletion: { _ in
+                }, receiveValue: { recipe in
+                    self.favorites.removeAll(where: { $0.id == recipe.id })
+                    self.favorites.append(recipe)
+                })
+                .store(in: &cancellables)
+        }
+    }
+    
+    func loadRecipes() {
+        backendController.getUserFavorites()
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { recipes in
+                self.favorites = recipes
+            })
+            .store(in: &cancellables)
+    }
+}
+
 struct FavoritesView: View {
-    @AppStorage("favorites") var favorites: [RecipeMeta] = []
+    @ObservedObject var viewController: FavoritesViewController
     
     enum Sort {
         case alphabetical
@@ -39,9 +77,7 @@ struct FavoritesView: View {
     
     @State var sort: Sort = .popular
     @State var displaySortOptions = false
-    
-    let backendController: RecipeBackendController
-    
+        
     var body: some View {
         NavigationView {
             ZStack(alignment: .topTrailing) {
@@ -49,8 +85,8 @@ struct FavoritesView: View {
                 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 20) {
-                        ForEach(favorites.sorted(by: sortingMethod[sort]!)) { recipe in
-                            RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: UIScreen.main.bounds.width - 20, backendController: backendController))
+                        ForEach(viewController.favorites.sorted(by: sortingMethod[sort]!)) { recipe in
+                            RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: UIScreen.main.bounds.width - 20, backendController: viewController.backendController))
                         }
                     }
                     .padding(.horizontal)
@@ -68,6 +104,10 @@ struct FavoritesView: View {
             }) {
                 Text("Sort")
             })
+        }
+        .onAppear {
+            viewController.loadRecipes()
+//            viewController.reloadRecipes()
         }
         .actionSheet(isPresented: $displaySortOptions) {
             ActionSheet(title: Text("Sort by"), message: Text(""), buttons: [

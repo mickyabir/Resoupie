@@ -34,7 +34,7 @@ struct RecipeGroupRow: View {
                         ZStack(alignment: .topTrailing) {
                             RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: 250, backendController: backendController))
                             
-                            let favorited = (favorites.firstIndex(of: recipe) != nil)
+                            let favorited = (favorites.firstIndex(where: { $0.id == recipe.id }) != nil)
                             Image(systemName: favorited ? "heart.fill" : "heart")
                                 .foregroundColor(favorited ? Color.red : Color.white)
                                 .font(.system(size: 18))
@@ -59,7 +59,7 @@ class RecipeMainViewController: ObservableObject {
     
     @Published var isLoading: Bool = false
 
-    init(backendController: RecipeBackendController) {
+    init(_ backendController: RecipeBackendController) {
         self.backendController = backendController
     }
     

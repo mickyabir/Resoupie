@@ -12,19 +12,20 @@ class PresentNewRecipe: ObservableObject {
 }
 
 struct ContentView: View {
-    @AppStorage("favorites") var favorites: [RecipeMeta] = []
     @State private var selection = 1
     
     let backendController: BackendController
     let profileViewController: ProfileViewController
     let recipeMainViewController: RecipeMainViewController
     let newRecipeViewController: NewRecipeViewController
+    let favoritesViewController: FavoritesViewController
 
     init() {
         backendController = BackendController()
-        profileViewController = ProfileViewController(backendController: backendController)
-        recipeMainViewController = RecipeMainViewController(backendController: backendController)
+        profileViewController = ProfileViewController(backendController)
+        recipeMainViewController = RecipeMainViewController(backendController)
         newRecipeViewController = NewRecipeViewController(backendController)
+        favoritesViewController = FavoritesViewController(backendController)
     }
     
     var body: some View {
@@ -48,7 +49,7 @@ struct ContentView: View {
                     }
                     .tag(2)
                 
-                FavoritesView(favorites: favorites, backendController: backendController)
+                FavoritesView(viewController: favoritesViewController)
                     .tabItem {
                         Label("Favorites", systemImage: "heart")
                     }

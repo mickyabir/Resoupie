@@ -34,7 +34,7 @@ class ProfileViewController: UserSignInViewController {
     
     let backendController: ProfileBackendController
     
-    init(backendController: ProfileBackendController) {
+    init(_ backendController: ProfileBackendController) {
         self.backendController = backendController
         self.reloadProfile()
     }

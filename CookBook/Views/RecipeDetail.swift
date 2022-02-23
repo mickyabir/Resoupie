@@ -56,6 +56,11 @@ struct RecipeDetail: View {
     @State var showLargeImage = false
     
     @State var currentServings: Int?
+    @State var xOff: CGFloat = 0.0
+    @State var yOff: CGFloat = 0.0
+    @State var scale: CGFloat = 1.0
+    @State var lastScaleValue: CGFloat = 1.0
+
     
     var viewController: RecipeDetailViewController
     
@@ -65,7 +70,7 @@ struct RecipeDetail: View {
             
             List {
                 Group {
-                    CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 20, height: UIScreen.main.bounds.size.width - 20)
+                    CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 40, height: UIScreen.main.bounds.size.width - 40)
                         .cornerRadius(10)
                         .onTapGesture {
                             withAnimation {
@@ -117,7 +122,6 @@ struct RecipeDetail: View {
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-//                .listRowInsets(EdgeInsets())
 
                 if !viewController.recipeMeta.recipe.specialTools.isEmpty {
                     Section(header: HStack {
@@ -284,7 +288,9 @@ struct RecipeDetail: View {
                 favorited.toggle()
                 
                 if favorited {
-                    favorites.append(viewController.recipeMeta)
+                    if favorites.firstIndex(where: {$0.id == viewController.recipeMeta.id }) == nil {
+                        favorites.append(viewController.recipeMeta)
+                    }
                     viewController.favoriteRecipe()
                 } else {
                     if let offset = favorites.firstIndex(where: {$0.id == viewController.recipeMeta.id}) {
@@ -306,8 +312,22 @@ struct RecipeDetail: View {
                     }
                 }
                 .opacity(showLargeImage ? 1.0 : 0.0)
-                .offset(y: 60)
-            
+                .offset(x: xOff, y: 60 + yOff)
+                .scaleEffect(self.scale)
+                .gesture(MagnificationGesture().onChanged { val in
+                    let delta = val / self.lastScaleValue
+                    self.lastScaleValue = val
+                    let newScale = max(1, self.scale * delta)
+                    self.scale = newScale
+                }.onEnded { val in
+                    // without this the next gesture will be broken
+                    self.lastScaleValue = 1.0
+                })
+                .simultaneousGesture(DragGesture().onChanged { val in
+                    self.xOff = val.translation.width
+                    self.yOff = val.translation.height
+                }.onEnded { _ in
+                })
         }
         .accentColor(Color.orange)
     }
