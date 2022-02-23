@@ -1,91 +1,68 @@
 //
-//  NewRecipe.swift
+//  EditRecipe.swift
 //  CookBook
 //
-//  Created by Michael Abir on 1/24/22.
+//  Created by Michael Abir on 2/23/22.
 //
 
 import SwiftUI
 import PhotosUI
 import Combine
 
-struct NewRecipeRow<Content: View>: View {
-    let content: Content
-    let heading: String?
-    
-    init(_ heading: String? = nil, @ViewBuilder content: () -> Content) {
-        self.content = content()
-        self.heading = heading
-    }
-    var body: some View {
-        VStack(spacing: 20) {
-            if heading != nil {
-                Text(heading!)
-                    .font(.title2)
-            }
-            content
-        }
-        .frame(minHeight: 100)
-    }
-}
+class EditRecipeViewController: ObservableObject {
+    typealias EditRecipeBackendController = RecipeBackendController & ImageBackendController
 
-struct NewRecipeRowDivider: View {
-    var body: some View {
-        Rectangle()
-            .fill(Color.orange)
-            .frame(height: 1)
-            .edgesIgnoringSafeArea(.horizontal)
-        
-    }
-}
-
-class NewRecipeViewController: ObservableObject {
-    typealias NewRecipeBackendController = RecipeBackendController & ImageBackendController
-
-    @Published var name: String = ""
     var emoji: String = ""
-    @Published var ingredients: [Ingredient] = []
-    @Published var steps: [String] = []
-    @Published var coordinate: CLLocationCoordinate2D?
+    var servings: String = ""
+
     @Published var image: UIImage?
-    @Published var servings: String = ""
-    @Published var tags: [String] = []
-    @Published var time: String = ""
-    @Published var specialTools: [String] = []
     @Published var showEmptyRecipeWarning = false
+    @Published var coordinatePickerActive = false
+    
+    @Published var coordinatePickerViewModel = CoordinatePickerViewModel()
     
     var cancellables: Set<AnyCancellable> = Set<AnyCancellable>()
     
-    let backendController: NewRecipeBackendController
+    @Published var recipe: Recipe
     
-    init(_ backendController: NewRecipeBackendController) {
+    let backendController: EditRecipeBackendController
+    
+    init(_ backendController: EditRecipeBackendController, recipe: Recipe? = nil, image: UIImage? = nil) {
         self.backendController = backendController
+        
+        if let recipe = recipe {
+            self.recipe = recipe
+            self.recipe.author = ""
+            self.emoji = recipe.emoji
+            self.servings = String(recipe.servings)
+        } else {
+            self.recipe = Recipe(image: "", name: "", author: "", ingredients: [Ingredient(id: "0", name: "", quantity: "", unit: "")], steps: [""], coordinate: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [])
+        }
     }
     
     func reset() {
-        name = ""
+        self.recipe = Recipe(image: "", name: "", author: "", ingredients: [], steps: [], coordinate: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [])
+
         emoji = ""
-        ingredients = []
-        steps = []
-        coordinate = nil
-        image = nil
         servings = ""
-        tags = []
-        time = ""
-        specialTools = []
         showEmptyRecipeWarning = false
     }
     
     func publishRecipe() {
-        if name == "" || ingredients.isEmpty || steps.isEmpty {
+        if recipe.name == "" || recipe.ingredients.isEmpty || recipe.steps.isEmpty {
             showEmptyRecipeWarning = true
             return
         }
         
+        recipe.specialTools = recipe.specialTools.filter({ !$0.isEmpty })
+        recipe.servings = Int(servings) ?? 0
+        
         if let image = image {
             backendController.uploadImageToServer(image: image)
+                .receive(on: DispatchQueue.main)
                 .tryMap { image_id -> Recipe in
-                    return Recipe(image: image_id, name: self.name, author: "author", ingredients: self.ingredients, steps: self.steps, coordinate: self.coordinate, emoji: self.emoji, servings: Int(self.servings) ?? 0, tags: self.tags, time: self.time, specialTools: self.specialTools)
+                    self.recipe.image = image_id
+                    return self.recipe
                 }
                 .flatMap(backendController.uploadRecipeToServer)
                 .eraseToAnyPublisher()
@@ -99,31 +76,23 @@ class NewRecipeViewController: ObservableObject {
     }
 }
 
-struct NewRecipeView: View {
+struct EditRecipeView: View {
     @State private var inputImage: UIImage?
     @State private var recipeImage: UIImage?
     @State private var showImageLibrary = false
-    
-    private let coordinatePickerViewModel = CoordinatePickerViewModel()
-    
-    @ObservedObject var viewController: NewRecipeViewController
+        
+    @ObservedObject var viewController: EditRecipeViewController
     
     @State private var editMode = EditMode.inactive
     
-    @State var specialTools: [String] = [""]
-    @State var steps: [String] = [""]
-    @State var ingredients: [Ingredient] = [Ingredient(id: "0", name: "", quantity: "", unit: "")]
     @Environment(\.presentationMode) var presentationMode
     
-    @State var coordinatePickerActive = false
     @State var locationEnabled = false
     
     @State var country: String?
     @State var locality: String?
-    @State var tags: [String] = []
     @State var currentTag: String = ""
     
-    @State var emoji: String = ""
     @State var displayEmojiWarning: Bool = false
 
     var body: some View {
@@ -133,22 +102,22 @@ struct NewRecipeView: View {
             
             Form {
                 Section(header: Text("About").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
-                    TextField("Recipe name", text: $viewController.name)
+                    TextField("Recipe name", text: $viewController.recipe.name)
                         .foregroundColor(Color.text)
                     
                     TextField("Servings", text: $viewController.servings)
                         .keyboardType(.numberPad)
                         .foregroundColor(Color.text)
                     
-                    TextField("Time", text: $viewController.time)
+                    TextField("Time", text: $viewController.recipe.time)
                         .foregroundColor(Color.text)
                     
-                    TextField("Emoji", text: $emoji)
+                    TextField("Emoji", text: $viewController.emoji)
                         .alert("Emoji only!", isPresented: $displayEmojiWarning) {
                             Button("OK", role: .cancel) {}
                         }
-                        .onReceive(Just(emoji), perform: { _ in
-                            if self.emoji != self.emoji.onlyEmoji() {
+                        .onReceive(Just(viewController.emoji), perform: { _ in
+                            if self.viewController.emoji != self.viewController.emoji.onlyEmoji() {
                                 withAnimation {
                                     displayEmojiWarning = true
                                 }
@@ -159,8 +128,7 @@ struct NewRecipeView: View {
                                 }
                                 
                             }
-                            self.emoji = String(self.emoji.onlyEmoji().prefix(1))
-                            viewController.emoji = self.emoji
+                            self.viewController.emoji = String(self.viewController.emoji.onlyEmoji().prefix(1))
                         })
                 }
                 .textCase(nil)
@@ -170,12 +138,12 @@ struct NewRecipeView: View {
                     Toggle("", isOn: $locationEnabled.animation())
                 }) {
                     if locationEnabled {
-                        NavigationLink(destination: CoordinatePicker(viewModel: coordinatePickerViewModel), isActive: $coordinatePickerActive) {
+                        NavigationLink(destination: CoordinatePicker(viewModel: viewController.coordinatePickerViewModel), isActive: $viewController.coordinatePickerActive) {
                             HStack {
                                 Spacer()
                                 
-                                if let country = coordinatePickerViewModel.country {
-                                    if let locality = coordinatePickerViewModel.locality {
+                                if let country = viewController.coordinatePickerViewModel.country {
+                                    if let locality = viewController.coordinatePickerViewModel.locality {
                                         Text(locality + ", " + country)
                                             .foregroundColor(Color.orange)
                                     } else {
@@ -191,7 +159,7 @@ struct NewRecipeView: View {
                                 
                             }
                             .onTapGesture {
-                                coordinatePickerActive = true
+                                viewController.coordinatePickerActive = true
                             }
                         }
                     }
@@ -223,7 +191,7 @@ struct NewRecipeView: View {
                 
                 Section(header: Text("Tags").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
                     FlexibleView(
-                        data: tags,
+                        data: viewController.recipe.tags,
                         spacing: 15,
                         alignment: .leading
                     ) { item in
@@ -233,7 +201,7 @@ struct NewRecipeView: View {
                             Image(systemName: "x.circle.fill")
                                 .foregroundColor(Color.lightText)
                                 .onTapGesture {
-                                    tags.removeAll(where: { $0 == item })
+                                    viewController.recipe.tags.removeAll(where: { $0 == item })
                                 }
                         }
                         .padding(8)
@@ -250,9 +218,9 @@ struct NewRecipeView: View {
                             let componentTags = currentTag
                                 .lowercased()
                                 .components(separatedBy: " ")
-                                .filter({ tags.firstIndex(of: $0) == nil })
+                                .filter({ viewController.recipe.tags.firstIndex(of: $0) == nil })
                                 .filter({ !$0.isEmpty })
-                            tags += componentTags
+                            viewController.recipe.tags += componentTags
                             currentTag = ""
                         }
                 }
@@ -274,17 +242,17 @@ struct NewRecipeView: View {
                             .font(.system(size: 16))
                     }
                 }) {
-                    ForEach(specialTools.indices, id: \.self) { index in
+                    ForEach(viewController.recipe.specialTools.indices, id: \.self) { index in
                         HStack {
-                            TextField("Tool " + String(index + 1), text: $specialTools[index])
+                            TextField("Tool " + String(index + 1), text: $viewController.recipe.specialTools[index])
                                 .foregroundColor(Color.text)
                         }
                     }
                     .onMove { sourceSet, destination in
-                        specialTools.move(fromOffsets: sourceSet, toOffset: destination)
+                        viewController.recipe.specialTools.move(fromOffsets: sourceSet, toOffset: destination)
                     }
                     .onDelete { index in
-                        specialTools.remove(atOffsets: index)
+                        viewController.recipe.specialTools.remove(atOffsets: index)
                     }
                     
                     
@@ -295,7 +263,7 @@ struct NewRecipeView: View {
                             .foregroundColor(Color.orange)
                             .onTapGesture {
                                 withAnimation {
-                                    specialTools.append("")
+                                    viewController.recipe.specialTools.append("")
                                 }
                             }
                         
@@ -319,26 +287,26 @@ struct NewRecipeView: View {
                             .font(.system(size: 16))
                     }
                 }) {
-                    ForEach(ingredients.indices, id: \.self) { index in
+                    ForEach(viewController.recipe.ingredients.indices, id: \.self) { index in
                         VStack {
-                            TextField("Ingredient " + String(index + 1), text: $ingredients[index].name)
+                            TextField("Ingredient " + String(index + 1), text: $viewController.recipe.ingredients[index].name)
                                 .foregroundColor(Color.text)
                             
                             HStack {
-                                TextField("Quantity", text: $ingredients[index].quantity)
+                                TextField("Quantity", text: $viewController.recipe.ingredients[index].quantity)
                                     .keyboardType(.decimalPad)
                                     .foregroundColor(Color.text)
                                 
-                                TextField("Unit", text: $ingredients[index].unit)
+                                TextField("Unit", text: $viewController.recipe.ingredients[index].unit)
                                     .foregroundColor(Color.text)
                             }
                         }
                     }
                     .onMove { sourceSet, destination in
-                        ingredients.move(fromOffsets: sourceSet, toOffset: destination)
+                        viewController.recipe.ingredients.move(fromOffsets: sourceSet, toOffset: destination)
                     }
                     .onDelete { index in
-                        ingredients.remove(atOffsets: index)
+                        viewController.recipe.ingredients.remove(atOffsets: index)
                     }
                     
                     HStack {
@@ -348,7 +316,7 @@ struct NewRecipeView: View {
                             .foregroundColor(Color.orange)
                             .onTapGesture {
                                 withAnimation {
-                                    ingredients.append(Ingredient(id: String(ingredients.count), name: "", quantity: "", unit: ""))
+                                    viewController.recipe.ingredients.append(Ingredient(id: String(viewController.recipe.ingredients.count), name: "", quantity: "", unit: ""))
                                 }
                             }
                         
@@ -372,18 +340,18 @@ struct NewRecipeView: View {
                             .font(.system(size: 16))
                     }
                 }) {
-                    ForEach(steps.indices, id: \.self) { index in
+                    ForEach(viewController.recipe.steps.indices, id: \.self) { index in
                         HStack {
                             Image(systemName: String(index + 1) + ".circle")
                                 .foregroundColor(Color.orange)
                                 .font(.system(size: 24))
                             
                             ZStack(alignment: .leading) {
-                                TextEditor(text: $steps[index])
+                                TextEditor(text: $viewController.recipe.steps[index])
                                     .foregroundColor(Color.text)
-                                    .onChange(of: steps[index]) { _ in
-                                        if !steps[index].filter({ $0.isNewline }).isEmpty {
-                                            steps[index] = steps[index].trimmingCharacters(in: .newlines)
+                                    .onChange(of: viewController.recipe.steps[index]) { _ in
+                                        if !viewController.recipe.steps[index].filter({ $0.isNewline }).isEmpty {
+                                            viewController.recipe.steps[index] = viewController.recipe.steps[index].trimmingCharacters(in: .newlines)
                                             let resign = #selector(UIResponder.resignFirstResponder)
                                             UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
                                         }
@@ -391,17 +359,17 @@ struct NewRecipeView: View {
                                 
                                 Text("Step " + String(index + 1))
                                     .foregroundColor(Color(UIColor.systemGray3))
-                                    .opacity(steps[index] == "" ? 1.0 : 0.0)
+                                    .opacity(viewController.recipe.steps[index] == "" ? 1.0 : 0.0)
                                     .padding(.leading, 4)
                                     .allowsHitTesting(false)
                             }
                         }
                     }
                     .onMove { sourceSet, destination in
-                        steps.move(fromOffsets: sourceSet, toOffset: destination)
+                        viewController.recipe.steps.move(fromOffsets: sourceSet, toOffset: destination)
                     }
                     .onDelete { index in
-                        steps.remove(atOffsets: index)
+                        viewController.recipe.steps.remove(atOffsets: index)
                     }
                     
                     
@@ -412,7 +380,7 @@ struct NewRecipeView: View {
                             .foregroundColor(Color.orange)
                             .onTapGesture {
                                 withAnimation {
-                                    steps.append("")
+                                    viewController.recipe.steps.append("")
                                 }
                             }
                         
@@ -422,7 +390,7 @@ struct NewRecipeView: View {
                 .textCase(nil)
             }
             .onAppear {
-                viewController.coordinate = coordinatePickerViewModel.chosenRegion
+                viewController.recipe.coordinate = viewController.coordinatePickerViewModel.chosenRegion
             }
             .onChange(of: inputImage) { _ in
                 guard let inputImage = inputImage else { return }
@@ -434,21 +402,11 @@ struct NewRecipeView: View {
                     dismissButton: .none
                 )
             }
-            .navigationTitle(viewController.name != "" ? viewController.name : "New Recipe")
+            .navigationTitle(viewController.recipe.name != "" ? viewController.recipe.name : "New Recipe")
             .sheet(isPresented: $showImageLibrary) {
                 PhotoPicker(image: $inputImage)
             }
-            .navigationBarItems(leading: Button(action: {
-                presentationMode.wrappedValue.dismiss()
-            }) {
-                Text("Cancel")
-                    .foregroundColor(Color.orange)
-            }, trailing: Button(action: {
-                viewController.ingredients = ingredients
-                viewController.steps = steps
-                viewController.tags = tags
-                viewController.specialTools = specialTools.filter({ !$0.isEmpty })
-                
+            .navigationBarItems(trailing: Button(action: {
                 viewController.publishRecipe()
                 presentationMode.wrappedValue.dismiss()
             }) {
@@ -471,6 +429,7 @@ struct NewRecipeView: View {
         }
     }
 }
+
 
 struct FlexibleView<Data: Collection, Content: View>: View where Data.Element: Hashable {
     let data: Data

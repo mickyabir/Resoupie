@@ -11,18 +11,31 @@ import Combine
 class RecipeDetailViewController: ObservableObject {
     private var cancellables: Set<AnyCancellable> = Set()
     let backendController: RecipeBackendController
-    var recipeMeta: RecipeMeta
+    @Published var recipeMeta: RecipeMeta
+    @Published var stars: [Int] = []
+    @Published var halfStar: Bool = false
+    @Published var emptyStars: [Int] = []
     
     init(recipeMeta: RecipeMeta, backendController: RecipeBackendController) {
         self.recipeMeta = recipeMeta
         self.backendController = backendController
+        self.stars = Array(0..<Int(floor(recipeMeta.rating)))
+        self.halfStar = recipeMeta.rating.truncatingRemainder(dividingBy: 1) > 0.3
+        let emptyCount = 5 - Int(floor(recipeMeta.rating)) - (self.halfStar ? 1 : 0)
+        self.emptyStars = Array(0..<emptyCount)
     }
     
     func rateRecipe(_ rating: Int) {
         backendController.rateRecipe(recipe_id: recipeMeta.id, rating: rating)
+            .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
-            }, receiveValue: { success in
-                
+            }, receiveValue: { newRating in
+                self.recipeMeta.rating = newRating
+                self.stars = Array(0..<Int(floor(newRating)))
+                self.halfStar = newRating.truncatingRemainder(dividingBy: 1) > 0.3
+                let emptyCount = 5 - Int(floor(newRating)) - (self.halfStar ? 1 : 0)
+                self.emptyStars = Array(0..<emptyCount)
+
             })
             .store(in: &cancellables)
     }
@@ -63,14 +76,16 @@ struct RecipeDetail: View {
     @State var scale: CGFloat = 1.0
     @State var lastScaleValue: CGFloat = 1.0
 
-    var viewController: RecipeDetailViewController
+    @ObservedObject var viewController: RecipeDetailViewController
+        
+    @State var showEditRecipe: Bool = false
     
     var body: some View {
         ZStack(alignment: .topLeading) {
             Color.background
             
             List {
-                Group {
+                VStack(spacing: 10) {
                     CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 40, height: UIScreen.main.bounds.size.width - 40)
                         .cornerRadius(10)
                         .onTapGesture {
@@ -82,12 +97,7 @@ struct RecipeDetail: View {
                     HStack {
                         Spacer()
                         
-                        let rating = viewController.recipeMeta.rating
-                        let stars = Int(floor(rating))
-                        let halfStar = rating.truncatingRemainder(dividingBy: 1) > 0.3
-                        let emptyStars = 5 - stars - (halfStar ? 1 : 0)
-                        
-                        ForEach(0..<stars) { index in
+                        ForEach(viewController.stars, id: \.self) { index in
                             Image(systemName: "star.fill")
                                 .foregroundColor(Color.yellow)
                                 .onTapGesture {
@@ -96,28 +106,50 @@ struct RecipeDetail: View {
                                 }
                         }
                         
-                        if halfStar {
+                        if viewController.halfStar {
                             Image(systemName: "star.leadinghalf.filled")
                                 .foregroundColor(Color.yellow)
                                 .onTapGesture {
-                                    let rating = stars + 1
+                                    let rating = viewController.stars.count + 1
                                     viewController.rateRecipe(rating)
                                 }
                         }
                         
-                        ForEach(0..<emptyStars) { index in
+                        ForEach(viewController.emptyStars, id: \.self) { index in
                             Image(systemName: "star")
                                 .foregroundColor(Color.yellow)
                                 .onTapGesture {
-                                    let rating = stars + (halfStar ? 1 : 0) + index + 1
+                                    let rating = viewController.stars.count + (viewController.halfStar ? 1 : 0) + index + 1
                                     viewController.rateRecipe(rating)
                                 }
                         }
                         
-                        Text(String(rating))
+                        Text(String(viewController.recipeMeta.rating))
                             .foregroundColor(Color.lightText)
                         
                         Spacer()
+                    }
+                    let editRecipeViewController: EditRecipeViewController = EditRecipeViewController(viewController.backendController as! RecipeBackendController & ImageBackendController, recipe: viewController.recipeMeta.recipe)
+                    
+                    NavigationLink(destination: EditRecipeView(viewController: editRecipeViewController), isActive: $showEditRecipe) {
+                        EmptyView()
+                    }
+                    .frame(width: 0, height: 0)
+                    .opacity(0)
+                    
+                    Button {
+                        showEditRecipe = true
+                    } label: {
+                        ZStack {
+                            Rectangle()
+                                .foregroundColor(Color.white)
+                                .cornerRadius(10)
+                                .frame(width: 180, height: 40)
+                            
+                            Text("Fork This Recipe")
+                                .foregroundColor(Color.orange)
+                                .font(.title3)
+                        }
                     }
                 }
                 .listRowBackground(Color.clear)

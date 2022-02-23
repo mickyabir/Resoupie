@@ -131,9 +131,23 @@ class ProfileViewController: UserSignInViewController {
     }
     
     func loadProfile() {
-        if recipes == [] {
-            reloadProfile()
-        }
+        backendController.getUser()
+            .receive(on: DispatchQueue.main)
+            .map { user in
+                self.name = user.name
+                self.username = user.username
+                self.signedIn = true
+                
+                return user.username
+            }
+            .flatMap(backendController.getUserRecipes)
+            .eraseToAnyPublisher()
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { recipes in
+                self.recipes = recipes
+            })
+            .store(in: &cancellables)
     }
     
     func signOut() {
@@ -154,7 +168,7 @@ class ProfileViewController: UserSignInViewController {
 
 struct ProfileView: View {
     @ObservedObject var viewController: ProfileViewController
-    @ObservedObject var newRecipeViewController: NewRecipeViewController
+    @ObservedObject var editRecipeViewController: EditRecipeViewController
     @State var isPresenting = false
 
     var body: some View {
@@ -177,7 +191,17 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $viewController.presentNewRecipe) {
                 NavigationView {
-                    NewRecipeView(viewController: newRecipeViewController)
+                    EditRecipeView(viewController: editRecipeViewController)
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarLeading) {
+                                Button {
+                                    viewController.presentNewRecipe = false
+                                } label: {
+                                    Text("Cancel")
+                                }
+                            }
+                        }
+
                 }
             }
             .navigationTitle(viewController.name == "" ? "Profile" : viewController.name)

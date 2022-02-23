@@ -23,9 +23,7 @@ class CoordinatePickerViewModel: ObservableObject {
     var locations: [PinLocation] = []
     
     func selectCurrentRegion(continuation: @escaping () -> ()) {
-//        let latDelta = Double.random(in: -0.025 ..< 0.025)
         let latDelta = Double.random(in: -region!.span.latitudeDelta/4..<region!.span.latitudeDelta/4)
-//        let longDelta = Double.random(in: -0.025 ..< 0.025)
         let longDelta = Double.random(in: -region!.span.longitudeDelta/8..<region!.span.longitudeDelta/8)
         
         let latitude = region!.center.latitude
@@ -40,8 +38,7 @@ class CoordinatePickerViewModel: ObservableObject {
             let ceo: CLGeocoder = CLGeocoder()
             let _ = ceo.reverseGeocodeLocation(loc, completionHandler:
                                                 {(placemarks, error) in
-                if (error != nil)
-                {
+                if (error != nil) {
                     print("reverse geodcode fail: \(error!.localizedDescription)")
                 }
                 if let placemarks = placemarks {

@@ -36,12 +36,17 @@ enum RecipeError: Error {
     
 }
 
+struct RecipeRateResponse: Codable {
+    var success: Bool
+    var rating: Double
+}
+
 protocol RecipeBackendController {
     func getRecipesWorld(position: CLLocationCoordinate2D, latDelta: Double, longDelta: Double) -> AnyPublisher<[RecipeMeta], Error>
     func getUserFavorites() -> AnyPublisher<[RecipeMeta], Error>
     func getUserRecipes(username: String) -> AnyPublisher<[RecipeMeta], Error>
     func getRecipeById(recipe_id: String) -> AnyPublisher<RecipeMeta, Error>
-    func rateRecipe(recipe_id: String, rating: Int) -> AnyPublisher<Bool, Error>
+    func rateRecipe(recipe_id: String, rating: Int) -> AnyPublisher<Double, Error>
     func favoriteRecipe(recipe_id: String) -> AnyPublisher<Bool, Error>
     func unfavoriteRecipe(recipe_id: String) -> AnyPublisher<Bool, Error>
     func loadNextRecipes(skip: Int, limit: Int) -> AnyPublisher<[RecipeMeta], Error>
@@ -95,14 +100,14 @@ extension BackendController: RecipeBackendController {
             .eraseToAnyPublisher()
     }
     
-    func rateRecipe(recipe_id: String, rating: Int) -> AnyPublisher<Bool, Error> {
+    func rateRecipe(recipe_id: String, rating: Int) -> AnyPublisher<Double, Error> {
         let params = [
             URLQueryItem(name: "rating", value: String(rating)),
         ]
         
-        return authorizedRequest(path: RecipeBackend.path + recipe_id, method: "POST", modelType: SuccessResponse.self, params: params)
+        return authorizedRequest(path: RecipeBackend.path + recipe_id, method: "POST", modelType: RecipeRateResponse.self, params: params)
             .tryMap { response in
-                response.success
+                response.rating
             }
             .eraseToAnyPublisher()
     }
