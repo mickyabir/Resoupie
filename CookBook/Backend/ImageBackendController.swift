@@ -38,7 +38,7 @@ extension BackendController: ImageBackendController {
     func createDataBody(media: UIImage?, boundary: String) -> Data {
         let lineBreak = "\r\n"
         var body = Data()
-        if let media = media?.cropsToSquare(maxWidth: 1000) {
+        if let media = media?.cropsToSquare(maxWidth: 800) {
             body.append("--\(boundary + lineBreak)")
             body.append("Content-Disposition: form-data; name=\"file\"; filename=\"filename\"\(lineBreak)")
             body.append("Content-Type: image/jpeg\(lineBreak + lineBreak)")
@@ -83,6 +83,10 @@ extension UIImage {
                 }
             }
         }
+        
+        if bestData == nil {
+            return self.scalePreservingAspectRatio(targetSize: CGSize(width: self.size.width * 0.8, height: self.size.height * 0.8)).jpegImageData(maxSize: maxSize, minSize: minSize, times: times)
+        }
 
         return bestData
     }
@@ -90,11 +94,7 @@ extension UIImage {
     func cropsToSquare(maxWidth: CGFloat? = nil) -> UIImage {
         let refWidth = CGFloat((self.cgImage!.width))
         let refHeight = CGFloat((self.cgImage!.height))
-        var cropSize = refWidth > refHeight ? refHeight : refWidth
-        
-        if let maxWidth = maxWidth {
-            cropSize = cropSize > maxWidth ? maxWidth : cropSize
-        }
+        let cropSize = refWidth > refHeight ? refHeight : refWidth
         
         let x = (refWidth - cropSize) / 2.0
         let y = (refHeight - cropSize) / 2.0
@@ -103,6 +103,40 @@ extension UIImage {
         let imageRef = self.cgImage?.cropping(to: cropRect)
         let cropped = UIImage(cgImage: imageRef!, scale: 0.0, orientation: self.imageOrientation)
         
+        if let maxWidth = maxWidth {
+            return cropped.scalePreservingAspectRatio(targetSize: CGSize(width: maxWidth, height: maxWidth))
+        }
+        
         return cropped
+    }
+}
+
+extension UIImage {
+    func scalePreservingAspectRatio(targetSize: CGSize) -> UIImage {
+        // Determine the scale factor that preserves aspect ratio
+        let widthRatio = targetSize.width / size.width
+        let heightRatio = targetSize.height / size.height
+        
+        let scaleFactor = min(widthRatio, heightRatio)
+        
+        // Compute the new image size that preserves aspect ratio
+        let scaledImageSize = CGSize(
+            width: size.width * scaleFactor,
+            height: size.height * scaleFactor
+        )
+
+        // Draw and return the resized UIImage
+        let renderer = UIGraphicsImageRenderer(
+            size: scaledImageSize
+        )
+
+        let scaledImage = renderer.image { _ in
+            self.draw(in: CGRect(
+                origin: .zero,
+                size: scaledImageSize
+            ))
+        }
+        
+        return scaledImage
     }
 }

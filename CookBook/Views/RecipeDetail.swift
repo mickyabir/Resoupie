@@ -58,10 +58,11 @@ struct RecipeDetail: View {
     @State var currentServings: Int?
     @State var xOff: CGFloat = 0.0
     @State var yOff: CGFloat = 0.0
+    @State var lastXOff: CGFloat = 0.0
+    @State var lastYOff: CGFloat = 0.0
     @State var scale: CGFloat = 1.0
     @State var lastScaleValue: CGFloat = 1.0
 
-    
     var viewController: RecipeDetailViewController
     
     var body: some View {
@@ -139,12 +140,16 @@ struct RecipeDetail: View {
                             HStack {
                     Text("Ingredients")
                         .foregroundColor(Color.title)
+                        .font(.title2).fontWeight(.semibold)
+                    
                     Spacer()
                     
                     VStack {
                         Text("Servings")
                             .foregroundColor(Color.lightText)
                             .font(.system(size: 14))
+                            .font(.title2).fontWeight(.semibold)
+                        
                         HStack {
                             Image(systemName: "minus")
                                 .foregroundColor((currentServings ?? viewController.recipeMeta.recipe.servings) > 1 ? Color.orange : Color.lightText)
@@ -161,6 +166,7 @@ struct RecipeDetail: View {
                             
                             Text(String(currentServings ?? viewController.recipeMeta.recipe.servings))
                                 .foregroundColor(Color.lightText)
+                                .font(.title2).fontWeight(.semibold)
                             
                             Image(systemName: "plus")
                                 .foregroundColor(Color.orange)
@@ -176,6 +182,7 @@ struct RecipeDetail: View {
                     
                     Spacer()
                     Image(systemName: groceriesAdded ? "folder.fill.badge.plus" : "folder.badge.plus")
+                        .font(.title2)
                         .padding(.trailing, 20)
                         .foregroundColor(Color.orange)
                         .onTapGesture {
@@ -227,8 +234,9 @@ struct RecipeDetail: View {
                         .padding(.vertical, 5)
                     }
                 }
+                .textCase(nil)
                 
-                Section(header: Text("Method").foregroundColor(Color.title)) {
+                Section(header: Text("Method").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
                     ForEach (viewController.recipeMeta.recipe.steps, id: \.self) { step in
                         let index = viewController.recipeMeta.recipe.steps.firstIndex(of: step)!
                         HStack {
@@ -242,6 +250,7 @@ struct RecipeDetail: View {
                         }
                     }
                 }
+                .textCase(nil)
                 
                 if !viewController.recipeMeta.recipe.tags.isEmpty {
                     Section(header: Text("Tags").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
@@ -303,31 +312,40 @@ struct RecipeDetail: View {
                     .foregroundColor(Color.red)
             })
             
-            Color.black.opacity(showLargeImage ? 0.7 : 0.0)
-            
-            CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.width)
-                .onTapGesture {
-                    withAnimation {
-                        showLargeImage = false
-                    }
+            Group {
+                Color.black.opacity(showLargeImage ? 0.7 : 0.0)
+                
+                CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.width)
+                    .opacity(showLargeImage ? 1.0 : 0.0)
+                    .offset(x: xOff / self.scale, y: 60 + yOff / self.scale)
+                    .scaleEffect(self.scale)
+                    .gesture(MagnificationGesture().onChanged { val in
+                        let delta = val / self.lastScaleValue
+                        self.lastScaleValue = val
+                        let newScale = max(1, self.scale * delta)
+                        self.scale = newScale
+                    }.onEnded { val in
+                        self.lastScaleValue = 1.0
+                    })
+                    .simultaneousGesture(DragGesture().onChanged { val in
+                        self.xOff = val.translation.width + self.lastXOff
+                        self.yOff = val.translation.height + self.lastYOff
+                    }.onEnded { _ in
+                        self.lastXOff = self.xOff
+                        self.lastYOff = self.yOff
+                    })
+            }
+            .onTapGesture {
+                withAnimation {
+                    showLargeImage = false
+                    xOff = 0
+                    yOff = 0
+                    lastXOff = 0
+                    lastYOff = 0
+                    scale = 1.0
                 }
-                .opacity(showLargeImage ? 1.0 : 0.0)
-                .offset(x: xOff, y: 60 + yOff)
-                .scaleEffect(self.scale)
-                .gesture(MagnificationGesture().onChanged { val in
-                    let delta = val / self.lastScaleValue
-                    self.lastScaleValue = val
-                    let newScale = max(1, self.scale * delta)
-                    self.scale = newScale
-                }.onEnded { val in
-                    // without this the next gesture will be broken
-                    self.lastScaleValue = 1.0
-                })
-                .simultaneousGesture(DragGesture().onChanged { val in
-                    self.xOff = val.translation.width
-                    self.yOff = val.translation.height
-                }.onEnded { _ in
-                })
+            }
+
         }
         .accentColor(Color.orange)
     }

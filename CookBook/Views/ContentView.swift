@@ -19,6 +19,7 @@ struct ContentView: View {
     let recipeMainViewController: RecipeMainViewController
     let newRecipeViewController: NewRecipeViewController
     let favoritesViewController: FavoritesViewController
+    let worldViewController: WorldViewController
 
     init() {
         backendController = BackendController()
@@ -26,12 +27,13 @@ struct ContentView: View {
         recipeMainViewController = RecipeMainViewController(backendController)
         newRecipeViewController = NewRecipeViewController(backendController)
         favoritesViewController = FavoritesViewController(backendController)
+        worldViewController = WorldViewController(backendController)
     }
     
     var body: some View {
         ZStack {
             TabView(selection: $selection) {
-                WorldView()
+                WorldView(viewController: worldViewController)
                     .tabItem {
                         Label("World", systemImage: "globe")
                     }

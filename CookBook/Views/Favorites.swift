@@ -36,19 +36,6 @@ class FavoritesViewController: ObservableObject {
         self.favorites = []
     }
     
-    func reloadRecipes() {
-        for recipe in favorites {
-            backendController.getRecipeById(recipe_id: recipe.id)
-                .receive(on: DispatchQueue.main)
-                .sink(receiveCompletion: { _ in
-                }, receiveValue: { recipe in
-                    self.favorites.removeAll(where: { $0.id == recipe.id })
-                    self.favorites.append(recipe)
-                })
-                .store(in: &cancellables)
-        }
-    }
-    
     func loadRecipes() {
         backendController.getUserFavorites()
             .receive(on: DispatchQueue.main)
@@ -107,7 +94,6 @@ struct FavoritesView: View {
         }
         .onAppear {
             viewController.loadRecipes()
-//            viewController.reloadRecipes()
         }
         .actionSheet(isPresented: $displaySortOptions) {
             ActionSheet(title: Text("Sort by"), message: Text(""), buttons: [
