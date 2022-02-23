@@ -96,7 +96,11 @@ class RecipeMainViewController: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { recipes in
-                self.recipes.append(contentsOf: recipes)
+                for recipe in recipes {
+                    if !self.recipes.contains(recipe) {
+                        self.recipes.append(recipe)
+                    }
+                }
                 self.isLoading = false
             })
             .store(in: &cancellables)
