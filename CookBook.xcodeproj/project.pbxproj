@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		81332AF227C35E9E00564A6C /* KeychainBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81332AF127C35E9E00564A6C /* KeychainBackend.swift */; };
 		813F156627A20F8700214CE0 /* ImageBackendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813F156527A20F8700214CE0 /* ImageBackendController.swift */; };
 		813F156927A2161D00214CE0 /* RecipeBackendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813F156827A2161D00214CE0 /* RecipeBackendController.swift */; };
 		8141EA2327A3707C008BE746 /* BackendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8141EA2227A3707C008BE746 /* BackendController.swift */; };
@@ -26,8 +27,8 @@
 		8179715C27AA7F1B00DE1753 /* RecipeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179715B27AA7F1B00DE1753 /* RecipeCard.swift */; };
 		81862D9027AC6C13006C947F /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81862D8F27AC6C13006C947F /* Colors.swift */; };
 		81933FEF27BF0E5E00E9BB10 /* UserBackendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81933FEE27BF0E5E00E9BB10 /* UserBackendController.swift */; };
+		819E4E0E27C22ECF004068A3 /* UserSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819E4E0D27C22ECF004068A3 /* UserSignIn.swift */; };
 		81B1BF82279F669300EC85BB /* NewRecipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF81279F669300EC85BB /* NewRecipe.swift */; };
-		81B1BF85279F851A00EC85BB /* EmojiPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF84279F851A00EC85BB /* EmojiPicker.swift */; };
 		81B1BF87279F852200EC85BB /* PhotoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF86279F852200EC85BB /* PhotoPicker.swift */; };
 		81B1BF90279FA6CA00EC85BB /* CoordinatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF8F279FA6CA00EC85BB /* CoordinatePicker.swift */; };
 		81B1BF92279FB0B300EC85BB /* SearchAreaButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF91279FB0B300EC85BB /* SearchAreaButton.swift */; };
@@ -55,6 +56,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		81332AF127C35E9E00564A6C /* KeychainBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainBackend.swift; sourceTree = "<group>"; };
 		813F156527A20F8700214CE0 /* ImageBackendController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageBackendController.swift; sourceTree = "<group>"; };
 		813F156827A2161D00214CE0 /* RecipeBackendController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeBackendController.swift; sourceTree = "<group>"; };
 		8141EA2227A3707C008BE746 /* BackendController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendController.swift; sourceTree = "<group>"; };
@@ -78,8 +80,8 @@
 		8179715B27AA7F1B00DE1753 /* RecipeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeCard.swift; sourceTree = "<group>"; };
 		81862D8F27AC6C13006C947F /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		81933FEE27BF0E5E00E9BB10 /* UserBackendController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserBackendController.swift; sourceTree = "<group>"; };
+		819E4E0D27C22ECF004068A3 /* UserSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSignIn.swift; sourceTree = "<group>"; };
 		81B1BF81279F669300EC85BB /* NewRecipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewRecipe.swift; sourceTree = "<group>"; };
-		81B1BF84279F851A00EC85BB /* EmojiPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPicker.swift; sourceTree = "<group>"; };
 		81B1BF86279F852200EC85BB /* PhotoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoPicker.swift; sourceTree = "<group>"; };
 		81B1BF8F279FA6CA00EC85BB /* CoordinatePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatePicker.swift; sourceTree = "<group>"; };
 		81B1BF91279FB0B300EC85BB /* SearchAreaButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchAreaButton.swift; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 				813F156827A2161D00214CE0 /* RecipeBackendController.swift */,
 				8141EA2227A3707C008BE746 /* BackendController.swift */,
 				81933FEE27BF0E5E00E9BB10 /* UserBackendController.swift */,
+				81332AF127C35E9E00564A6C /* KeychainBackend.swift */,
 			);
 			path = Backend;
 			sourceTree = "<group>";
@@ -215,7 +218,6 @@
 		81B1BF83279F84FB00EC85BB /* Utility */ = {
 			isa = PBXGroup;
 			children = (
-				81B1BF84279F851A00EC85BB /* EmojiPicker.swift */,
 				81B1BF86279F852200EC85BB /* PhotoPicker.swift */,
 				81B1BF91279FB0B300EC85BB /* SearchAreaButton.swift */,
 				81B1BF8F279FA6CA00EC85BB /* CoordinatePicker.swift */,
@@ -223,6 +225,7 @@
 				8179715B27AA7F1B00DE1753 /* RecipeCard.swift */,
 				81862D8F27AC6C13006C947F /* Colors.swift */,
 				815B2E6F27C1BF8800F1CA2D /* CustomList.swift */,
+				819E4E0D27C22ECF004068A3 /* UserSignIn.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -366,6 +369,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				815E82712798CAC800530BA2 /* RecipesMain.swift in Sources */,
+				819E4E0E27C22ECF004068A3 /* UserSignIn.swift in Sources */,
 				813F156627A20F8700214CE0 /* ImageBackendController.swift in Sources */,
 				81BAF3F6279CB8DB004B0767 /* Profile.swift in Sources */,
 				8141EA2327A3707C008BE746 /* BackendController.swift in Sources */,
@@ -382,8 +386,8 @@
 				81BAF3EE2799FDBB004B0767 /* World.swift in Sources */,
 				81B1BF87279F852200EC85BB /* PhotoPicker.swift in Sources */,
 				81B1BF90279FA6CA00EC85BB /* CoordinatePicker.swift in Sources */,
-				81B1BF85279F851A00EC85BB /* EmojiPicker.swift in Sources */,
 				81862D9027AC6C13006C947F /* Colors.swift in Sources */,
+				81332AF227C35E9E00564A6C /* KeychainBackend.swift in Sources */,
 				815E826F2798CA8800530BA2 /* Groceries.swift in Sources */,
 				8141EA2527A3740E008BE746 /* CustomAsyncImage.swift in Sources */,
 				81933FEF27BF0E5E00E9BB10 /* UserBackendController.swift in Sources */,
@@ -550,6 +554,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"CookBook/Preview Content\"";
 				DEVELOPMENT_TEAM = WPQ22XTUSF;
 				ENABLE_PREVIEWS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CookBook/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -583,6 +588,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"CookBook/Preview Content\"";
 				DEVELOPMENT_TEAM = WPQ22XTUSF;
 				ENABLE_PREVIEWS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CookBook/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -620,6 +626,7 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "AD-Ventures.CookBookTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -644,6 +651,7 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "AD-Ventures.CookBookTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;

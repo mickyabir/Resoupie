@@ -8,33 +8,41 @@
 import Foundation
 import UIKit
 import SwiftUI
+import Combine
 
 struct ImageUploadResponse: Codable {
     var image_id: String
 }
 
-class ImageBackendController {
-    public static let url = BackendController.url + "images/"
-    @AppStorage("token") var token: String = ""
-    
-    func uploadImageToServer(image: UIImage, continuation: @escaping (String?) -> Void) {
+protocol ImageBackendController {
+    func uploadImageToServer(image: UIImage) -> AnyPublisher<String, Error>
+
+}
+
+extension BackendController: ImageBackendController {
+    internal struct ImageBackend {
+        static let path = "images/"
+    }
+
+    func uploadImageToServer(image: UIImage) -> AnyPublisher<String, Error> {
         let boundary = generateBoundary()
         let dataBody = createDataBody(media: image, boundary: boundary)
         
-        let backendController = BackendController()
-        backendController.authorizedRequest(path: "images/", method: "POST", modelType: ImageUploadResponse.self, body: dataBody, contentType: .multipart(boundary)) { response in
-            continuation(response?.image_id ?? nil)
-        }
+        return authorizedRequest(path: ImageBackend.path, method: "POST", modelType: ImageUploadResponse.self, body: dataBody, contentType: .multipart(boundary))
+            .tryMap { response in
+                return response.image_id
+            }
+            .eraseToAnyPublisher()
     }
     
     func createDataBody(media: UIImage?, boundary: String) -> Data {
         let lineBreak = "\r\n"
         var body = Data()
-        if let media = media?.cropsToSquare() {
+        if let media = media?.cropsToSquare(maxWidth: 800) {
             body.append("--\(boundary + lineBreak)")
             body.append("Content-Disposition: form-data; name=\"file\"; filename=\"filename\"\(lineBreak)")
             body.append("Content-Type: image/jpeg\(lineBreak + lineBreak)")
-            body.append(media.jpegImageData(maxSize: 4000000, minSize: 0, times: 10)!)
+            body.append(media.jpegImageData(maxSize: 200000, minSize: 0, times: 10)!)
             body.append(lineBreak)
         }
         
@@ -44,18 +52,6 @@ class ImageBackendController {
     
     func generateBoundary() -> String {
         return "Boundary-\(NSUUID().uuidString)"
-    }
-    
-    static func downloadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
-        print("Download Started")
-        URLSession.shared.dataTask(with: url, completionHandler: { data, response, error in
-            guard let data = data, error == nil else { return }
-            print("Download Finished")
-            // always update the UI from the main thread
-            DispatchQueue.main.async() {
-                completion(UIImage(data: data))
-            }
-        }).resume()
     }
 }
 
@@ -87,11 +83,15 @@ extension UIImage {
                 }
             }
         }
+        
+        if bestData == nil {
+            return self.scalePreservingAspectRatio(targetSize: CGSize(width: self.size.width * 0.8, height: self.size.height * 0.8)).jpegImageData(maxSize: maxSize, minSize: minSize, times: times)
+        }
 
         return bestData
     }
 
-    func cropsToSquare() -> UIImage {
+    func cropsToSquare(maxWidth: CGFloat? = nil) -> UIImage {
         let refWidth = CGFloat((self.cgImage!.width))
         let refHeight = CGFloat((self.cgImage!.height))
         let cropSize = refWidth > refHeight ? refHeight : refWidth
@@ -103,6 +103,40 @@ extension UIImage {
         let imageRef = self.cgImage?.cropping(to: cropRect)
         let cropped = UIImage(cgImage: imageRef!, scale: 0.0, orientation: self.imageOrientation)
         
+        if let maxWidth = maxWidth {
+            return cropped.scalePreservingAspectRatio(targetSize: CGSize(width: maxWidth, height: maxWidth))
+        }
+        
         return cropped
+    }
+}
+
+extension UIImage {
+    func scalePreservingAspectRatio(targetSize: CGSize) -> UIImage {
+        // Determine the scale factor that preserves aspect ratio
+        let widthRatio = targetSize.width / size.width
+        let heightRatio = targetSize.height / size.height
+        
+        let scaleFactor = min(widthRatio, heightRatio)
+        
+        // Compute the new image size that preserves aspect ratio
+        let scaledImageSize = CGSize(
+            width: size.width * scaleFactor,
+            height: size.height * scaleFactor
+        )
+
+        // Draw and return the resized UIImage
+        let renderer = UIGraphicsImageRenderer(
+            size: scaledImageSize
+        )
+
+        let scaledImage = renderer.image { _ in
+            self.draw(in: CGRect(
+                origin: .zero,
+                size: scaledImageSize
+            ))
+        }
+        
+        return scaledImage
     }
 }

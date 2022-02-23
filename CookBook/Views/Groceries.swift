@@ -161,7 +161,7 @@ struct GroceriesView: View {
                     }) {
                         ZStack {
                             Rectangle()
-                                .foregroundColor(Color.background)
+                                .foregroundColor(Color.white)
                                 .cornerRadius(8)
                                 .frame(width: 150, height: 40)
                             

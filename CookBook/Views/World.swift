@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import Combine
 
 struct Place: Identifiable {
     var id: String
@@ -22,50 +23,25 @@ struct PlaceAnnotationEmojiView: View {
     }
 }
 
-class WorldViewModel: ObservableObject {
+class WorldViewController: ObservableObject {
     @Published var recipes: [RecipeMeta] = []
     
-    func loadRecipes() {
-//        let recipeBackendController = RecipeBackendController()
-//        let _ = recipeBackendController.loadAllRecipes { allRecipes in
-//            self.recipes = allRecipes
-//        }
+    private var cancellables = Set<AnyCancellable>()
+    
+    let backendController: RecipeBackendController
+    
+    init(_ backendController: RecipeBackendController) {
+        self.backendController = backendController
     }
     
     func fetchRecipes(region: MKCoordinateRegion) {
-        loadRecipes()
-        
-        recipes = recipes
-            .filter({
-                $0.recipe.coordinate != nil
+        backendController.getRecipesWorld(position: region.center, latDelta: region.span.latitudeDelta, longDelta: region.span.longitudeDelta)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { recipes in
+                self.recipes = recipes
             })
-        
-        for recipe_i in recipes {
-            for recipe_j in recipes {
-                if recipe_i == recipe_j {
-                    continue
-                }
-                
-                if abs(recipe_i.recipe.coordinate!.latitude - recipe_j.recipe.coordinate!.latitude) < region.span.latitudeDelta * 0.02 && abs(recipe_i.recipe.coordinate!.longitude - recipe_j.recipe.coordinate!.longitude) < region.span.longitudeDelta * 0.02 {
-                    if recipe_i.favorited >= recipe_j.favorited {
-                        if let index = recipes.firstIndex(of: recipe_j) {
-                            recipes.remove(at: index)
-                        }
-                    } else {
-                        if let index = recipes.firstIndex(of: recipe_i) {
-                            recipes.remove(at: index)
-                        }
-                    }
-                }
-            }
-            
-            recipes = recipes.filter({
-                $0.recipe.coordinate!.latitude > region.center.latitude - region.span.latitudeDelta &&
-                $0.recipe.coordinate!.latitude < region.center.latitude + region.span.latitudeDelta &&
-                $0.recipe.coordinate!.longitude > region.center.longitude - region.span.longitudeDelta &&
-                $0.recipe.coordinate!.longitude < region.center.longitude + region.span.longitudeDelta
-            })
-        }
+            .store(in: &cancellables)
     }
 }
 
@@ -74,56 +50,68 @@ struct WorldView: View {
     
     @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
     
-    @ObservedObject var viewModel = WorldViewModel()
+    @ObservedObject var viewController: WorldViewController
     
     @State var displayRecipe = false
     @State var chosenRecipeIndex = 0
     
+    @State var lastRegion: MKCoordinateRegion?
     
     var body: some View {
-        let places = viewModel.recipes.filter {
-            $0.recipe.coordinate != nil
-        } .map {
-            Place(id: $0.id, emoji: $0.recipe.emoji, coordinate: $0.recipe.coordinate!)
-        }
+        let places = viewController.recipes.map { Place(id: $0.id, emoji: $0.recipe.emoji, coordinate: $0.recipe.coordinate!) }
         
-        Map(coordinateRegion: $region, annotationItems: places) { place in
-            MapAnnotation(coordinate: place.coordinate) {
-                Button {
-                    if let index = viewModel.recipes.firstIndex(where: { $0.id == place.id }) {
-                        chosenRecipeIndex = index
-                        displayRecipe = true
+        ZStack(alignment: .bottom) {
+            Map(coordinateRegion: $region, annotationItems: places) { place in
+                MapAnnotation(coordinate: place.coordinate) {
+                    Button {
+                        if let index = viewController.recipes.firstIndex(where: { $0.id == place.id }) {
+                            chosenRecipeIndex = index
+                            displayRecipe = true
+                        }
+                    } label: {
+                        PlaceAnnotationEmojiView(title: place.emoji)
                     }
-                } label: {
-                    PlaceAnnotationEmojiView(title: place.emoji)
                 }
             }
+            .edgesIgnoringSafeArea(.top)
+            .onChange(of: region) { newRegion in
+                //            viewController.fetchRecipes(region: newRegion)
+            }
+            .onAppear {
+                viewController.fetchRecipes(region: region)
+            }
+            .popover(isPresented: $displayRecipe,content: {
+                NavigationView {
+                    RecipeDetail(viewController: RecipeDetailViewController(recipeMeta: viewController.recipes[chosenRecipeIndex], backendController: viewController.backendController))
+                        .navigationBarItems(leading:
+                                                Button(action: {
+                            displayRecipe = false
+                        }) {
+                            Image(systemName: "chevron.down")
+                                .foregroundColor(Color.orange)
+                        })
+                }
+                
+            })
+            
+            Button {
+                viewController.fetchRecipes(region: region)
+            } label: {
+                ZStack {
+                    Rectangle()
+                        .foregroundColor(Color.white)
+                        .frame(width: 120, height: 40)
+                        .cornerRadius(10)
+                    Text("Search Here")
+                }
+            }
+            .padding(.bottom)
         }
-        .edgesIgnoringSafeArea(.top)
-        .onChange(of: region) { newRegion in
-            viewModel.fetchRecipes(region: newRegion)
-        }
-        .onAppear {
-            viewModel.fetchRecipes(region: region)
-        }
-        .sheet(isPresented: $displayRecipe, onDismiss: {
-//            self.chosenRecipe = nil
-        }, content: {
-//            RecipeDetail(recipeMeta: viewModel.recipes[chosenRecipeIndex], image: Image())
-        })
     }
 }
 
 extension MKCoordinateRegion: Equatable {
     public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
         return lhs.span.latitudeDelta == rhs.span.latitudeDelta && lhs.span.longitudeDelta == rhs.span.longitudeDelta && lhs.center.latitude == rhs.center.latitude && lhs.center.longitude == rhs.center.longitude
-    }
-}
-
-struct World_Previews: PreviewProvider {
-    static var previews: some View {
-        WorldView()
-            .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
-            .previewDisplayName("iPhone 12")
     }
 }

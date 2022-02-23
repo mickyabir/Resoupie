@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PhotosUI
+import Combine
 
 struct NewRecipeRow<Content: View>: View {
     let content: Content
@@ -39,8 +40,10 @@ struct NewRecipeRowDivider: View {
 }
 
 class NewRecipeViewController: ObservableObject {
+    typealias NewRecipeBackendController = RecipeBackendController & ImageBackendController
+
     @Published var name: String = ""
-    @Published var emoji: String = ""
+    var emoji: String = ""
     @Published var ingredients: [Ingredient] = []
     @Published var steps: [String] = []
     @Published var coordinate: CLLocationCoordinate2D?
@@ -49,8 +52,29 @@ class NewRecipeViewController: ObservableObject {
     @Published var tags: [String] = []
     @Published var time: String = ""
     @Published var specialTools: [String] = []
-    
     @Published var showEmptyRecipeWarning = false
+    
+    var cancellables: Set<AnyCancellable> = Set<AnyCancellable>()
+    
+    let backendController: NewRecipeBackendController
+    
+    init(_ backendController: NewRecipeBackendController) {
+        self.backendController = backendController
+    }
+    
+    func reset() {
+        name = ""
+        emoji = ""
+        ingredients = []
+        steps = []
+        coordinate = nil
+        image = nil
+        servings = ""
+        tags = []
+        time = ""
+        specialTools = []
+        showEmptyRecipeWarning = false
+    }
     
     func publishRecipe() {
         if name == "" || ingredients.isEmpty || steps.isEmpty {
@@ -58,26 +82,19 @@ class NewRecipeViewController: ObservableObject {
             return
         }
         
-        let imageUploader = ImageBackendController()
-        
-        var imageIdString: String = ""
-        
         if let image = image {
-            imageUploader.uploadImageToServer(image: image) { [self] imageId in
-                guard let imageId = imageId else { return }
-                imageIdString = imageId
-                let recipe = Recipe(image: imageIdString, name: name, author: "author", ingredients: ingredients, steps: steps, coordinate: self.coordinate, emoji: emoji, servings: Int(servings) ?? 0, tags: tags, time: time, specialTools: specialTools)
-                
-                let recipeUploader = RecipeBackendController()
-                recipeUploader.uploadRecipeToServer(recipe: recipe) { result in
-                    print(result)
+            backendController.uploadImageToServer(image: image)
+                .tryMap { image_id -> Recipe in
+                    return Recipe(image: image_id, name: self.name, author: "author", ingredients: self.ingredients, steps: self.steps, coordinate: self.coordinate, emoji: self.emoji, servings: Int(self.servings) ?? 0, tags: self.tags, time: self.time, specialTools: self.specialTools)
                 }
-                print(imageId)
-                
-                recipeUploader.loadAllRecipes { recipes in
-                    print(recipes)
-                }
-            }
+                .flatMap(backendController.uploadRecipeToServer)
+                .eraseToAnyPublisher()
+                .receive(on: DispatchQueue.main)
+                .sink(receiveCompletion: { _ in
+                }, receiveValue: { success in
+                    self.reset()
+                })
+                .store(in: &cancellables)
         }
     }
 }
@@ -89,7 +106,7 @@ struct NewRecipeView: View {
     
     private let coordinatePickerViewModel = CoordinatePickerViewModel()
     
-    @ObservedObject var viewController = NewRecipeViewController()
+    @ObservedObject var viewController: NewRecipeViewController
     
     @State private var editMode = EditMode.inactive
     
@@ -106,6 +123,9 @@ struct NewRecipeView: View {
     @State var tags: [String] = []
     @State var currentTag: String = ""
     
+    @State var emoji: String = ""
+    @State var displayEmojiWarning: Bool = false
+
     var body: some View {
         ZStack {
             Color.background
@@ -116,7 +136,6 @@ struct NewRecipeView: View {
                     TextField("Recipe name", text: $viewController.name)
                         .foregroundColor(Color.text)
                     
-                    //                    HStack {
                     TextField("Servings", text: $viewController.servings)
                         .keyboardType(.numberPad)
                         .foregroundColor(Color.text)
@@ -124,10 +143,25 @@ struct NewRecipeView: View {
                     TextField("Time", text: $viewController.time)
                         .foregroundColor(Color.text)
                     
-                    EmojiPickerView() { emoji in
-                        viewController.emoji = emoji
-                    }
-                    //                    }
+                    TextField("Emoji", text: $emoji)
+                        .alert("Emoji only!", isPresented: $displayEmojiWarning) {
+                            Button("OK", role: .cancel) {}
+                        }
+                        .onReceive(Just(emoji), perform: { _ in
+                            if self.emoji != self.emoji.onlyEmoji() {
+                                withAnimation {
+                                    displayEmojiWarning = true
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.25) {
+                                    withAnimation {
+                                        displayEmojiWarning.toggle()
+                                    }
+                                }
+                                
+                            }
+                            self.emoji = String(self.emoji.onlyEmoji().prefix(1))
+                            viewController.emoji = self.emoji
+                        })
                 }
                 .textCase(nil)
                 
@@ -526,4 +560,17 @@ extension View {
 private struct SizePreferenceKey: PreferenceKey {
     static var defaultValue: CGSize = .zero
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) {}
+}
+
+extension String {
+    func onlyEmoji() -> String {
+        return self.filter({$0.isEmoji})
+    }
+}
+
+extension Character {
+    var isEmoji: Bool {
+        guard let scalar = unicodeScalars.first else { return false }
+        return scalar.properties.isEmoji && (scalar.value > 0x238C || unicodeScalars.count > 1)
+    }
 }

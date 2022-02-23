@@ -8,6 +8,7 @@
 import Foundation
 import CoreLocation
 import SwiftUI
+import Combine
 
 struct UserBackendModel: Codable {
     var name: String
@@ -15,32 +16,45 @@ struct UserBackendModel: Codable {
     var followers: Int
 }
 
-struct AccessTokenModel: Codable {
+struct SignInTokenModel: Codable {
     var access_token: String
+    var refresh_token: String
 }
 
-class UserBackendController: BackendControllable {
-    internal let path = "users/"
-    
-    func verifyToken(continuation: @escaping (Bool) -> Void) {
-        let backendController = BackendController()
-        backendController.authorizedRequest(path: "auth/verify", method: "GET", modelType: SuccessResponse.self) { response in
-            continuation(response?.success ?? false)
-        }
+enum UserError: Error {
+    case invalid
+}
+
+protocol UserBackendController {
+    func verifyToken() -> AnyPublisher<Bool, Error>
+    func getUser() -> AnyPublisher<User, Error>
+    func signIn(username: String, password: String) -> AnyPublisher<Bool, Error>
+    func signUp(name: String, username: String, password: String) -> AnyPublisher<Bool, Error>
+    func signOut() -> AnyPublisher<Bool, Error>
+}
+
+extension BackendController: UserBackendController {
+    internal struct UserBackend {
+        static let path = "users/"
     }
     
-    func getUser(continuation: @escaping (User?) -> Void) {
-        let backendController = BackendController()
-        backendController.authorizedRequest(path: path + "me/", method: "GET", modelType: UserBackendModel.self) { user in
-            if let user = user {
-                continuation(User(name: user.name, username: user.username, followers: user.followers))
-            } else {
-                continuation(nil)
+    func verifyToken() -> AnyPublisher<Bool, Error> {
+        authorizedRequest(path: "auth/verify", method: "GET", modelType: SuccessResponse.self)
+            .tryMap { response in
+                return response.success
             }
-        }
+            .eraseToAnyPublisher()
     }
     
-    func signIn(username: String, password: String, continuation: @escaping (String?) -> Void) {
+    func getUser() -> AnyPublisher<User, Error> {
+        return authorizedRequest(path: UserBackend.path + "me/", method: "GET", modelType: UserBackendModel.self)
+            .tryMap { user in
+                return User(name: user.name, username: user.username, followers: user.followers)
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func signIn(username: String, password: String) -> AnyPublisher<Bool, Error> {
         let parameters: [String: String] = [
             "username": username,
             "password": password
@@ -54,17 +68,20 @@ class UserBackendController: BackendControllable {
         }
         
         guard let jsonData = jsonData else {
-            continuation(nil)
-            return
+            return Empty<Bool, Error>(completeImmediately: true).eraseToAnyPublisher()
         }
         
-        let backendController = BackendController()
-        backendController.authorizedRequest(path: path + "signin", method: "POST", modelType: AccessTokenModel.self, body: jsonData, contentType: .json) { token in
-            continuation(token?.access_token ?? "")
-        }
+        return request(path: UserBackend.path + "signin/", method: "POST", modelType: SignInTokenModel.self, body: jsonData, contentType: .json)
+            .receive(on: DispatchQueue.main)
+            .tryMap { response in
+                KeychainBackend.main.saveAccessToken(accessToken: response.access_token)
+                KeychainBackend.main.saveRefreshToken(refreshToken: response.refresh_token)
+                return true
+            }
+            .eraseToAnyPublisher()        
     }
     
-    func signUp(name: String, username: String, password: String, continuation: @escaping (String?) -> Void) {
+    func signUp(name: String, username: String, password: String) -> AnyPublisher<Bool, Error> {
         let parameters: [String: String] = [
             "name": name,
             "username": username,
@@ -79,13 +96,26 @@ class UserBackendController: BackendControllable {
         }
         
         guard let jsonData = jsonData else {
-            continuation(nil)
-            return
+            return Empty<Bool, Error>(completeImmediately: true).eraseToAnyPublisher()
         }
         
-        let backendController = BackendController()
-        backendController.authorizedRequest(path: path + "signup", method: "POST", modelType: AccessTokenModel.self, body: jsonData, contentType: .json) { token in
-            continuation(token?.access_token ?? "")
-        }
+        return request(path: UserBackend.path + "signup/", method: "POST", modelType: SignInTokenModel.self, body: jsonData, contentType: .json)
+            .receive(on: DispatchQueue.main)
+            .tryMap { response in
+                KeychainBackend.main.saveAccessToken(accessToken: response.access_token)
+                KeychainBackend.main.saveRefreshToken(refreshToken: response.refresh_token)
+                return true
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func signOut() -> AnyPublisher<Bool, Error> {
+        return authorizedRequest(path: UserBackend.path + "signout/", method: "POST", modelType: SuccessResponse.self)
+            .receive(on: DispatchQueue.main)
+            .tryMap { response in
+                KeychainBackend.main.deleteTokens()
+                return response.success
+            }
+            .eraseToAnyPublisher()
     }
 }
