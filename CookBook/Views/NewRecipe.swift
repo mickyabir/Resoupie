@@ -561,3 +561,16 @@ private struct SizePreferenceKey: PreferenceKey {
     static var defaultValue: CGSize = .zero
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) {}
 }
+
+extension String {
+    func onlyEmoji() -> String {
+        return self.filter({$0.isEmoji})
+    }
+}
+
+extension Character {
+    var isEmoji: Bool {
+        guard let scalar = unicodeScalars.first else { return false }
+        return scalar.properties.isEmoji && (scalar.value > 0x238C || unicodeScalars.count > 1)
+    }
+}
