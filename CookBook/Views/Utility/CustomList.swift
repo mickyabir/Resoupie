@@ -6,16 +6,13 @@
 //
 
 import SwiftUI
-//
-//func contextMenu<MenuItems: View>(
-//    @ViewBuilder menuItems: () -> MenuItems
-//) -> some View
 
 struct CustomSection<HeaderView: View, ChildView: View>: View {
     var header: HeaderView
     @ViewBuilder var content: () -> ChildView
+    
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 4) {
             header
                 .foregroundColor(Color.title)
                 .font(.title2.weight(.semibold))
@@ -27,6 +24,8 @@ struct CustomSection<HeaderView: View, ChildView: View>: View {
                 
                 VStack(alignment: .leading) {
                     content()
+                        .padding(.horizontal)
+                        .foregroundColor(Color.text)
                 }
             }
         }
@@ -37,11 +36,12 @@ struct CustomSection<HeaderView: View, ChildView: View>: View {
 struct CustomList<Content: View>: View {
     @ViewBuilder var content: () -> Content
     var body: some View {
-        ScrollView {
-            Color.gray
-            
-            VStack(spacing: 20) {
-                content()
+        ZStack {
+            Color(UIColor.systemGray6)
+            ScrollView {
+                VStack(spacing: 20) {
+                    content()
+                }
             }
         }
     }
@@ -54,18 +54,16 @@ struct CustomList_Previews: PreviewProvider {
                 ForEach(0..<3) { index in
                     Text(String(index))
                 }
+                
+                Text("Test")
             }
-            .background(Color.blue)
             
-            CustomSection(header: Text("Special Tools")) {
+            CustomSection(header: Text("Ingredients")) {
                 ForEach(0..<3) { index in
                     Text(String(index))
                 }
             }
-            .background(Color.green)
-
         }
-        .background(Color.red)
         .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
         .previewDisplayName("iPhone 12")
     }

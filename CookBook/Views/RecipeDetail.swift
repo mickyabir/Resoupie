@@ -12,7 +12,7 @@ class RecipeDetailViewController: ObservableObject {
     private var cancellables: Set<AnyCancellable> = Set()
     let backendController: RecipeBackendController
     var recipeMeta: RecipeMeta
-
+    
     init(recipeMeta: RecipeMeta, backendController: RecipeBackendController) {
         self.recipeMeta = recipeMeta
         self.backendController = backendController
@@ -26,7 +26,7 @@ class RecipeDetailViewController: ObservableObject {
             })
             .store(in: &cancellables)
     }
-
+    
     func favoriteRecipe() {
         backendController.favoriteRecipe(recipe_id: recipeMeta.id)
             .sink(receiveCompletion: { _ in
@@ -54,7 +54,7 @@ struct RecipeDetail: View {
     @State var groceriesAdded = false
     
     @State var showLargeImage = false
-            
+    
     @State var currentServings: Int?
     
     var viewController: RecipeDetailViewController
@@ -64,55 +64,61 @@ struct RecipeDetail: View {
             Color.background
             
             List {
-                CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 70, height: UIScreen.main.bounds.size.width - 70)
-                    .cornerRadius(10)
-                    .onTapGesture {
-                        withAnimation {
-                            showLargeImage = true
+                Group {
+                    CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 20, height: UIScreen.main.bounds.size.width - 20)
+                        .cornerRadius(10)
+                        .onTapGesture {
+                            withAnimation {
+                                showLargeImage = true
+                            }
                         }
+                    
+                    HStack {
+                        Spacer()
+                        
+                        let rating = viewController.recipeMeta.rating
+                        let stars = Int(floor(rating))
+                        let halfStar = rating.truncatingRemainder(dividingBy: 1) > 0.3
+                        let emptyStars = 5 - stars - (halfStar ? 1 : 0)
+                        
+                        ForEach(0..<stars) { index in
+                            Image(systemName: "star.fill")
+                                .foregroundColor(Color.yellow)
+                                .onTapGesture {
+                                    let rating = index + 1
+                                    viewController.rateRecipe(rating)
+                                }
+                        }
+                        
+                        if halfStar {
+                            Image(systemName: "star.leadinghalf.filled")
+                                .foregroundColor(Color.yellow)
+                                .onTapGesture {
+                                    let rating = stars + 1
+                                    viewController.rateRecipe(rating)
+                                }
+                        }
+                        
+                        ForEach(0..<emptyStars) { index in
+                            Image(systemName: "star")
+                                .foregroundColor(Color.yellow)
+                                .onTapGesture {
+                                    let rating = stars + (halfStar ? 1 : 0) + index + 1
+                                    viewController.rateRecipe(rating)
+                                }
+                        }
+                        
+                        Text(String(rating))
+                            .foregroundColor(Color.lightText)
+                        
+                        Spacer()
                     }
-                
-                HStack {
-                    Spacer()
-                    
-                    let rating = viewController.recipeMeta.rating
-                    let stars = Int(floor(rating))
-                    let halfStar = rating.truncatingRemainder(dividingBy: 1) > 0.3
-                    let emptyStars = 5 - stars - (halfStar ? 1 : 0)
-                    
-                    ForEach(0..<stars) { index in
-                        Image(systemName: "star.fill")
-                            .foregroundColor(Color.yellow)
-                            .onTapGesture {
-                                let rating = index + 1
-                                viewController.rateRecipe(rating)
-                            }
-                    }
-                    
-                    if halfStar {
-                        Image(systemName: "star.leadinghalf.filled")
-                            .foregroundColor(Color.yellow)
-                            .onTapGesture {
-                                let rating = stars + 1
-                                viewController.rateRecipe(rating)
-                            }
-                    }
-                    
-                    ForEach(0..<emptyStars) { index in
-                        Image(systemName: "star")
-                            .foregroundColor(Color.yellow)
-                            .onTapGesture {
-                                let rating = stars + (halfStar ? 1 : 0) + index + 1
-                                viewController.rateRecipe(rating)
-                            }
-                    }
-                    
-                    Text(String(rating))
-                        .foregroundColor(Color.lightText)
-                    
-                    Spacer()
                 }
-                
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+//                .listRowInsets(EdgeInsets())
+
                 if !viewController.recipeMeta.recipe.specialTools.isEmpty {
                     Section(header: HStack {
                         Text("Special Tools").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)

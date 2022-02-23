@@ -38,11 +38,11 @@ extension BackendController: ImageBackendController {
     func createDataBody(media: UIImage?, boundary: String) -> Data {
         let lineBreak = "\r\n"
         var body = Data()
-        if let media = media?.cropsToSquare() {
+        if let media = media?.cropsToSquare(maxWidth: 1000) {
             body.append("--\(boundary + lineBreak)")
             body.append("Content-Disposition: form-data; name=\"file\"; filename=\"filename\"\(lineBreak)")
             body.append("Content-Type: image/jpeg\(lineBreak + lineBreak)")
-            body.append(media.jpegImageData(maxSize: 1000000, minSize: 0, times: 10)!)
+            body.append(media.jpegImageData(maxSize: 200000, minSize: 0, times: 10)!)
             body.append(lineBreak)
         }
         
@@ -87,10 +87,14 @@ extension UIImage {
         return bestData
     }
 
-    func cropsToSquare() -> UIImage {
+    func cropsToSquare(maxWidth: CGFloat? = nil) -> UIImage {
         let refWidth = CGFloat((self.cgImage!.width))
         let refHeight = CGFloat((self.cgImage!.height))
-        let cropSize = refWidth > refHeight ? refHeight : refWidth
+        var cropSize = refWidth > refHeight ? refHeight : refWidth
+        
+        if let maxWidth = maxWidth {
+            cropSize = cropSize > maxWidth ? maxWidth : cropSize
+        }
         
         let x = (refWidth - cropSize) / 2.0
         let y = (refHeight - cropSize) / 2.0

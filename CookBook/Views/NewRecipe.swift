@@ -62,6 +62,20 @@ class NewRecipeViewController: ObservableObject {
         self.backendController = backendController
     }
     
+    func reset() {
+        name = ""
+        emoji = ""
+        ingredients = []
+        steps = []
+        coordinate = nil
+        image = nil
+        servings = ""
+        tags = []
+        time = ""
+        specialTools = []
+        showEmptyRecipeWarning = false
+    }
+    
     func publishRecipe() {
         if name == "" || ingredients.isEmpty || steps.isEmpty {
             showEmptyRecipeWarning = true
@@ -78,6 +92,7 @@ class NewRecipeViewController: ObservableObject {
                 .receive(on: DispatchQueue.main)
                 .sink(receiveCompletion: { _ in
                 }, receiveValue: { success in
+                    self.reset()
                 })
                 .store(in: &cancellables)
         }

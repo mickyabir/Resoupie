@@ -36,7 +36,7 @@ struct RecipeCard: View {
                 .shadow(color: Color.black.opacity(0.2), radius: 8)
             VStack(alignment: .leading) {
                 CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: viewController.width)
-                    .cornerRadius(10)
+                    .cornerRadius(10, corners: [.topLeft, .topRight])
                 
                 HStack {
                     VStack(alignment: .leading) {
@@ -91,5 +91,23 @@ struct RecipeCard: View {
             }
         })
         .padding(.bottom)
+    }
+}
+
+
+extension View {
+    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
+        clipShape( RoundedCorner(radius: radius, corners: corners) )
+    }
+}
+
+struct RoundedCorner: Shape {
+
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
+        return Path(path.cgPath)
     }
 }

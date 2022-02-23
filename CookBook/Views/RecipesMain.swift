@@ -29,25 +29,22 @@ struct RecipeGroupRow: View {
             
             
             ScrollView(.horizontal, showsIndicators: false) {
-                ZStack {
-                    LazyHStack {
-                        ForEach(recipes) { recipe in
-                            ZStack(alignment: .topTrailing) {
-                                RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: 250, backendController: backendController))
-                                
-                                let favorited = (favorites.firstIndex(of: recipe) != nil)
-                                Image(systemName: favorited ? "heart.fill" : "heart")
-                                    .foregroundColor(favorited ? Color.red : Color.white)
-                                    .font(.system(size: 18))
-                                    .padding(.top, 10)
-                                    .padding(.trailing, 10)
-                            }
-                            .padding(.top, 50)
+                LazyHStack {
+                    ForEach(recipes) { recipe in
+                        ZStack(alignment: .topTrailing) {
+                            RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: 250, backendController: backendController))
+                            
+                            let favorited = (favorites.firstIndex(of: recipe) != nil)
+                            Image(systemName: favorited ? "heart.fill" : "heart")
+                                .foregroundColor(favorited ? Color.red : Color.white)
+                                .font(.system(size: 18))
+                                .padding(.top, 10)
+                                .padding(.trailing, 10)
                         }
+                        .padding(.top, 50)
                     }
-                    .padding(.leading, 20)
                 }
-                
+                .padding(.leading, 20)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: 500)
@@ -130,10 +127,11 @@ struct RecipeMainContinuousView: View {
         LazyVStack {
             ForEach(viewController.recipes) { recipe in
                 RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: UIScreen.main.bounds.size.width - 40, backendController: viewController.backendController))
-                let thresholdIndex = viewController.recipes.index(viewController.recipes.endIndex, offsetBy: -1)
-                if viewController.recipes.firstIndex(where: { $0.id == recipe.id }) == thresholdIndex {
-                    let _ = viewController.loadMoreRecipes()
-                }
+                    .onAppear {
+                        if viewController.recipes.last == recipe {
+                            let _ = viewController.loadMoreRecipes()
+                        }
+                    }
             }
         }
         .onAppear() {
