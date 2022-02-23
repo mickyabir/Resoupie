@@ -19,7 +19,6 @@ struct Ingredient: Hashable, Codable, Identifiable {
 struct Recipe: Hashable, Codable {
     var image: String
     var name: String
-    var author: String
     var ingredients: [Ingredient]
     var steps: [String]
     var coordinate: CLLocationCoordinate2D?
@@ -28,19 +27,22 @@ struct Recipe: Hashable, Codable {
     var tags: [String]
     var time: String
     var specialTools: [String]
+    var parent_id: String?
 }
 
 struct RecipeMeta: Hashable, Codable, Identifiable {
     var id: String
+    var author: String
     var recipe: Recipe
     var rating: Double
     var favorited: Int
     
-    init(id: String, recipe: Recipe, rating: Double, favorited: Int) {
+    init(id: String, author: String, recipe: Recipe, rating: Double, favorited: Int) {
         self.recipe = recipe
         self.rating = rating
         self.favorited = favorited
         self.id = id
+        self.author = author
     }
 }
 

@@ -13,7 +13,6 @@ import Combine
 struct RecipeBackendModel: Codable {
     var image: String
     var name: String
-    var author: String
     var ingredients: [Ingredient]
     var steps: [String]
     var emoji: String
@@ -23,13 +22,21 @@ struct RecipeBackendModel: Codable {
     var tags: [String]
     var time: String
     var specialTools: [String]
+    var parent_id: String?
 }
 
 struct RecipeMetaBackendModel: Codable {
     var id: String
+    var author: String
     var recipe: RecipeBackendModel
     var rating: Double
     var favorited: Int
+}
+
+struct ForkInfoModel: Codable {
+    var parent_name: String
+    var parent_author: String
+    var parent_id: String
 }
 
 enum RecipeError: Error {
@@ -51,12 +58,18 @@ protocol RecipeBackendController {
     func unfavoriteRecipe(recipe_id: String) -> AnyPublisher<Bool, Error>
     func loadNextRecipes(skip: Int, limit: Int) -> AnyPublisher<[RecipeMeta], Error>
     func loadAllRecipes() -> AnyPublisher<[RecipeMeta], Error>
+    func getForkInfo(recipe_id: String) -> AnyPublisher<ForkInfoModel, Error>
     func uploadRecipeToServer(recipe: Recipe) -> AnyPublisher<Bool, Error>
 }
 
 extension BackendController: RecipeBackendController {
     internal struct RecipeBackend {
         static let path = "recipes/"
+    }
+    
+    func getForkInfo(recipe_id: String) -> AnyPublisher<ForkInfoModel, Error> {
+        return authorizedRequest(path: RecipeBackend.path + recipe_id + "/parent", method: "GET", modelType: ForkInfoModel.self)
+            .eraseToAnyPublisher()
     }
     
     func getRecipesWorld(position: CLLocationCoordinate2D, latDelta: Double, longDelta: Double) -> AnyPublisher<[RecipeMeta], Error> {
@@ -105,7 +118,7 @@ extension BackendController: RecipeBackendController {
             URLQueryItem(name: "rating", value: String(rating)),
         ]
         
-        return authorizedRequest(path: RecipeBackend.path + recipe_id, method: "POST", modelType: RecipeRateResponse.self, params: params)
+        return authorizedRequest(path: RecipeBackend.path + recipe_id + "/rate", method: "POST", modelType: RecipeRateResponse.self, params: params)
             .tryMap { response in
                 response.rating
             }
@@ -156,7 +169,7 @@ extension BackendController: RecipeBackendController {
             lat = Double(coordinate.latitude)
             long = Double(coordinate.longitude)
         }
-        let recipeModel = RecipeBackendModel(image: recipe.image, name: recipe.name, author: recipe.author, ingredients: recipe.ingredients, steps: recipe.steps, emoji: recipe.emoji, servings: recipe.servings, coordinate_lat: lat, coordinate_long: long, tags: recipe.tags, time: recipe.time, specialTools: recipe.specialTools)
+        let recipeModel = RecipeBackendModel(image: recipe.image, name: recipe.name, ingredients: recipe.ingredients, steps: recipe.steps, emoji: recipe.emoji, servings: recipe.servings, coordinate_lat: lat, coordinate_long: long, tags: recipe.tags, time: recipe.time, specialTools: recipe.specialTools, parent_id: recipe.parent_id)
         
         var jsonData: Data?
         do {
@@ -182,9 +195,8 @@ extension BackendController: RecipeBackendController {
             coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
         }
         
-        let recipeObject = Recipe(image: recipeModel.recipe.image, name: recipeModel.recipe.name, author: recipeModel.recipe.author, ingredients: recipeModel.recipe.ingredients, steps: recipeModel.recipe.steps, coordinate: coordinate, emoji: recipeModel.recipe.emoji, servings: recipeModel.recipe.servings, tags: recipeModel.recipe.tags, time: recipeModel.recipe.time, specialTools: recipeModel.recipe.specialTools)
-        return RecipeMeta(id: recipeModel.id, recipe: recipeObject, rating: recipeModel.rating, favorited: recipeModel.favorited)
-
+        let recipeObject = Recipe(image: recipeModel.recipe.image, name: recipeModel.recipe.name, ingredients: recipeModel.recipe.ingredients, steps: recipeModel.recipe.steps, coordinate: coordinate, emoji: recipeModel.recipe.emoji, servings: recipeModel.recipe.servings, tags: recipeModel.recipe.tags, time: recipeModel.recipe.time, specialTools: recipeModel.recipe.specialTools, parent_id: recipeModel.recipe.parent_id)
+        return RecipeMeta(id: recipeModel.id, author: recipeModel.author, recipe: recipeObject, rating: recipeModel.rating, favorited: recipeModel.favorited)
     }
     
     private func mapRecipeMetas(recipeModels: [RecipeMetaBackendModel]) -> [RecipeMeta] {

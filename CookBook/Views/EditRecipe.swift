@@ -27,21 +27,21 @@ class EditRecipeViewController: ObservableObject {
     
     let backendController: EditRecipeBackendController
     
-    init(_ backendController: EditRecipeBackendController, recipe: Recipe? = nil, image: UIImage? = nil) {
+    init(_ backendController: EditRecipeBackendController, recipe: Recipe? = nil, parent_id: String? = nil, image: UIImage? = nil) {
         self.backendController = backendController
         
         if let recipe = recipe {
             self.recipe = recipe
-            self.recipe.author = ""
             self.emoji = recipe.emoji
             self.servings = String(recipe.servings)
+            self.recipe.parent_id = parent_id
         } else {
-            self.recipe = Recipe(image: "", name: "", author: "", ingredients: [Ingredient(id: "0", name: "", quantity: "", unit: "")], steps: [""], coordinate: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [])
+            self.recipe = Recipe(image: "", name: "", ingredients: [Ingredient(id: "0", name: "", quantity: "", unit: "")], steps: [""], coordinate: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
         }
     }
     
     func reset() {
-        self.recipe = Recipe(image: "", name: "", author: "", ingredients: [], steps: [], coordinate: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [])
+        self.recipe = Recipe(image: "", name: "", ingredients: [], steps: [], coordinate: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
 
         emoji = ""
         servings = ""

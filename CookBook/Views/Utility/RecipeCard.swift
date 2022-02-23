@@ -43,7 +43,7 @@ struct RecipeCard: View {
                         Text(viewController.recipeMeta.recipe.name)
                             .font(.headline)
                             .foregroundColor(Color.text)
-                        Text(viewController.recipeMeta.recipe.author)
+                        Text(viewController.recipeMeta.author)
                             .font(.subheadline)
                             .foregroundColor(Color.lightText)
                     }

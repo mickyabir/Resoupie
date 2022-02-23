@@ -15,6 +15,10 @@ class RecipeDetailViewController: ObservableObject {
     @Published var stars: [Int] = []
     @Published var halfStar: Bool = false
     @Published var emptyStars: [Int] = []
+    @Published var forkInfo: ForkInfoModel?
+    @Published var showFork: Bool = false
+    var forkViewController: RecipeDetailViewController?
+    var forkRecipeMeta: RecipeMeta?
     
     init(recipeMeta: RecipeMeta, backendController: RecipeBackendController) {
         self.recipeMeta = recipeMeta
@@ -23,6 +27,16 @@ class RecipeDetailViewController: ObservableObject {
         self.halfStar = recipeMeta.rating.truncatingRemainder(dividingBy: 1) > 0.3
         let emptyCount = 5 - Int(floor(recipeMeta.rating)) - (self.halfStar ? 1 : 0)
         self.emptyStars = Array(0..<emptyCount)
+    }
+    
+    func getForkInfo() {
+        backendController.getForkInfo(recipe_id: recipeMeta.id)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { forkInfo in
+                self.forkInfo = forkInfo
+            })
+            .store(in: &cancellables)
     }
     
     func rateRecipe(_ rating: Int) {
@@ -57,6 +71,21 @@ class RecipeDetailViewController: ObservableObject {
             })
             .store(in: &cancellables)
     }
+    
+    func presentFork() {
+        if let forkInfo = forkInfo {
+            backendController.getRecipeById(recipe_id: forkInfo.parent_id)
+                .receive(on: DispatchQueue.main)
+                .sink(receiveCompletion: { _ in
+                }, receiveValue: { forkRecipe in
+                    self.forkRecipeMeta = forkRecipe
+                    self.forkViewController = RecipeDetailViewController(recipeMeta: forkRecipe, backendController: self.backendController)
+                    self.showFork = true
+                })
+                .store(in: &cancellables)
+
+        }
+    }
 }
 
 struct RecipeDetail: View {
@@ -86,6 +115,26 @@ struct RecipeDetail: View {
             
             List {
                 VStack(spacing: 10) {
+                    if let fork = viewController.forkInfo {
+                        if viewController.showFork {
+                            NavigationLink(destination: RecipeDetail(viewController: viewController.forkViewController!), isActive: $viewController.showFork) {
+                                EmptyView()
+                            }
+                            .frame(width: 0, height: 0)
+                            .opacity(0)
+                        }
+                        HStack(spacing: 0) {
+                            Text("Forked from " + fork.parent_author + "'s ")
+                                .foregroundColor(Color.lightText)
+                            Text(fork.parent_name)
+                                .foregroundColor(Color.orange)
+                        }
+                        .padding(.bottom)
+                        .onTapGesture {
+                            viewController.presentFork()
+                        }
+                    }
+
                     CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 40, height: UIScreen.main.bounds.size.width - 40)
                         .cornerRadius(10)
                         .onTapGesture {
@@ -129,27 +178,28 @@ struct RecipeDetail: View {
                         
                         Spacer()
                     }
-                    let editRecipeViewController: EditRecipeViewController = EditRecipeViewController(viewController.backendController as! RecipeBackendController & ImageBackendController, recipe: viewController.recipeMeta.recipe)
+                    let editRecipeViewController: EditRecipeViewController = EditRecipeViewController(viewController.backendController as! RecipeBackendController & ImageBackendController, recipe: viewController.recipeMeta.recipe, parent_id: viewController.recipeMeta.id)
                     
                     NavigationLink(destination: EditRecipeView(viewController: editRecipeViewController), isActive: $showEditRecipe) {
                         EmptyView()
                     }
                     .frame(width: 0, height: 0)
                     .opacity(0)
+                    .onTapGesture {
+                    }
                     
-                    Button {
+                    ZStack {
+                        Rectangle()
+                            .foregroundColor(Color.white)
+                            .cornerRadius(10)
+                            .frame(width: 180, height: 40)
+                        
+                        Text("Fork This Recipe")
+                            .foregroundColor(Color.orange)
+                            .font(.title3)
+                    }
+                    .onTapGesture {
                         showEditRecipe = true
-                    } label: {
-                        ZStack {
-                            Rectangle()
-                                .foregroundColor(Color.white)
-                                .cornerRadius(10)
-                                .frame(width: 180, height: 40)
-                            
-                            Text("Fork This Recipe")
-                                .foregroundColor(Color.orange)
-                                .font(.title3)
-                        }
                     }
                 }
                 .listRowBackground(Color.clear)
@@ -314,12 +364,14 @@ struct RecipeDetail: View {
                 }
                 
                 groceriesAdded = groceries.firstIndex(where: { $0.id == viewController.recipeMeta.id }) != nil
+                
+                viewController.getForkInfo()
             }
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     VStack {
                         Text(viewController.recipeMeta.recipe.name).font(.headline).foregroundColor(Color.navbarTitle)
-                        Text(viewController.recipeMeta.recipe.author).font(.subheadline).foregroundColor(Color.lightText)
+                        Text(viewController.recipeMeta.author).font(.subheadline).foregroundColor(Color.lightText)
                     }
                 }
             }
