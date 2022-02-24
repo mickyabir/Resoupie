@@ -18,8 +18,8 @@ class RecipeDetailViewController: ObservableObject {
     @Published var forkInfo: ForkInfoModel?
     @Published var showFork: Bool = false
     var forkViewController: RecipeDetailViewController?
-    var forkRecipeMeta: RecipeMeta?
-    
+    var forkRecipeMeta: RecipeMeta? 
+        
     init(recipeMeta: RecipeMeta, backendController: RecipeBackendController) {
         self.recipeMeta = recipeMeta
         self.backendController = backendController

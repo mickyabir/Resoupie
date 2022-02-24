@@ -9,7 +9,7 @@ import SwiftUI
 
 class Theme {
     static func navigationBarColors(background : UIColor?,
-       titleColor : UIColor? = nil, tintColor : UIColor? = nil ){
+       titleColor : UIColor? = nil, tintColor : UIColor? = nil ) {
         
         let navigationAppearance = UINavigationBarAppearance()
         
@@ -18,7 +18,6 @@ class Theme {
             navigationAppearance.backgroundColor = background
         } else {
             navigationAppearance.configureWithDefaultBackground()
-//            navigationAppearance.configureWithTransparentBackground()
         }
         
         if let titleColor = titleColor {
@@ -29,6 +28,12 @@ class Theme {
         UINavigationBar.appearance().standardAppearance = navigationAppearance
         UINavigationBar.appearance().compactAppearance = navigationAppearance
         UINavigationBar.appearance().scrollEdgeAppearance = navigationAppearance
+
+        // Needed until disappearing tabbar bug is fixed
+        let tabBarAppearance = UITabBarAppearance()
+        tabBarAppearance.configureWithOpaqueBackground()
+        UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+        UITabBar.appearance().standardAppearance = tabBarAppearance
 
         if let tintColor = tintColor {
             UINavigationBar.appearance().tintColor = tintColor

@@ -154,7 +154,7 @@ struct RecipesMainView: View {
     var body: some View {
         NavigationView {
             ZStack(alignment: .topTrailing) {
-                Color.white
+                Color.background
                 
                 VStack {
                     Spacer()

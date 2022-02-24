@@ -20,7 +20,7 @@ struct ContentView: View {
     let editRecipeViewController: EditRecipeViewController
     let favoritesViewController: FavoritesViewController
     let worldViewController: WorldViewController
-
+    
     init() {
         backendController = BackendController()
         profileViewController = ProfileViewController(backendController)
@@ -31,38 +31,36 @@ struct ContentView: View {
     }
     
     var body: some View {
-        ZStack {
-            TabView(selection: $selection) {
-                WorldView(viewController: worldViewController)
-                    .tabItem {
-                        Label("World", systemImage: "globe")
-                    }
-                    .tag(0)
-                
-                RecipesMainView(viewController: recipeMainViewController)
-                    .tabItem {
-                        Label("Recipes", systemImage: "fork.knife")
-                    }
-                    .tag(1)
-                
-                ProfileView(viewController: profileViewController, editRecipeViewController: editRecipeViewController)
-                    .tabItem {
-                        Label("Profile", systemImage: "person.crop.circle")
-                    }
-                    .tag(2)
-                
-                FavoritesView(viewController: favoritesViewController)
-                    .tabItem {
-                        Label("Favorites", systemImage: "heart")
-                    }
-                    .tag(3)
-                
-                GroceriesView()
-                    .tabItem {
-                        Label("Groceries", systemImage: "checklist")
-                    }
-                    .tag(4)
-            }
+        TabView(selection: $selection) {
+            WorldView(viewController: worldViewController)
+                .tabItem {
+                    Label("World", systemImage: "globe")
+                }
+                .tag(0)
+            
+            RecipesMainView(viewController: recipeMainViewController)
+                .tabItem {
+                    Label("Recipes", systemImage: "fork.knife")
+                }
+                .tag(1)
+            
+            ProfileView(viewController: profileViewController, editRecipeViewController: editRecipeViewController)
+                .tabItem {
+                    Label("Profile", systemImage: "person.crop.circle")
+                }
+                .tag(2)
+            
+            FavoritesView(viewController: favoritesViewController)
+                .tabItem {
+                    Label("Favorites", systemImage: "heart")
+                }
+                .tag(3)
+            
+            GroceriesView()
+                .tabItem {
+                    Label("Groceries", systemImage: "checklist")
+                }
+                .tag(4)
         }
         .accentColor(Color.orange)
     }
@@ -77,7 +75,7 @@ extension Array: RawRepresentable where Element: Codable {
         }
         self = result
     }
-
+    
     public var rawValue: String {
         guard let data = try? JSONEncoder().encode(self),
               let result = String(data: data, encoding: .utf8)
