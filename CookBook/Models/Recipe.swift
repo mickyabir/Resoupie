@@ -46,6 +46,13 @@ struct RecipeMeta: Hashable, Codable, Identifiable {
     }
 }
 
+extension RecipeMeta {
+    func contains(_ searchText: String) -> Bool {
+        let searchText = searchText.lowercased()
+        return author.lowercased().contains(searchText) || recipe.name.lowercased().contains(searchText) || !recipe.ingredients.filter({ $0.name.lowercased().contains(searchText) }).isEmpty || !recipe.specialTools.filter({ $0.lowercased().contains(searchText) }).isEmpty || !recipe.specialTools.filter({ $0.lowercased().contains(searchText) }).isEmpty
+    }
+}
+
 extension CLLocationCoordinate2D: Hashable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         return lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude

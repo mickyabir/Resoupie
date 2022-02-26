@@ -26,6 +26,7 @@ struct SortMethod {
 class FavoritesViewController: ObservableObject {
 //    @AppStorage("favorites") var favorites: [RecipeMeta] = []
     @Published var favorites: [RecipeMeta]
+    @Published var displayedFavorites: [RecipeMeta]
 
     let backendController: RecipeBackendController
     
@@ -34,6 +35,7 @@ class FavoritesViewController: ObservableObject {
     init(_ backendController: RecipeBackendController) {
         self.backendController = backendController
         self.favorites = []
+        self.displayedFavorites = []
     }
     
     func loadRecipes() {
@@ -42,8 +44,19 @@ class FavoritesViewController: ObservableObject {
             .sink(receiveCompletion: { _ in
             }, receiveValue: { recipes in
                 self.favorites = recipes
+                self.displayedFavorites = recipes
             })
             .store(in: &cancellables)
+    }
+    
+    func search(_ searchText: String) {
+        withAnimation {
+            if searchText.isEmpty {
+                self.displayedFavorites = self.favorites
+            } else {
+                self.displayedFavorites = self.favorites.filter( { $0.contains(searchText) } )
+            }
+        }
     }
 }
 
@@ -65,6 +78,8 @@ struct FavoritesView: View {
     @State var sort: Sort = .popular
     @State var displaySortOptions = false
         
+    @State var searchText: String = ""
+    
     var body: some View {
         NavigationView {
             ZStack(alignment: .topTrailing) {
@@ -72,7 +87,7 @@ struct FavoritesView: View {
                 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 20) {
-                        ForEach(viewController.favorites.sorted(by: sortingMethod[sort]!)) { recipe in
+                        ForEach(viewController.displayedFavorites.sorted(by: sortingMethod[sort]!)) { recipe in
                             RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: UIScreen.main.bounds.width - 20, backendController: viewController.backendController))
                         }
                     }
@@ -94,6 +109,13 @@ struct FavoritesView: View {
         }
         .onAppear {
             viewController.loadRecipes()
+        }
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always)) {
+//            Text("Example search").searchCompletion("Example search")
+        }
+        .disableAutocorrection(true)
+        .onChange(of: searchText) { newText in
+            viewController.search(newText)
         }
         .actionSheet(isPresented: $displaySortOptions) {
             ActionSheet(title: Text("Sort by"), message: Text(""), buttons: [

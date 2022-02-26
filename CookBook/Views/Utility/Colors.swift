@@ -44,9 +44,7 @@ class Theme {
 extension Color {
     static let offWhite = Color(red: 225 / 255, green: 225 / 255, blue: 235 / 255)
     static let lightGray = Color(red: 250 / 255, green: 250 / 255, blue: 250 / 255)
-    static let background = Color(red: 240 / 255, green: 242 / 255, blue: 246 / 255)
-    static let backgroundGradient1 = Color(red: 255 / 255, green: 179 / 255, blue: 138 / 255)
-    static let backgroundGradient2 = Color(red: 255 / 255, green: 209 / 255, blue: 181 / 255)
+    static let background = Color(red: 250 / 255, green: 252 / 255, blue: 255 / 255)
     static let text = Color(red: 105 / 255, green: 84 / 255, blue: 70 / 255)
     static let lightText = Color(red: 153 / 255, green: 136 / 255, blue: 124 / 255)
     static let navbarTitle = Color(red: 105 / 255, green: 84 / 255, blue: 70 / 255)
