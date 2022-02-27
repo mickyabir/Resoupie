@@ -58,7 +58,7 @@ struct WorldView: View {
     @State var lastRegion: MKCoordinateRegion?
     
     var body: some View {
-        let places = viewController.recipes.map { Place(id: $0.id, emoji: $0.recipe.emoji, coordinate: $0.recipe.coordinate!) }
+        let places = viewController.recipes.map { Place(id: $0.id, emoji: $0.recipe.emoji, coordinate: $0.recipe.coordinate()!) }
         
         ZStack(alignment: .bottom) {
             Map(coordinateRegion: $region, annotationItems: places) { place in

@@ -36,12 +36,12 @@ class EditRecipeViewController: ObservableObject {
             self.servings = String(recipe.servings)
             self.recipe.parent_id = parent_id
         } else {
-            self.recipe = Recipe(image: "", name: "", ingredients: [Ingredient(id: "0", name: "", quantity: "", unit: "")], steps: [""], coordinate: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
+            self.recipe = Recipe(image: "", name: "", ingredients: [Ingredient(id: "0", name: "", quantity: "", unit: "")], steps: [""], coordinate_lat: nil, coordinate_long: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
         }
     }
     
     func reset() {
-        self.recipe = Recipe(image: "", name: "", ingredients: [], steps: [], coordinate: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
+        self.recipe = Recipe(image: "", name: "", ingredients: [], steps: [], coordinate_lat: nil, coordinate_long: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
 
         emoji = ""
         servings = ""
@@ -390,7 +390,8 @@ struct EditRecipeView: View {
                 .textCase(nil)
             }
             .onAppear {
-                viewController.recipe.coordinate = viewController.coordinatePickerViewModel.chosenRegion
+                viewController.recipe.coordinate_lat = viewController.coordinatePickerViewModel.chosenRegion?.latitude
+                viewController.recipe.coordinate_long = viewController.coordinatePickerViewModel.chosenRegion?.longitude
             }
             .onChange(of: inputImage) { _ in
                 guard let inputImage = inputImage else { return }
