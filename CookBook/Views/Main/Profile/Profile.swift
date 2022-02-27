@@ -8,12 +8,6 @@
 import SwiftUI
 import Combine
 
-struct User {
-    var name: String
-    var username: String
-    var followers: Int
-}
-
 class ProfileViewController: UserSignInViewController {
     typealias ProfileBackendController = RecipeBackendController & UserBackendController & ImageBackendController
     

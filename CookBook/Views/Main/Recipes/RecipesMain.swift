@@ -8,49 +8,6 @@
 import SwiftUI
 import Combine
 
-struct RecipeGroupRow: View {
-    var title: String
-    var recipes: [RecipeMeta]
-    @AppStorage("favorites") var favorites: [RecipeMeta] = []
-    
-    let backendController: RecipeBackendController
-    
-    var body: some View {
-        ZStack(alignment: .topLeading) {
-            Rectangle()
-                .foregroundColor(Color.theme.background)
-
-            Text(title)
-                .font(.title2)
-                .fontWeight(.semibold)
-                .padding(.leading)
-                .padding(.top, 10)
-                .foregroundColor(Color.theme.title2)
-            
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack {
-                    ForEach(recipes) { recipe in
-                        ZStack(alignment: .topTrailing) {
-                            RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: 250, backendController: backendController))
-                            
-                            let favorited = (favorites.firstIndex(where: { $0.id == recipe.id }) != nil)
-                            Image(systemName: favorited ? "heart.fill" : "heart")
-                                .foregroundColor(favorited ? Color.red : Color.white)
-                                .font(.system(size: 18))
-                                .padding(.top, 10)
-                                .padding(.trailing, 10)
-                        }
-                        .padding(.top, 50)
-                    }
-                }
-                .padding(.leading, 20)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: 500)
-    }
-}
-
 class RecipeMainViewController: ObservableObject {
     @Published var recipes: [RecipeMeta] = [RecipeMeta]()
 
@@ -104,43 +61,6 @@ class RecipeMainViewController: ObservableObject {
                 self.isLoading = false
             })
             .store(in: &cancellables)
-    }
-}
-
-struct RecipeMainDefaultView: View {
-    @ObservedObject var viewController: RecipeMainViewController
-
-    var body: some View {
-        LazyVStack {
-            RecipeGroupRow(title: "Popular", recipes: viewController.recipes, backendController: viewController.backendController)
-            
-            RecipeGroupRow(title: "For You", recipes: viewController.recipes, backendController: viewController.backendController)
-            
-            RecipeGroupRow(title: "Vegan", recipes: viewController.recipes, backendController: viewController.backendController)
-        }
-        .onAppear() {
-            viewController.loadAllRecipes()
-        }
-    }
-}
-
-struct RecipeMainContinuousView: View {
-    @ObservedObject var viewController: RecipeMainViewController
-
-    var body: some View {
-        LazyVStack {
-            ForEach(viewController.recipes) { recipe in
-                RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: UIScreen.main.bounds.size.width - 40, backendController: viewController.backendController))
-                    .onAppear {
-                        if viewController.recipes.last == recipe {
-                            let _ = viewController.loadMoreRecipes()
-                        }
-                    }
-            }
-        }
-        .onAppear() {
-            viewController.loadRecipes()
-        }
     }
 }
 

@@ -9,20 +9,6 @@ import SwiftUI
 import MapKit
 import Combine
 
-struct Place: Identifiable {
-    var id: String
-    var emoji: String
-    var coordinate: CLLocationCoordinate2D
-}
-
-struct PlaceAnnotationEmojiView: View {
-    let title: String
-    var body: some View {
-        Text(title)
-            .font(.system(size: 40))
-    }
-}
-
 class WorldViewController: ObservableObject {
     @Published var recipes: [RecipeMeta] = []
     

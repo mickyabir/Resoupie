@@ -7,18 +7,6 @@
 
 import SwiftUI
 
-struct GroceryListItem: Hashable, Codable, Identifiable {
-    var id: String
-    var ingredient: String
-    var check: Bool
-}
-
-struct GroceryList: Hashable, Codable, Identifiable {
-    var id: String
-    var name: String
-    var items: [GroceryListItem]
-}
-
 struct GroceriesView: View {
     @AppStorage("groceryLists") var groceries: [GroceryList] = []
     

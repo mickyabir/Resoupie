@@ -2,20 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>CFBundleDisplayName</key>
 	<string>CookBook</string>
-	<key>CFBundleDocumentTypes</key>
-	<array>
-		<dict/>
-	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
-			<key>http://2301-2603-8001-7301-ceb0-34ed-16c7-b188-cf9.ngrok.io/</key>
-			<string></string>
 			<key>http://44.201.79.172</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
@@ -23,8 +17,6 @@
 				<key>NSIncludesSubdomains</key>
 				<true/>
 			</dict>
-			<key>https://2301-2603-8001-7301-ceb0-34ed-16c7-b188-cf9.ngrok.io</key>
-			<string></string>
 			<key>https://44.201.79.172</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>

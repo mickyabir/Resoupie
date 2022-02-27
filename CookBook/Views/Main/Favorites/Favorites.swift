@@ -24,7 +24,6 @@ struct SortMethod {
 }
 
 class FavoritesViewController: ObservableObject {
-//    @AppStorage("favorites") var favorites: [RecipeMeta] = []
     @Published var favorites: [RecipeMeta]
     @Published var displayedFavorites: [RecipeMeta]
 
