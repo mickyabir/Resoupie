@@ -18,14 +18,14 @@ struct RecipeGroupRow: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
             Rectangle()
-                .foregroundColor(Color.background)
+                .foregroundColor(Color.theme.background)
 
             Text(title)
                 .font(.title2)
                 .fontWeight(.semibold)
                 .padding(.leading)
                 .padding(.top, 10)
-                .foregroundColor(Color.title2)
+                .foregroundColor(Color.theme.title2)
             
             
             ScrollView(.horizontal, showsIndicators: false) {
@@ -154,7 +154,7 @@ struct RecipesMainView: View {
     var body: some View {
         NavigationView {
             ZStack(alignment: .topTrailing) {
-                Color.background
+                Color.theme.background
                 
                 VStack {
                     Spacer()
@@ -203,7 +203,7 @@ struct RecipesMainView: View {
                     } label: {
                         Image(systemName: continuous ? "infinity.circle.fill" : "infinity.circle")
                             .font(.system(size: 22))
-                            .foregroundColor(Color.orange)
+                            .foregroundColor(Color.theme.accent)
                     }
                 }
             }

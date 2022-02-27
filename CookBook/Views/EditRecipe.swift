@@ -97,20 +97,20 @@ struct EditRecipeView: View {
 
     var body: some View {
         ZStack {
-            Color.background
+            Color.theme.background
                 .ignoresSafeArea()
             
             Form {
-                Section(header: Text("About").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
+                Section(header: Text("About").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)) {
                     TextField("Recipe name", text: $viewController.recipe.name)
-                        .foregroundColor(Color.text)
+                        .foregroundColor(Color.theme.text)
                     
                     TextField("Servings", text: $viewController.servings)
                         .keyboardType(.numberPad)
-                        .foregroundColor(Color.text)
+                        .foregroundColor(Color.theme.text)
                     
                     TextField("Time", text: $viewController.recipe.time)
-                        .foregroundColor(Color.text)
+                        .foregroundColor(Color.theme.text)
                     
                     TextField("Emoji", text: $viewController.emoji)
                         .alert("Emoji only!", isPresented: $displayEmojiWarning) {
@@ -134,7 +134,7 @@ struct EditRecipeView: View {
                 .textCase(nil)
                 
                 Section(header: HStack {
-                    Text("Location").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)
+                    Text("Location").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)
                     Toggle("", isOn: $locationEnabled.animation())
                 }) {
                     if locationEnabled {
@@ -145,14 +145,14 @@ struct EditRecipeView: View {
                                 if let country = viewController.coordinatePickerViewModel.country {
                                     if let locality = viewController.coordinatePickerViewModel.locality {
                                         Text(locality + ", " + country)
-                                            .foregroundColor(Color.orange)
+                                            .foregroundColor(Color.theme.accent)
                                     } else {
                                         Text(country)
-                                            .foregroundColor(Color.orange)
+                                            .foregroundColor(Color.theme.accent)
                                     }
                                 } else {
                                     Text("Choose Location")
-                                        .foregroundColor(Color.orange)
+                                        .foregroundColor(Color.theme.accent)
                                 }
                                 
                                 Spacer()
@@ -166,7 +166,7 @@ struct EditRecipeView: View {
                 }
                 .textCase(nil)
                 
-                Section(header: Text("Image").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
+                Section(header: Text("Image").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)) {
                     if viewController.image != nil {
                         Image(uiImage: viewController.image!)
                             .resizable()
@@ -179,7 +179,7 @@ struct EditRecipeView: View {
                         Spacer()
                         
                         Text((viewController.image == nil ? "Add" : "Edit") + " Image")
-                            .foregroundColor(Color.orange)
+                            .foregroundColor(Color.theme.accent)
                             .onTapGesture {
                                 showImageLibrary = true
                             }
@@ -189,7 +189,7 @@ struct EditRecipeView: View {
                 }
                 .textCase(nil)
                 
-                Section(header: Text("Tags").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
+                Section(header: Text("Tags").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)) {
                     FlexibleView(
                         data: viewController.recipe.tags,
                         spacing: 15,
@@ -197,9 +197,9 @@ struct EditRecipeView: View {
                     ) { item in
                         HStack {
                             Text(verbatim: item)
-                                .foregroundColor(Color.text)
+                                .foregroundColor(Color.theme.text)
                             Image(systemName: "x.circle.fill")
-                                .foregroundColor(Color.lightText)
+                                .foregroundColor(Color.theme.lightText)
                                 .onTapGesture {
                                     viewController.recipe.tags.removeAll(where: { $0 == item })
                                 }
@@ -228,7 +228,7 @@ struct EditRecipeView: View {
                 
                 
                 Section(header: HStack {
-                    Text("Special Tools").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)
+                    Text("Special Tools").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)
                     
                     Spacer()
                     
@@ -238,14 +238,14 @@ struct EditRecipeView: View {
                         }
                     } label: {
                         Text(editMode == .active ? "Done" : "Edit")
-                            .foregroundColor(Color.orange)
+                            .foregroundColor(Color.theme.accent)
                             .font(.system(size: 16))
                     }
                 }) {
                     ForEach(viewController.recipe.specialTools.indices, id: \.self) { index in
                         HStack {
                             TextField("Tool " + String(index + 1), text: $viewController.recipe.specialTools[index])
-                                .foregroundColor(Color.text)
+                                .foregroundColor(Color.theme.text)
                         }
                     }
                     .onMove { sourceSet, destination in
@@ -260,7 +260,7 @@ struct EditRecipeView: View {
                         Spacer()
                         
                         Image(systemName: "plus")
-                            .foregroundColor(Color.orange)
+                            .foregroundColor(Color.theme.accent)
                             .onTapGesture {
                                 withAnimation {
                                     viewController.recipe.specialTools.append("")
@@ -273,7 +273,7 @@ struct EditRecipeView: View {
                 .textCase(nil)
                 
                 Section(header: HStack {
-                    Text("Ingredients").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)
+                    Text("Ingredients").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)
                     
                     Spacer()
                     
@@ -283,22 +283,22 @@ struct EditRecipeView: View {
                         }
                     } label: {
                         Text(editMode == .active ? "Done" : "Edit")
-                            .foregroundColor(Color.orange)
+                            .foregroundColor(Color.theme.accent)
                             .font(.system(size: 16))
                     }
                 }) {
                     ForEach(viewController.recipe.ingredients.indices, id: \.self) { index in
                         VStack {
                             TextField("Ingredient " + String(index + 1), text: $viewController.recipe.ingredients[index].name)
-                                .foregroundColor(Color.text)
+                                .foregroundColor(Color.theme.text)
                             
                             HStack {
                                 TextField("Quantity", text: $viewController.recipe.ingredients[index].quantity)
                                     .keyboardType(.decimalPad)
-                                    .foregroundColor(Color.text)
+                                    .foregroundColor(Color.theme.text)
                                 
                                 TextField("Unit", text: $viewController.recipe.ingredients[index].unit)
-                                    .foregroundColor(Color.text)
+                                    .foregroundColor(Color.theme.text)
                             }
                         }
                     }
@@ -313,7 +313,7 @@ struct EditRecipeView: View {
                         Spacer()
                         
                         Image(systemName: "plus")
-                            .foregroundColor(Color.orange)
+                            .foregroundColor(Color.theme.accent)
                             .onTapGesture {
                                 withAnimation {
                                     viewController.recipe.ingredients.append(Ingredient(id: String(viewController.recipe.ingredients.count), name: "", quantity: "", unit: ""))
@@ -326,7 +326,7 @@ struct EditRecipeView: View {
                 .textCase(nil)
                 
                 Section(header: HStack {
-                    Text("Method").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)
+                    Text("Method").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)
                     
                     Spacer()
                     
@@ -336,19 +336,19 @@ struct EditRecipeView: View {
                         }
                     } label: {
                         Text(editMode == .active ? "Done" : "Edit")
-                            .foregroundColor(Color.orange)
+                            .foregroundColor(Color.theme.accent)
                             .font(.system(size: 16))
                     }
                 }) {
                     ForEach(viewController.recipe.steps.indices, id: \.self) { index in
                         HStack {
                             Image(systemName: String(index + 1) + ".circle")
-                                .foregroundColor(Color.orange)
+                                .foregroundColor(Color.theme.accent)
                                 .font(.system(size: 24))
                             
                             ZStack(alignment: .leading) {
                                 TextEditor(text: $viewController.recipe.steps[index])
-                                    .foregroundColor(Color.text)
+                                    .foregroundColor(Color.theme.text)
                                     .onChange(of: viewController.recipe.steps[index]) { _ in
                                         if !viewController.recipe.steps[index].filter({ $0.isNewline }).isEmpty {
                                             viewController.recipe.steps[index] = viewController.recipe.steps[index].trimmingCharacters(in: .newlines)
@@ -377,7 +377,7 @@ struct EditRecipeView: View {
                         Spacer()
                         
                         Image(systemName: "plus")
-                            .foregroundColor(Color.orange)
+                            .foregroundColor(Color.theme.accent)
                             .onTapGesture {
                                 withAnimation {
                                     viewController.recipe.steps.append("")
@@ -411,7 +411,7 @@ struct EditRecipeView: View {
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Publish")
-                    .foregroundColor(Color.orange)
+                    .foregroundColor(Color.theme.accent)
             })
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
@@ -421,7 +421,7 @@ struct EditRecipeView: View {
                             let resign = #selector(UIResponder.resignFirstResponder)
                             UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
                         }
-                        .foregroundColor(Color.orange)
+                        .foregroundColor(Color.theme.accent)
                     }
                 }
             }
@@ -501,35 +501,5 @@ struct _FlexibleView<Data: Collection, Content: View>: View where Data.Element: 
         }
         
         return rows
-    }
-}
-
-extension View {
-    func readSize(onChange: @escaping (CGSize) -> Void) -> some View {
-        background(
-            GeometryReader { geometryProxy in
-                Color.clear
-                    .preference(key: SizePreferenceKey.self, value: geometryProxy.size)
-            }
-        )
-            .onPreferenceChange(SizePreferenceKey.self, perform: onChange)
-    }
-}
-
-private struct SizePreferenceKey: PreferenceKey {
-    static var defaultValue: CGSize = .zero
-    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {}
-}
-
-extension String {
-    func onlyEmoji() -> String {
-        return self.filter({$0.isEmoji})
-    }
-}
-
-extension Character {
-    var isEmoji: Bool {
-        guard let scalar = unicodeScalars.first else { return false }
-        return scalar.properties.isEmoji && (scalar.value > 0x238C || unicodeScalars.count > 1)
     }
 }

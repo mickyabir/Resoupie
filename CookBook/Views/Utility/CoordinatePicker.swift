@@ -95,18 +95,8 @@ struct CoordinatePicker: View {
                 }
             } label: {
                 Text("Select")
-                    .foregroundColor(Color.orange)
+                    .foregroundColor(Color.theme.accent)
             }
         }
-    }
-}
-
-
-
-struct CoordinatePicker_Previews: PreviewProvider {
-    static var previews: some View {
-        CoordinatePicker(viewModel: CoordinatePickerViewModel())
-            .previewDevice(PreviewDevice(rawValue: "iPhone 12"))
-            .previewDisplayName("iPhone 12")
     }
 }

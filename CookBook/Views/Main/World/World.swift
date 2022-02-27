@@ -88,7 +88,7 @@ struct WorldView: View {
                             displayRecipe = false
                         }) {
                             Image(systemName: "chevron.down")
-                                .foregroundColor(Color.orange)
+                                .foregroundColor(Color.theme.accent)
                         })
                 }
                 
@@ -107,11 +107,5 @@ struct WorldView: View {
             }
             .padding(.bottom)
         }
-    }
-}
-
-extension MKCoordinateRegion: Equatable {
-    public static func == (lhs: MKCoordinateRegion, rhs: MKCoordinateRegion) -> Bool {
-        return lhs.span.latitudeDelta == rhs.span.latitudeDelta && lhs.span.longitudeDelta == rhs.span.longitudeDelta && lhs.center.latitude == rhs.center.latitude && lhs.center.longitude == rhs.center.longitude
     }
 }

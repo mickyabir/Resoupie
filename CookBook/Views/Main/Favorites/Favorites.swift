@@ -83,7 +83,7 @@ struct FavoritesView: View {
     var body: some View {
         NavigationView {
             ZStack(alignment: .topTrailing) {
-                Color.background
+                Color.theme.background
                 
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 20) {

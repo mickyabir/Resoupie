@@ -7,10 +7,6 @@
 
 import SwiftUI
 
-class PresentNewRecipe: ObservableObject {
-    @Published var showNewRecipe = false
-}
-
 struct ContentView: View {
     @State private var selection = 1
     
@@ -62,26 +58,6 @@ struct ContentView: View {
                 }
                 .tag(4)
         }
-        .accentColor(Color.orange)
-    }
-}
-
-extension Array: RawRepresentable where Element: Codable {
-    public init?(rawValue: String) {
-        guard let data = rawValue.data(using: .utf8),
-              let result = try? JSONDecoder().decode([Element].self, from: data)
-        else {
-            return nil
-        }
-        self = result
-    }
-    
-    public var rawValue: String {
-        guard let data = try? JSONEncoder().encode(self),
-              let result = String(data: data, encoding: .utf8)
-        else {
-            return "[]"
-        }
-        return result
+        .accentColor(Color.theme.accent)
     }
 }

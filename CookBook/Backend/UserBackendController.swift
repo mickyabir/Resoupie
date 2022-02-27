@@ -74,8 +74,8 @@ extension BackendController: UserBackendController {
         return request(path: UserBackend.path + "signin/", method: "POST", modelType: SignInTokenModel.self, body: jsonData, contentType: .json)
             .receive(on: DispatchQueue.main)
             .tryMap { response in
-                KeychainBackend.main.saveAccessToken(accessToken: response.access_token)
-                KeychainBackend.main.saveRefreshToken(refreshToken: response.refresh_token)
+                KeychainWrapper.main.saveAccessToken(accessToken: response.access_token)
+                KeychainWrapper.main.saveRefreshToken(refreshToken: response.refresh_token)
                 return true
             }
             .eraseToAnyPublisher()        
@@ -102,8 +102,8 @@ extension BackendController: UserBackendController {
         return request(path: UserBackend.path + "signup/", method: "POST", modelType: SignInTokenModel.self, body: jsonData, contentType: .json)
             .receive(on: DispatchQueue.main)
             .tryMap { response in
-                KeychainBackend.main.saveAccessToken(accessToken: response.access_token)
-                KeychainBackend.main.saveRefreshToken(refreshToken: response.refresh_token)
+                KeychainWrapper.main.saveAccessToken(accessToken: response.access_token)
+                KeychainWrapper.main.saveRefreshToken(refreshToken: response.refresh_token)
                 return true
             }
             .eraseToAnyPublisher()
@@ -113,7 +113,7 @@ extension BackendController: UserBackendController {
         return authorizedRequest(path: UserBackend.path + "signout/", method: "POST", modelType: SuccessResponse.self)
             .receive(on: DispatchQueue.main)
             .tryMap { response in
-                KeychainBackend.main.deleteTokens()
+                KeychainWrapper.main.deleteTokens()
                 return response.success
             }
             .eraseToAnyPublisher()

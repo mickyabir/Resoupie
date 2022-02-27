@@ -14,7 +14,7 @@ struct CustomSection<HeaderView: View, ChildView: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             header
-                .foregroundColor(Color.title)
+                .foregroundColor(Color.theme.title)
                 .font(.title2.weight(.semibold))
             
             ZStack(alignment: .leading) {
@@ -25,7 +25,7 @@ struct CustomSection<HeaderView: View, ChildView: View>: View {
                 VStack(alignment: .leading) {
                     content()
                         .padding(.horizontal)
-                        .foregroundColor(Color.text)
+                        .foregroundColor(Color.theme.text)
                 }
             }
         }

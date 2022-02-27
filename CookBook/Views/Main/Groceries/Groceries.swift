@@ -56,7 +56,7 @@ struct GroceriesView: View {
                                     .frame(width: editMode == .active ? 30 : 0)
                                 
                                 TextField("List", text: $groceries[listIndex].name)
-                                    .foregroundColor(Color.title)
+                                    .foregroundColor(Color.theme.title)
                                     .disableAutocorrection(true)
                                     .onTapGesture {
                                         
@@ -68,7 +68,7 @@ struct GroceriesView: View {
                                     HStack {
                                         Image(systemName: item.check ? "checkmark.circle.fill" : "circle")
                                             .frame(width: 22, height: 22)
-                                            .foregroundColor(Color.orange)
+                                            .foregroundColor(Color.theme.accent)
                                             .font(.system(size: 22))
                                             .onTapGesture {
                                                 if let index = groceries[listIndex].items.firstIndex(of: item) {
@@ -90,7 +90,7 @@ struct GroceriesView: View {
                                             let itemIndex = groceries[listIndex].items.firstIndex(of: item)!
                                             TextField("Ingredient", text: $groceries[listIndex].items[itemIndex].ingredient)
                                                 .font(.system(size: 16))
-                                                .foregroundColor(item.check ? Color.lightText : Color.text)
+                                                .foregroundColor(item.check ? Color.theme.lightText : Color.theme.text)
                                                 .opacity(item.check ? 0.8 : 1.0)
                                                 .disableAutocorrection(true)
                                                 .disabled(editMode == .active)
@@ -98,7 +98,7 @@ struct GroceriesView: View {
                                             
                                             
                                             Image(systemName: "folder")
-                                                .foregroundColor(Color.text)
+                                                .foregroundColor(Color.theme.text)
                                                 .opacity(editMode == .active ? 1.0 : 0.0)
                                                 .onTapGesture {
                                                     selectedItem = item
@@ -121,7 +121,7 @@ struct GroceriesView: View {
                                     
                                     Image(systemName: "plus")
                                         .font(.system(size: 16))
-                                        .foregroundColor(Color.orange)
+                                        .foregroundColor(Color.theme.accent)
                                         .onTapGesture {
                                             groceries[listIndex].items.append(GroceryListItem(id: UUID().uuidString, ingredient: "", check: false))
                                             
@@ -208,7 +208,7 @@ struct GroceriesView: View {
                 groceries.append(GroceryList(id: UUID().uuidString, name: "", items: []))
             } label: {
                 Image(systemName: "folder.badge.plus")
-                    .foregroundColor(Color.orange)
+                    .foregroundColor(Color.theme.accent)
             })
             .onAppear {
                 if groceries.count == 0 {

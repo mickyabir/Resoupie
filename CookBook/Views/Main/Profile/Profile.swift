@@ -174,7 +174,7 @@ struct ProfileView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color.background
+                Color.theme.background
                 
                 ScrollView {
                     VStack {

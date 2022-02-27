@@ -1,5 +1,5 @@
 //
-//  KeychainBackend.swift
+//  KeychainWrapper.swift
 //  CookBook
 //
 //  Created by Michael Abir on 2/20/22.
@@ -7,37 +7,37 @@
 
 import Foundation
 
-class KeychainBackend {
-    static let main = KeychainBackend()
+class KeychainWrapper {
+    static let main = KeychainWrapper()
     
-    static let service = "com.resoupie"
+    static let service = "com.cookbook"
     
-    static let accesssTokenService = KeychainBackend.service + "-access-token"
-    static let refreshTokenService = KeychainBackend.service + "-refresh-token"
+    static let accesssTokenService = KeychainWrapper.service + "-access-token"
+    static let refreshTokenService = KeychainWrapper.service + "-refresh-token"
 
     func saveAccessToken(accessToken: String) {
         let accessData = accessToken.data(using: String.Encoding.utf8)!
-        save(accessData, tag: KeychainBackend.accesssTokenService)
+        save(accessData, tag: KeychainWrapper.accesssTokenService)
     }
 
     func saveRefreshToken(refreshToken: String) {
         let refreshData = refreshToken.data(using: String.Encoding.utf8)!
-        save(refreshData, tag: KeychainBackend.refreshTokenService)
+        save(refreshData, tag: KeychainWrapper.refreshTokenService)
     }
     
     func getAccessToken() -> String {
-        let accessData = read(tag: KeychainBackend.accesssTokenService)
+        let accessData = read(tag: KeychainWrapper.accesssTokenService)
         return String(data: accessData ?? Data(), encoding: .utf8) ?? ""
     }
 
     func getRefreshToken() -> String {
-        let refreshData = read(tag: KeychainBackend.refreshTokenService)
+        let refreshData = read(tag: KeychainWrapper.refreshTokenService)
         return String(data: refreshData ?? Data(), encoding: .utf8) ?? ""
     }
     
     func deleteTokens() {
-        delete(tag: KeychainBackend.accesssTokenService)
-        delete(tag: KeychainBackend.refreshTokenService)
+        delete(tag: KeychainWrapper.accesssTokenService)
+        delete(tag: KeychainWrapper.refreshTokenService)
     }
     
     private func save(_ data: Data, tag: String) {

@@ -202,7 +202,7 @@ struct RecipeDetail: View {
     
     var body: some View {
         ZStack(alignment: .topLeading) {
-            Color.background
+            Color.theme.background
             
             List {
                 VStack(spacing: 10) {
@@ -215,11 +215,11 @@ struct RecipeDetail: View {
                         
                         HStack(spacing: 0) {
                             Image(systemName: "fork.knife")
-                                .foregroundColor(Color.lightText)
+                                .foregroundColor(Color.theme.lightText)
                             Text(" from " + fork.parent_author + "'s ")
-                                .foregroundColor(Color.lightText)
+                                .foregroundColor(Color.theme.lightText)
                             Text(fork.parent_name)
-                                .foregroundColor(Color.orange)
+                                .foregroundColor(Color.theme.accent)
                         }
                         .padding(.bottom)
                         .onTapGesture {
@@ -269,8 +269,8 @@ struct RecipeDetail: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     VStack {
-                        Text(viewController.recipeMeta.recipe.name).font(.headline).foregroundColor(Color.navbarTitle)
-                        Text(viewController.recipeMeta.author).font(.subheadline).foregroundColor(Color.lightText)
+                        Text(viewController.recipeMeta.recipe.name).font(.headline).foregroundColor(Color.theme.navbarTitle)
+                        Text(viewController.recipeMeta.author).font(.subheadline).foregroundColor(Color.theme.lightText)
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -299,7 +299,7 @@ struct RecipeDetail: View {
             expandImage
             
         }
-        .accentColor(Color.orange)
+        .accentColor(Color.theme.accent)
     }
 }
 
@@ -326,7 +326,7 @@ extension RecipeDetail {
                     Text("Fork This Recipe")
                     Image(systemName: "fork.knife")
                 }
-                .foregroundColor(Color.orange)
+                .foregroundColor(Color.theme.accent)
                 .font(.headline)
 
             }
@@ -378,18 +378,18 @@ extension RecipeDetail {
             StarsRating(viewController: viewController)
             
             Text(String(viewController.recipeMeta.rating))
-                .foregroundColor(Color.lightText)
+                .foregroundColor(Color.theme.lightText)
             
             Spacer()
         }
     }
     private var specialToolsSection: some View {
         Section(header: HStack {
-            Text("Special Tools").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)
+            Text("Special Tools").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)
         }) {
             ForEach(viewController.recipeMeta.recipe.specialTools.indices, id: \.self) { index in
                 Text(viewController.recipeMeta.recipe.specialTools[index])
-                    .foregroundColor(Color.text)
+                    .foregroundColor(Color.theme.text)
             }
         }
         .textCase(nil)
@@ -398,20 +398,20 @@ extension RecipeDetail {
         Section(header:
                     HStack {
             Text("Ingredients")
-                .foregroundColor(Color.title)
+                .foregroundColor(Color.theme.title)
                 .font(.title2).fontWeight(.semibold)
             
             Spacer()
             
             VStack {
                 Text("Servings")
-                    .foregroundColor(Color.lightText)
+                    .foregroundColor(Color.theme.lightText)
                     .font(.system(size: 14))
                     .font(.title2).fontWeight(.semibold)
                 
                 HStack {
                     Image(systemName: "minus")
-                        .foregroundColor((currentServings ?? viewController.recipeMeta.recipe.servings) > 1 ? Color.orange : Color.lightText)
+                        .foregroundColor((currentServings ?? viewController.recipeMeta.recipe.servings) > 1 ? Color.theme.accent : Color.theme.lightText)
                         .onTapGesture {
                             if currentServings == nil {
                                 currentServings = viewController.recipeMeta.recipe.servings
@@ -424,11 +424,11 @@ extension RecipeDetail {
                         }
                     
                     Text(String(currentServings ?? viewController.recipeMeta.recipe.servings))
-                        .foregroundColor(Color.lightText)
+                        .foregroundColor(Color.theme.lightText)
                         .font(.title2).fontWeight(.semibold)
                     
                     Image(systemName: "plus")
-                        .foregroundColor(Color.orange)
+                        .foregroundColor(Color.theme.accent)
                         .onTapGesture {
                             if currentServings == nil {
                                 currentServings = viewController.recipeMeta.recipe.servings
@@ -443,7 +443,7 @@ extension RecipeDetail {
             Image(systemName: groceriesAdded ? "folder.fill.badge.plus" : "folder.badge.plus")
                 .font(.title2)
                 .padding(.trailing, 20)
-                .foregroundColor(Color.orange)
+                .foregroundColor(Color.theme.accent)
                 .onTapGesture {
                     withAnimation {
                         groceriesAdded.toggle()
@@ -479,7 +479,7 @@ extension RecipeDetail {
                                 }
                             }
                         }
-                        .foregroundColor(Color.orange)
+                        .foregroundColor(Color.theme.accent)
                         .font(.system(size: 18))
                     
                     var currentQuantity = Double(ingredient.quantity) ?? 0
@@ -488,7 +488,7 @@ extension RecipeDetail {
                     }
                     let ingredientText = (currentQuantity > 0 ? String(currentQuantity) : ingredient.quantity) + " " + ingredient.unit + " " + ingredient.name
                     Text(ingredientText)
-                        .foregroundColor(Color.text)
+                        .foregroundColor(Color.theme.text)
                 }
                 .padding(.vertical, 5)
             }
@@ -497,16 +497,16 @@ extension RecipeDetail {
     }
     
     private var methodSection: some View {
-        Section(header: Text("Method").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
+        Section(header: Text("Method").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)) {
             ForEach (viewController.recipeMeta.recipe.steps, id: \.self) { step in
                 let index = viewController.recipeMeta.recipe.steps.firstIndex(of: step)!
                 HStack {
                     Image(systemName: String(index + 1) + ".circle.fill")
-                        .foregroundColor(Color.orange)
+                        .foregroundColor(Color.theme.accent)
                         .font(.system(size: 24))
                     
                     Text(step)
-                        .foregroundColor(Color.text)
+                        .foregroundColor(Color.theme.text)
                         .padding(.vertical, 5)
                 }
             }
@@ -514,7 +514,7 @@ extension RecipeDetail {
         .textCase(nil)
     }
     private var tagsSection: some View {
-        Section(header: Text("Tags").foregroundColor(Color.title).font(.title2).fontWeight(.semibold)) {
+        Section(header: Text("Tags").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)) {
             FlexibleView(
                 data: viewController.recipeMeta.recipe.tags,
                 spacing: 15,
@@ -522,7 +522,7 @@ extension RecipeDetail {
             ) { item in
                 HStack {
                     Text(verbatim: item)
-                        .foregroundColor(Color.text)
+                        .foregroundColor(Color.theme.text)
                 }
                 .padding(8)
                 .background(

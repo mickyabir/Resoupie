@@ -53,7 +53,7 @@ struct UserSignIn<ViewController>: View where ViewController: UserSignInViewCont
             
             ZStack {
                 Rectangle()
-                    .foregroundColor(Color.background)
+                    .foregroundColor(Color.theme.background)
                     .cornerRadius(10)
                 
                 VStack {
@@ -67,7 +67,7 @@ struct UserSignIn<ViewController>: View where ViewController: UserSignInViewCont
                             }
                         } label: {
                             Image(systemName: "x.square.fill")
-                                .foregroundColor(Color.lightText)
+                                .foregroundColor(Color.theme.lightText)
                                 .font(.system(size: 20))
                         }
                         .padding([.trailing, .top])
@@ -86,7 +86,7 @@ struct UserSignIn<ViewController>: View where ViewController: UserSignInViewCont
                         } label: {
                             Text("Sign In")
                         }
-                        .foregroundColor(viewController.accessState == .signIn ? Color.orange : Color.lightText)
+                        .foregroundColor(viewController.accessState == .signIn ? Color.theme.accent : Color.theme.lightText)
                         .opacity(viewController.accessState == .signIn ? 1.0 : 0.7)
                         .alert(isPresented: $viewController.signinError) {
                             Alert(title: Text("Error"), message: Text("Can't Sign In"), dismissButton: .none)
@@ -101,7 +101,7 @@ struct UserSignIn<ViewController>: View where ViewController: UserSignInViewCont
                         } label: {
                             Text("Sign Up")
                         }
-                        .foregroundColor(viewController.accessState == .signUp ? Color.orange : Color.lightText)
+                        .foregroundColor(viewController.accessState == .signUp ? Color.theme.accent : Color.theme.lightText)
                         .opacity(viewController.accessState == .signUp ? 1.0 : 0.7)
                         
                         Spacer()

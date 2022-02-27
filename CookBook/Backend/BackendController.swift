@@ -76,12 +76,12 @@ class BackendController {
     }
     
     func refreshToken() -> AnyPublisher<String, Error> {
-        let refreshToken = KeychainBackend.main.getRefreshToken()
+        let refreshToken = KeychainWrapper.main.getRefreshToken()
         let requestObject = AuthorizedRequestObject(accessToken: refreshToken, path: "auth/refresh", method: "POST")
         return _authorizedRequest(requestObject: requestObject)
             .decode(type: AccessTokenModel.self, decoder: JSONDecoder())
             .tryMap { response in
-                KeychainBackend.main.saveAccessToken(accessToken: response.access_token)
+                KeychainWrapper.main.saveAccessToken(accessToken: response.access_token)
                 return response.access_token
             }
             .eraseToAnyPublisher()
@@ -146,7 +146,7 @@ class BackendController {
 
     
     func authorizedRequest<T: Codable>(path: String, method: String, modelType: T.Type, params: [URLQueryItem]? = nil, body: Data? = nil, contentType: ContentType? = nil) -> AnyPublisher<T, Error> {
-        let accessToken = KeychainBackend.main.getAccessToken()
+        let accessToken = KeychainWrapper.main.getAccessToken()
         var requestObject = AuthorizedRequestObject(accessToken: accessToken, path: path, method: method, params: params, body: body, contentType: contentType)
 
         
