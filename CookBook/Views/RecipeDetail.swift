@@ -200,8 +200,19 @@ struct RecipeDetail: View {
     
     @State var showEditRecipe: Bool = false
     
+    @State var showAuthorProfile: Bool = false
+    
     var body: some View {
         ZStack(alignment: .topLeading) {
+            NavigationLink(destination: ProfileView(viewController: ProfileViewController(viewController.backendController, name: viewController.recipeMeta.author, user_id: viewController.recipeMeta.user_id)), isActive: $showAuthorProfile) {
+                EmptyView()
+            }
+            .frame(width: 0, height: 0)
+            .opacity(0)
+            .onTapGesture {
+            }
+
+            
             Color.theme.background
             
             List {
@@ -271,6 +282,9 @@ struct RecipeDetail: View {
                     VStack {
                         Text(viewController.recipeMeta.recipe.name).font(.headline).foregroundColor(Color.theme.navbarTitle)
                         Text(viewController.recipeMeta.author).font(.subheadline).foregroundColor(Color.theme.lightText)
+                            .onTapGesture {
+                                showAuthorProfile = true
+                            }
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -299,7 +313,6 @@ struct RecipeDetail: View {
             expandImage
             
         }
-        .accentColor(Color.theme.accent)
     }
 }
 
@@ -469,7 +482,7 @@ extension RecipeDetail {
                                 if let currentServings = currentServings {
                                     currentQuantity = currentQuantity / Double(viewController.recipeMeta.recipe.servings) * Double(currentServings)
                                 }
-                                let ingredientString = ingredient.name + " (" + (currentQuantity > 0 ? String(currentQuantity) : ingredient.quantity) + " " + ingredient.unit +  ")"
+                                let ingredientString = ingredient.name + " (" + (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity) + " " + ingredient.unit +  ")"
                                 groceries[0].items.append(GroceryListItem(id: viewController.recipeMeta.id + "_" + ingredient.id, ingredient: ingredientString, check: false))
                             } else if index != nil {
                                 for listIndex in 0..<groceries.count {
@@ -486,7 +499,7 @@ extension RecipeDetail {
                     if let currentServings = currentServings {
                         let _ = (currentQuantity = currentQuantity / Double(viewController.recipeMeta.recipe.servings) * Double(currentServings))
                     }
-                    let ingredientText = (currentQuantity > 0 ? String(currentQuantity) : ingredient.quantity) + " " + ingredient.unit + " " + ingredient.name
+                    let ingredientText = (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity) + " " + ingredient.unit + " " + ingredient.name
                     Text(ingredientText)
                         .foregroundColor(Color.theme.text)
                 }

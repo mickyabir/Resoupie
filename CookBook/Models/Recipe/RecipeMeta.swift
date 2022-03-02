@@ -10,6 +10,7 @@ import Foundation
 struct RecipeMeta: Hashable, Codable, Identifiable {
     var id: String
     var author: String
+    var user_id: String
     var recipe: Recipe
     var rating: Double
     var favorited: Int

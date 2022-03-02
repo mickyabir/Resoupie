@@ -46,52 +46,57 @@ struct WorldView: View {
     var body: some View {
         let places = viewController.recipes.map { Place(id: $0.id, emoji: $0.recipe.emoji, coordinate: $0.recipe.coordinate()!) }
         
-        ZStack(alignment: .bottom) {
-            Map(coordinateRegion: $region, annotationItems: places) { place in
-                MapAnnotation(coordinate: place.coordinate) {
-                    Button {
-                        if let index = viewController.recipes.firstIndex(where: { $0.id == place.id }) {
-                            chosenRecipeIndex = index
-                            displayRecipe = true
+        NavigationView {
+            ZStack(alignment: .bottom) {
+                Map(coordinateRegion: $region, annotationItems: places) { place in
+                    MapAnnotation(coordinate: place.coordinate) {
+                        Button {
+                            if let index = viewController.recipes.firstIndex(where: { $0.id == place.id }) {
+                                chosenRecipeIndex = index
+                                displayRecipe = true
+                            }
+                        } label: {
+                            PlaceAnnotationEmojiView(title: place.emoji)
                         }
-                    } label: {
-                        PlaceAnnotationEmojiView(title: place.emoji)
                     }
                 }
-            }
-            .edgesIgnoringSafeArea(.top)
-            .onChange(of: region) { newRegion in
-                //            viewController.fetchRecipes(region: newRegion)
-            }
-            .onAppear {
-                viewController.fetchRecipes(region: region)
-            }
-            .popover(isPresented: $displayRecipe,content: {
-                NavigationView {
-                    RecipeDetail(viewController: RecipeDetailViewController(recipeMeta: viewController.recipes[chosenRecipeIndex], backendController: viewController.backendController))
-                        .navigationBarItems(leading:
-                                                Button(action: {
-                            displayRecipe = false
-                        }) {
-                            Image(systemName: "chevron.down")
-                                .foregroundColor(Color.theme.accent)
-                        })
+                .edgesIgnoringSafeArea(.top)
+                .onChange(of: region) { newRegion in
+                    //            viewController.fetchRecipes(region: newRegion)
                 }
+                .onAppear {
+                    viewController.fetchRecipes(region: region)
+                }
+                .popover(isPresented: $displayRecipe,content: {
+                    NavigationView {
+                        RecipeDetail(viewController: RecipeDetailViewController(recipeMeta: viewController.recipes[chosenRecipeIndex], backendController: viewController.backendController))
+                            .navigationBarItems(leading:
+                                                    Button(action: {
+                                displayRecipe = false
+                            }) {
+                                Image(systemName: "chevron.down")
+                            })
+                    }
+                    
+                })
                 
-            })
-            
-            Button {
-                viewController.fetchRecipes(region: region)
-            } label: {
-                ZStack {
-                    Rectangle()
-                        .foregroundColor(Color.white)
-                        .frame(width: 120, height: 40)
-                        .cornerRadius(10)
-                    Text("Search Here")
+                Button {
+                    viewController.fetchRecipes(region: region)
+                } label: {
+                    ZStack {
+                        Rectangle()
+                            .foregroundColor(Color.white)
+                            .frame(width: 140, height: 40)
+                            .cornerRadius(10)
+                        Text("Search Here")
+                    }
+                    .shadow(color: Color.black.opacity(0.2), radius: 8)
                 }
+                .padding(.bottom)
             }
-            .padding(.bottom)
+            .navigationBarHidden(true)
         }
+        .navigationBarHidden(true)
+
     }
 }

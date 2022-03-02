@@ -25,6 +25,8 @@ class EditRecipeViewController: ObservableObject {
     
     @Published var recipe: Recipe
     
+    @Environment(\.presentationMode) var presentationMode
+    
     let backendController: EditRecipeBackendController
     
     init(_ backendController: EditRecipeBackendController, recipe: Recipe? = nil, parent_id: String? = nil, image: UIImage? = nil) {
@@ -70,6 +72,7 @@ class EditRecipeViewController: ObservableObject {
                 .sink(receiveCompletion: { _ in
                 }, receiveValue: { success in
                     self.reset()
+                    self.presentationMode.wrappedValue.dismiss()
                 })
                 .store(in: &cancellables)
         }
@@ -84,9 +87,7 @@ struct EditRecipeView: View {
     @ObservedObject var viewController: EditRecipeViewController
     
     @State private var editMode = EditMode.inactive
-    
-    @Environment(\.presentationMode) var presentationMode
-    
+        
     @State var locationEnabled = false
     
     @State var country: String?
@@ -238,7 +239,6 @@ struct EditRecipeView: View {
                         }
                     } label: {
                         Text(editMode == .active ? "Done" : "Edit")
-                            .foregroundColor(Color.theme.accent)
                             .font(.system(size: 16))
                     }
                 }) {
@@ -283,7 +283,6 @@ struct EditRecipeView: View {
                         }
                     } label: {
                         Text(editMode == .active ? "Done" : "Edit")
-                            .foregroundColor(Color.theme.accent)
                             .font(.system(size: 16))
                     }
                 }) {
@@ -336,7 +335,6 @@ struct EditRecipeView: View {
                         }
                     } label: {
                         Text(editMode == .active ? "Done" : "Edit")
-                            .foregroundColor(Color.theme.accent)
                             .font(.system(size: 16))
                     }
                 }) {
@@ -409,10 +407,8 @@ struct EditRecipeView: View {
             }
             .navigationBarItems(trailing: Button(action: {
                 viewController.publishRecipe()
-                presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Publish")
-                    .foregroundColor(Color.theme.accent)
             })
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
@@ -422,7 +418,6 @@ struct EditRecipeView: View {
                             let resign = #selector(UIResponder.resignFirstResponder)
                             UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
                         }
-                        .foregroundColor(Color.theme.accent)
                     }
                 }
             }

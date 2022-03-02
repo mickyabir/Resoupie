@@ -31,7 +31,7 @@ protocol UserSignInViewController: ObservableObject {
     func submit()
 }
 
-struct UserSignIn<ViewController>: View where ViewController: UserSignInViewController {
+struct UserSignIn<ViewController: UserSignInViewController>: View {
     enum FocusedField: Hashable {
         case name
         case username

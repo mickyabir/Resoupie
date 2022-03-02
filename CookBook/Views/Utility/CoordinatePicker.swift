@@ -82,10 +82,12 @@ struct CoordinatePicker: View {
             .onTapGesture {
                 
             }
+
             Circle()
                 .strokeBorder(Color.white, lineWidth: 4)
                 .background(Circle().foregroundColor(Color.blue).opacity(0.1))
                 .frame(width: 300, height: 300)
+                .allowsHitTesting(false)
         }
         .navigationBarTitle("Location", displayMode: .inline)
         .toolbar {
@@ -95,7 +97,6 @@ struct CoordinatePicker: View {
                 }
             } label: {
                 Text("Select")
-                    .foregroundColor(Color.theme.accent)
             }
         }
     }

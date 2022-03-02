@@ -72,24 +72,29 @@ struct RecipeCard: View {
                 .padding(.horizontal, 15)
                 .padding(.bottom, 5)
             }
+            
+            NavigationLink(destination:
+                            NewRecipeDetail(NewRecipeDetailViewController(recipeMeta: viewController.recipeMeta, backendController: viewController.backendController)), isActive: $presentRecipe) {
+                EmptyView()
+            }
+                            
         }
         .frame(width: viewController.width, height: viewController.width + 50)
         .onTapGesture {
             presentRecipe = true
         }
         .padding(.horizontal, 5)
-        .popover(isPresented: $presentRecipe, content: {
-            NavigationView {
-                RecipeDetail(viewController: RecipeDetailViewController(recipeMeta: viewController.recipeMeta, backendController: viewController.backendController))
-                    .navigationBarItems(leading:
-                                            Button(action: {
-                        presentRecipe = false
-                    }) {
-                        Image(systemName: "chevron.down")
-                            .foregroundColor(Color.theme.accent)
-                    })
-            }
-        })
+//        .popover(isPresented: $presentRecipe, content: {
+//            NavigationView {
+//                RecipeDetail(viewController: RecipeDetailViewController(recipeMeta: viewController.recipeMeta, backendController: viewController.backendController))
+//                    .navigationBarItems(leading:
+//                                            Button(action: {
+//                        presentRecipe = false
+//                    }) {
+//                        Image(systemName: "chevron.down")
+//                    })
+//            }
+//        })
         .padding(.bottom)
     }
 }

@@ -43,36 +43,41 @@ extension View {
 
 extension View {
     func setTheme(_ theme: ThemeStyle.Type) -> some View {
-        let navigationAppearance = UINavigationBarAppearance()
+                let navigationAppearance = UINavigationBarAppearance()
         
-        Color.theme = theme
-
-        if let background = Color.theme.navbarBackground {
-            navigationAppearance.configureWithOpaqueBackground()
-            navigationAppearance.backgroundColor = UIColor(background)
-        } else {
-            navigationAppearance.configureWithDefaultBackground()
-        }
-
-        if let titleColor = Color.theme.navbarTitle {
-            navigationAppearance.titleTextAttributes = [.foregroundColor: UIColor(titleColor)]
-            navigationAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor(titleColor)]
-        }
-
-        UINavigationBar.appearance().standardAppearance = navigationAppearance
-        UINavigationBar.appearance().compactAppearance = navigationAppearance
-        UINavigationBar.appearance().scrollEdgeAppearance = navigationAppearance
-
-        // Needed until disappearing tabbar bug is fixed
-        let tabBarAppearance = UITabBarAppearance()
-        tabBarAppearance.configureWithOpaqueBackground()
-        UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-        UITabBar.appearance().standardAppearance = tabBarAppearance
-
-        if let tintColor = Color.theme.navbarTint {
-            UINavigationBar.appearance().tintColor = UIColor(tintColor)
-        }
-
+                Color.theme = theme
+        
+//                if let background = Color.theme.navbarBackground {
+//                    navigationAppearance.configureWithOpaqueBackground()
+//                    navigationAppearance.backgroundColor = UIColor(background)
+//                } else {
+//                    navigationAppearance.configureWithDefaultBackground()
+//        //            navigationAppearance.configureWithTransparentBackground()
+//                }
+        
+                navigationAppearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        
+        
+                if let titleColor = Color.theme.navbarTitle {
+                    navigationAppearance.titleTextAttributes = [.foregroundColor: UIColor(titleColor)]
+                    navigationAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor(titleColor)]
+                }
+        
+                UINavigationBar.appearance().standardAppearance = navigationAppearance
+                UINavigationBar.appearance().compactAppearance = navigationAppearance
+                UINavigationBar.appearance().scrollEdgeAppearance = navigationAppearance
+        
+                // Needed until disappearing tabbar bug is fixed
+                let tabBarAppearance = UITabBarAppearance()
+                tabBarAppearance.configureWithOpaqueBackground()
+                UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+                UITabBar.appearance().standardAppearance = tabBarAppearance
+        
+                UINavigationBar.appearance().tintColor = UIColor(Color.theme.navbarTint)
+                UINavigationBar.appearance().isTranslucent = true
+        
+                UIView.appearance().tintColor = UIColor(Color.theme.tint)
+        
         return self
     }
 }

@@ -35,6 +35,8 @@ enum ServerError: Error {
 class BackendController {
     public static let url = "http://44.201.79.172/"
     
+    public static let users: UserBackendController = BackendController()
+    
     enum ContentType {
         case json
         case multipart(String)
@@ -49,7 +51,7 @@ class BackendController {
         }
     }
     
-    static var cancellables: Set<AnyCancellable> = Set()
+    static private var cancellables: Set<AnyCancellable> = Set()
     
     func verifyJWT(_ accessToken: String) -> Bool {
         if accessToken == "" {

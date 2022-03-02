@@ -16,6 +16,7 @@ struct CookBookApp: App {
             ContentView()
                 .preferredColorScheme(.light)
                 .setTheme(LightTheme.self)
+                .tint(Color.orange)
         }
     }
 }
