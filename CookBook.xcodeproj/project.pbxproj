@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		8128CF1627CF48F000EFDFC7 /* Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128CF1527CF48F000EFDFC7 /* Double.swift */; };
-		8128CF1827CF4A9400EFDFC7 /* Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128CF1727CF4A9400EFDFC7 /* Test.swift */; };
 		812F175227CB4F8A0095F7D0 /* RecipeMeta.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812F175127CB4F8A0095F7D0 /* RecipeMeta.swift */; };
 		812F175427CB4FB30095F7D0 /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812F175327CB4FB30095F7D0 /* Ingredient.swift */; };
 		812F175727CB50350095F7D0 /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812F175627CB50350095F7D0 /* Place.swift */; };
@@ -84,7 +83,6 @@
 
 /* Begin PBXFileReference section */
 		8128CF1527CF48F000EFDFC7 /* Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Double.swift; sourceTree = "<group>"; };
-		8128CF1727CF4A9400EFDFC7 /* Test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Test.swift; sourceTree = "<group>"; };
 		812F175127CB4F8A0095F7D0 /* RecipeMeta.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeMeta.swift; sourceTree = "<group>"; };
 		812F175327CB4FB30095F7D0 /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
 		812F175627CB50350095F7D0 /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
@@ -291,7 +289,6 @@
 				8179715B27AA7F1B00DE1753 /* RecipeCard.swift */,
 				8172715827C6CBDE00C78801 /* EditRecipe.swift */,
 				815BDC0527CC74D4004E7A17 /* NewRecipeDetail.swift */,
-				8128CF1727CF4A9400EFDFC7 /* Test.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -630,7 +627,6 @@
 				815E826F2798CA8800530BA2 /* Groceries.swift in Sources */,
 				818D398B27CAE1E0008F4A47 /* MKCoordinateRegion.swift in Sources */,
 				812F176C27CB54D50095F7D0 /* Profile.swift in Sources */,
-				8128CF1827CF4A9400EFDFC7 /* Test.swift in Sources */,
 				8141EA2527A3740E008BE746 /* CustomAsyncImage.swift in Sources */,
 				81933FEF27BF0E5E00E9BB10 /* UserBackendController.swift in Sources */,
 			);

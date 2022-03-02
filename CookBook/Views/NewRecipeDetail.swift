@@ -9,68 +9,6 @@ import SwiftUI
 import MapKit
 import Combine
 
-class RecipeDetailScrollPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = .zero
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
-}
-
-struct RecipeDetailChildPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = .zero
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
-}
-
-struct VerticalScrollView<Content: View>: View {
-    let content: (CGFloat) -> Content
-    
-    let offset: CGFloat
-    
-    @State private var _offset: CGFloat = 0
-    @State private var _lastOffset: CGFloat = 0
-    @State private var contentHeight: CGFloat = 0
-    
-    init(offset: CGFloat = 0, @ViewBuilder content: @escaping (CGFloat) -> Content) {
-        self.offset = offset
-        self.content = content
-    }
-    
-    var body: some View {
-        ZStack {
-            Color.clear
-                .contentShape(
-                    Rectangle()
-                )
-                .edgesIgnoringSafeArea(.all)
-            
-            content(_offset)
-                .offset(y: _offset + offset + (contentHeight - UIScreen.main.bounds.height) / 2 - 10)
-                .readSize { size in
-                    DispatchQueue.main.async {
-                        contentHeight = size.height
-                    }
-                }
-
-        }
-        .gesture(
-            DragGesture()
-                .onChanged { gesture in
-                    withAnimation(.spring()) {
-                        _offset = min(-offset, _lastOffset + gesture.translation.height)
-                    }
-                }
-                .onEnded { _ in
-                    withAnimation(.spring()) {
-                        _offset = min(0, _offset)
-                        _lastOffset = _offset
-                    }
-                }
-        )
-        
-    }
-}
 
 struct NewStarsRating: View {
     @ObservedObject var viewController: NewRecipeDetailViewController
@@ -315,7 +253,7 @@ struct NewRecipeDetail: View {
                 Text(String(viewController.recipeMeta.rating))
                     .foregroundColor(Color.theme.light)
                     .fontWeight(.semibold)
-                .padding(.trailing)
+                    .padding(.trailing)
             }
             .frame(maxWidth: .infinity)
             .background(
@@ -415,51 +353,36 @@ struct NewRecipeDetail: View {
         }
     }
     
+    @State var scroll: CGFloat = 0
+    
     var body: some View {
-        NavigationView {
-            ZStack(alignment: .top) {
-                Color.theme.background
-                
-                VerticalScrollView(offset: initialOffset) { offset in
-                    VStack {
-                        header(offset: offset)
-                        
-                        forkButtonSection
-                        forkButtonSection
-                        forkButtonSection
-                        forkButtonSection
-                        forkButtonSection
-                        forkButtonSection
-
-                        if let location = viewController.recipeMeta.recipe
-                            .coordinate() {
-                            mapViewSection(location)
-                        }
+        ZStack(alignment: .top) {
+            Color.theme.background
+            
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack {
+                    header(offset: scroll)
+                    
+                    forkButtonSection
+                    
+                    if let location = viewController.recipeMeta.recipe
+                        .coordinate() {
+                        mapViewSection(location)
                     }
-                    .preference(key: RecipeDetailScrollPreferenceKey.self, value: offset)
                 }
-                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
-                .onPreferenceChange(RecipeDetailScrollPreferenceKey.self, perform: { offset in
-                    DispatchQueue.main.async {
-                        withAnimation(.easeInOut) {
-                            self.showEmoji = offset < -120
-                        }
-                        
-                        withAnimation(.spring()) {
-                            showNavBar = offset < -120
-                        }
-                        
-                        print(offset)
-                    }
-                })
-                
-                
-                navigationBar
+                .readScroll { scroll in
+                    self.scroll = scroll + 97
+                    print(self.scroll)
+                    self.showNavBar = self.scroll <= -197
+                }
             }
-            .navigationBarHidden(true)
-            .edgesIgnoringSafeArea(.top)
+            .offset(y: -100)
+            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+        
+            navigationBar
         }
         .navigationBarHidden(true)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -475,7 +398,7 @@ extension NewRecipeDetail {
                 
                 Text(viewController.recipeMeta.recipe.emoji)
                     .font(.title)
-                    .padding(.bottom)
+                    .padding(.bottom, 10)
                     .transition(.move(edge: .bottom))
                     .opacity(showEmoji ? 1.0 : 0.0)
                 
@@ -484,15 +407,20 @@ extension NewRecipeDetail {
             
             HStack {
                 Image(systemName: "chevron.left")
-                    .font(Font.title3.weight(.semibold))
+                    .font(Font.title3.weight(.medium))
                     .foregroundColor(Color.theme.light)
                     .colorMultiply(showNavBar ? Color.theme.accent : Color.theme.light)
-                    .onTapGesture {
-                        presentation.wrappedValue.dismiss()
-                    }
-                    .padding()
+                    .background(
+                        Rectangle()
+                            .foregroundColor(Color.black.opacity(0.0001))
+                            .frame(width: 40, height: 30)
+                    )
                 
                 Spacer()
+            }
+            .padding()
+            .onTapGesture {
+                presentation.wrappedValue.dismiss()
             }
         }
     }
@@ -527,8 +455,8 @@ struct NewRecipeDetail_Previews: PreviewProvider {
         
         let recipe = Recipe(image: "621c33b12cfadc340f1c20bd", name: "Spaghetti", ingredients: ingredients, steps: ["Step 1", "Step 2"], coordinate_lat: location.latitude, coordinate_long: location.longitude, emoji: "🍝", servings: 2, tags: ["vegan", "italian"], time: "25 min", specialTools: ["Tool 1"], parent_id: nil)
         
-//        let recipe = Recipe(image: "621c33b12cfadc340f1c20bd", name: "Spaghetti", ingredients: ingredients, steps: ["Step 1", "Step 2"], coordinate_lat: location.latitude, coordinate_long: nil, emoji: "🍝", servings: 2, tags: ["vegan", "italian"], time: "25 min", specialTools: ["Tool 1"], parent_id: nil)
-
+        //        let recipe = Recipe(image: "621c33b12cfadc340f1c20bd", name: "Spaghetti", ingredients: ingredients, steps: ["Step 1", "Step 2"], coordinate_lat: location.latitude, coordinate_long: nil, emoji: "🍝", servings: 2, tags: ["vegan", "italian"], time: "25 min", specialTools: ["Tool 1"], parent_id: nil)
+        
         
         let recipeMeta = RecipeMeta(id: "", author: "Micky Abir", user_id: "", recipe: recipe, rating: 4.3, favorited: 82)
         NewRecipeDetail(NewRecipeDetailViewController(recipeMeta: recipeMeta, backendController: BackendController()))

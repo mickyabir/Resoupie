@@ -29,6 +29,11 @@ fileprivate struct SizePreferenceKey: PreferenceKey {
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) {}
 }
 
+fileprivate struct ScrollPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = .zero
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {}
+}
+
 extension View {
     func readSize(onChange: @escaping (CGSize) -> Void) -> some View {
         background(
@@ -38,6 +43,16 @@ extension View {
             }
         )
             .onPreferenceChange(SizePreferenceKey.self, perform: onChange)
+    }
+    
+    func readScroll(onChange: @escaping (CGFloat) -> Void) -> some View {
+        background(
+            GeometryReader { geometryProxy in
+                Color.clear
+                    .preference(key: ScrollPreferenceKey.self, value: geometryProxy.frame(in: .global).minY)
+            }
+        )
+        .onPreferenceChange(ScrollPreferenceKey.self, perform: onChange)
     }
 }
 

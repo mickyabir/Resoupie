@@ -74,7 +74,7 @@ struct RecipeCard: View {
             }
             
             NavigationLink(destination:
-                            NewRecipeDetail(NewRecipeDetailViewController(recipeMeta: viewController.recipeMeta, backendController: viewController.backendController)), isActive: $presentRecipe) {
+                            NewRecipeDetail(NewRecipeDetailViewController(recipeMeta: viewController.recipeMeta, backendController: viewController.backendController)).navigationBarTitleDisplayMode(.inline), isActive: $presentRecipe) {
                 EmptyView()
             }
                             
@@ -85,7 +85,6 @@ struct RecipeCard: View {
         }
         .padding(.horizontal, 5)
 //        .popover(isPresented: $presentRecipe, content: {
-//            NavigationView {
 //                RecipeDetail(viewController: RecipeDetailViewController(recipeMeta: viewController.recipeMeta, backendController: viewController.backendController))
 //                    .navigationBarItems(leading:
 //                                            Button(action: {
@@ -93,7 +92,6 @@ struct RecipeCard: View {
 //                    }) {
 //                        Image(systemName: "chevron.down")
 //                    })
-//            }
 //        })
         .padding(.bottom)
     }
