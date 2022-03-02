@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8128CF1627CF48F000EFDFC7 /* Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128CF1527CF48F000EFDFC7 /* Double.swift */; };
+		8128CF1C27CF6DDD00EFDFC7 /* UINavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128CF1B27CF6DDD00EFDFC7 /* UINavigationController.swift */; };
 		812F175227CB4F8A0095F7D0 /* RecipeMeta.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812F175127CB4F8A0095F7D0 /* RecipeMeta.swift */; };
 		812F175427CB4FB30095F7D0 /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812F175327CB4FB30095F7D0 /* Ingredient.swift */; };
 		812F175727CB50350095F7D0 /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812F175627CB50350095F7D0 /* Place.swift */; };
@@ -83,6 +84,7 @@
 
 /* Begin PBXFileReference section */
 		8128CF1527CF48F000EFDFC7 /* Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Double.swift; sourceTree = "<group>"; };
+		8128CF1B27CF6DDD00EFDFC7 /* UINavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UINavigationController.swift; sourceTree = "<group>"; };
 		812F175127CB4F8A0095F7D0 /* RecipeMeta.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeMeta.swift; sourceTree = "<group>"; };
 		812F175327CB4FB30095F7D0 /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
 		812F175627CB50350095F7D0 /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
@@ -382,6 +384,7 @@
 			isa = PBXGroup;
 			children = (
 				818D399627CAE32D008F4A47 /* UIImage.swift */,
+				8128CF1B27CF6DDD00EFDFC7 /* UINavigationController.swift */,
 			);
 			path = UIKit;
 			sourceTree = "<group>";
@@ -581,6 +584,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				818D398D27CAE21C008F4A47 /* View.swift in Sources */,
+				8128CF1C27CF6DDD00EFDFC7 /* UINavigationController.swift in Sources */,
 				818D399527CAE2EE008F4A47 /* Data.swift in Sources */,
 				815BDC0E27CDB2D5004E7A17 /* CLGeocoder.swift in Sources */,
 				815E82712798CAC800530BA2 /* RecipesMain.swift in Sources */,

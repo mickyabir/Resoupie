@@ -305,13 +305,7 @@ struct NewRecipeDetail: View {
             }
         }
         .padding(.vertical)
-        .background(
-            Rectangle()
-                .foregroundColor(Color.white)
-                .frame(width: UIScreen.main.bounds.width - 20)
-                .cornerRadius(12)
-                .shadow(color: Color.black.opacity(0.1), radius: 10)
-        )
+        .background(sectionRectangle)
         .onTapGesture {
             viewController.mapPressed()
         }
@@ -327,34 +321,34 @@ struct NewRecipeDetail: View {
             .frame(width: 0, height: 0)
             .opacity(0)
             
-            ZStack {
-                Rectangle()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .foregroundColor(Color.theme.light)
-                    .cornerRadius(12)
-                
-                HStack {
-                    Spacer ()
-                    Text("Fork This Recipe")
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                }
-                .padding(.horizontal, 20)
-                .foregroundColor(Color.theme.tint)
+            HStack {
+                Spacer ()
+                Image(systemName: "fork.knife")
+                Text("Fork This Recipe")
+                    .font(.title3)
+                Spacer()
+                Image(systemName: "chevron.right")
             }
-            .padding(.horizontal, 10)
-            .padding(.top, 10)
-            .padding(.bottom, 20)
+            .background(sectionRectangle)
+            .padding(.horizontal, 30)
+            .foregroundColor(Color.theme.tint)
             .onTapGesture {
                 showEditRecipe = true
             }
-            .shadow(color: Color.black.opacity(0.1), radius: 10)
         }
     }
     
     @State var scroll: CGFloat = 0
     
+    private var sectionRectangle: some View {
+        Rectangle()
+            .foregroundColor(Color.white)
+            .frame(minHeight: 50)
+            .frame(width: UIScreen.main.bounds.width - 20)
+            .cornerRadius(12)
+            .shadow(color: Color.black.opacity(0.1), radius: 10)
+    }
+        
     var body: some View {
         ZStack(alignment: .top) {
             Color.theme.background
@@ -364,21 +358,67 @@ struct NewRecipeDetail: View {
                     header(offset: scroll)
                     
                     forkButtonSection
-                    
+                        .padding(.bottom)
+
                     if let location = viewController.recipeMeta.recipe
                         .coordinate() {
                         mapViewSection(location)
+                            .padding(.vertical)
                     }
+                    
+                    VStack {
+                        HStack {
+                            Text("Ingredients")
+                                .foregroundColor(Color.theme.title3)
+                                .font(.title3)
+                            
+                            Spacer()
+                            
+                            VStack {
+                                Text("Servings")
+                                    .foregroundColor(Color.theme.lightText)
+                                    .font(.subheadline)
+                                    .padding(.top)
+                                
+                                HStack {
+                                    Image(systemName: "minus")
+                                        .foregroundColor(Color.theme.accent)
+                                        .font(.title)
+                                    Text("1")
+                                        .foregroundColor(Color.theme.text)
+                                        .font(.title)
+                                    Image(systemName: "plus")
+                                        .foregroundColor(Color.theme.accent)
+                                        .font(.title)
+                                }
+                                
+                                Spacer()
+                            }
+                            
+                            Spacer()
+                            
+                            Image(systemName: "folder.badge.plus")
+                                .foregroundColor(Color.theme.accent)
+                                .font(.title3)
+                        }
+                        .padding(.horizontal, 30)
+                    }
+                    .background(
+                        sectionRectangle
+                    )
+                    .padding(.vertical)
+                    
                 }
                 .readScroll { scroll in
                     self.scroll = scroll + 97
-                    print(self.scroll)
                     self.showNavBar = self.scroll <= -197
                 }
+                .offset(y: -100)
+
             }
-            .offset(y: -100)
+            .edgesIgnoringSafeArea(.bottom)
             .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
-        
+            
             navigationBar
         }
         .navigationBarHidden(true)
@@ -391,6 +431,7 @@ extension NewRecipeDetail {
         ZStack(alignment: .bottom) {
             ZStack(alignment: .bottom) {
                 Rectangle()
+                    .foregroundColor(Color.clear)
                     .background(.ultraThinMaterial)
                     .frame(maxWidth: .infinity)
                     .frame(height: navbarHeight)
@@ -410,18 +451,26 @@ extension NewRecipeDetail {
                     .font(Font.title3.weight(.medium))
                     .foregroundColor(Color.theme.light)
                     .colorMultiply(showNavBar ? Color.theme.accent : Color.theme.light)
-                    .background(
-                        Rectangle()
-                            .foregroundColor(Color.black.opacity(0.0001))
-                            .frame(width: 40, height: 30)
-                    )
+//                    .background(
+//                        Rectangle()
+//                            .foregroundColor(Color.black.opacity(0.0001))
+//                            .frame(width: 40, height: 30)
+//                    )
                 
+                Text("Back")
+//                    .font(Font.title3.weight(.medium))
+                    .foregroundColor(Color.theme.light)
+                    .colorMultiply(showNavBar ? Color.theme.accent : Color.theme.light)
+
                 Spacer()
             }
             .padding()
             .onTapGesture {
                 presentation.wrappedValue.dismiss()
             }
+            
+            Divider()
+                .opacity(showNavBar ? 1.0 : 0.0)
         }
     }
     
