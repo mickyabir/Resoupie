@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		8128CF1627CF48F000EFDFC7 /* Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128CF1527CF48F000EFDFC7 /* Double.swift */; };
 		8128CF1C27CF6DDD00EFDFC7 /* UINavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128CF1B27CF6DDD00EFDFC7 /* UINavigationController.swift */; };
+		8128CF1F27D02D3800EFDFC7 /* RecipeDetailSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128CF1E27D02D3800EFDFC7 /* RecipeDetailSection.swift */; };
+		8128CF2127D0315800EFDFC7 /* StarsRating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128CF2027D0315800EFDFC7 /* StarsRating.swift */; };
 		812F175227CB4F8A0095F7D0 /* RecipeMeta.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812F175127CB4F8A0095F7D0 /* RecipeMeta.swift */; };
 		812F175427CB4FB30095F7D0 /* Ingredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812F175327CB4FB30095F7D0 /* Ingredient.swift */; };
 		812F175727CB50350095F7D0 /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812F175627CB50350095F7D0 /* Place.swift */; };
@@ -85,6 +87,8 @@
 /* Begin PBXFileReference section */
 		8128CF1527CF48F000EFDFC7 /* Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Double.swift; sourceTree = "<group>"; };
 		8128CF1B27CF6DDD00EFDFC7 /* UINavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UINavigationController.swift; sourceTree = "<group>"; };
+		8128CF1E27D02D3800EFDFC7 /* RecipeDetailSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeDetailSection.swift; sourceTree = "<group>"; };
+		8128CF2027D0315800EFDFC7 /* StarsRating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarsRating.swift; sourceTree = "<group>"; };
 		812F175127CB4F8A0095F7D0 /* RecipeMeta.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeMeta.swift; sourceTree = "<group>"; };
 		812F175327CB4FB30095F7D0 /* Ingredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ingredient.swift; sourceTree = "<group>"; };
 		812F175627CB50350095F7D0 /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
@@ -171,6 +175,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8128CF1D27D02D1800EFDFC7 /* RecipeDetail */ = {
+			isa = PBXGroup;
+			children = (
+				814C8D24279766940056A7D2 /* RecipeDetail.swift */,
+				815BDC0527CC74D4004E7A17 /* NewRecipeDetail.swift */,
+				8128CF1E27D02D3800EFDFC7 /* RecipeDetailSection.swift */,
+				8128CF2027D0315800EFDFC7 /* StarsRating.swift */,
+			);
+			path = RecipeDetail;
+			sourceTree = "<group>";
+		};
 		812F175527CB502D0095F7D0 /* Place */ = {
 			isa = PBXGroup;
 			children = (
@@ -286,11 +301,10 @@
 			children = (
 				818D399B27CAE38F008F4A47 /* Main */,
 				81B1BF83279F84FB00EC85BB /* Utility */,
-				814C8D24279766940056A7D2 /* RecipeDetail.swift */,
 				819E4E0D27C22ECF004068A3 /* UserSignIn.swift */,
 				8179715B27AA7F1B00DE1753 /* RecipeCard.swift */,
 				8172715827C6CBDE00C78801 /* EditRecipe.swift */,
-				815BDC0527CC74D4004E7A17 /* NewRecipeDetail.swift */,
+				8128CF1D27D02D1800EFDFC7 /* RecipeDetail */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -612,10 +626,12 @@
 				812F175927CB50430095F7D0 /* PlaceAnnotationEmojiView.swift in Sources */,
 				81BAF3EC2798D408004B0767 /* Favorites.swift in Sources */,
 				812F176E27CC69EB0095F7D0 /* AppStorage.swift in Sources */,
+				8128CF1F27D02D3800EFDFC7 /* RecipeDetailSection.swift in Sources */,
 				814C8CF72797631E0056A7D2 /* CookBookApp.swift in Sources */,
 				812F176527CB513C0095F7D0 /* RecipeGroupRow.swift in Sources */,
 				813F156927A2161D00214CE0 /* RecipeBackendController.swift in Sources */,
 				8179715C27AA7F1B00DE1753 /* RecipeCard.swift in Sources */,
+				8128CF2127D0315800EFDFC7 /* StarsRating.swift in Sources */,
 				818D399127CAE2C0008F4A47 /* String.swift in Sources */,
 				81BAF3EE2799FDBB004B0767 /* World.swift in Sources */,
 				81B1BF87279F852200EC85BB /* PhotoPicker.swift in Sources */,

@@ -29,6 +29,7 @@ struct FlexibleView<Data: Collection, Content: View>: View where Data.Element: H
                 alignment: alignment,
                 content: content
             )
+            
         }
     }
 }
@@ -77,5 +78,26 @@ struct _FlexibleView<Data: Collection, Content: View>: View where Data.Element: 
         }
         
         return rows
+    }
+}
+
+struct FlexibleView_Previews: PreviewProvider {
+    static var previews: some View {
+        let data = ["vegan", "easy", "pasta", "italian", "test", "hello"]
+        FlexibleView(
+            data: data,
+            spacing: 15,
+            alignment: .leading
+        ) { item in
+            HStack {
+                Text(verbatim: item)
+                    .foregroundColor(Color.theme.text)
+            }
+            .padding(8)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.gray.opacity(0.1))
+            )
+        }
     }
 }

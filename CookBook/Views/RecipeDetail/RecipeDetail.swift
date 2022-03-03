@@ -526,6 +526,7 @@ extension RecipeDetail {
         }
         .textCase(nil)
     }
+    
     private var tagsSection: some View {
         Section(header: Text("Tags").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)) {
             FlexibleView(
