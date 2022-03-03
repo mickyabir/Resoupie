@@ -32,7 +32,7 @@ enum ServerError: Error {
   }
 }
 
-class BackendController {
+class BackendController: ObservableObject {
     public static let url = "http://44.201.79.172/"
     
     public static let users: UserBackendController = BackendController()

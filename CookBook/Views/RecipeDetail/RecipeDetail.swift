@@ -8,11 +8,6 @@
 import SwiftUI
 import Combine
 
-protocol StarsRatingViewController: ObservableObject {
-    var rating: Double { get }
-    func rateRecipe(_ rating: Int, continuation: @escaping (Double) -> ())
-}
-
 struct StarsRating: View {
     @ObservedObject var viewController: RecipeDetailViewController
     

@@ -17,6 +17,7 @@ struct CookBookApp: App {
                 .preferredColorScheme(.light)
                 .setTheme(LightTheme.self)
                 .tint(Color.orange)
+                .environmentObject(BackendController())
         }
     }
 }

@@ -20,6 +20,7 @@ protocol ThemeStyle {
     static var navbarTint: Color { get }
     static var navbarBackground: Color? { get }
     static var light: Color { get }
+    static var red: Color { get }
 }
 
 struct LightTheme: ThemeStyle {
@@ -35,4 +36,5 @@ struct LightTheme: ThemeStyle {
     static let navbarTitle: Color? = Color(red: 105 / 255, green: 84 / 255, blue: 70 / 255)
     static let navbarBackground: Color? = nil
     static let light = Color(red: 255 / 255, green: 255 / 255, blue: 255 / 255)
+    static let red = Color.red
 }

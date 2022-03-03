@@ -7,14 +7,19 @@
 
 import SwiftUI
 
+protocol StarsRatingViewController: ObservableObject {
+    var rating: Double { get }
+    func rateRecipe(_ rating: Int, continuation: @escaping (Double) -> ())
+}
+
 struct NewStarsRating: View {
-    @ObservedObject var viewController: NewRecipeDetailViewController
+    @ObservedObject var viewController: NewRecipeDetailViewModel
     
     @State private var starNames: [String] = [String](repeating: "star", count: 5)
     @State private var starRotations: [Double] = [Double](repeating: 0, count: 5)
     @State private var starIndexAppeared: [Bool] = [Bool](repeating: false, count: 5)
     
-    init(viewController: NewRecipeDetailViewController) {
+    init(viewController: NewRecipeDetailViewModel) {
         self.viewController = viewController
     }
     

@@ -23,7 +23,7 @@ struct RecipeCard: View {
     @State var presentRecipe = false
     @State var image: UIImage?
     
-    let viewController: RecipeCardViewController
+    @ObservedObject var viewController: RecipeCardViewController
     
     init(_ viewController: RecipeCardViewController) {
         self.viewController = viewController
@@ -74,7 +74,7 @@ struct RecipeCard: View {
             }
             
             NavigationLink(destination:
-                            NewRecipeDetail(NewRecipeDetailViewController(recipeMeta: viewController.recipeMeta, backendController: viewController.backendController)).navigationBarTitleDisplayMode(.inline), isActive: $presentRecipe) {
+                            NewRecipeDetail(viewController.recipeMeta).navigationBarTitleDisplayMode(.inline), isActive: $presentRecipe) {
                 EmptyView()
             }
                             
