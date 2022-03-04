@@ -12,14 +12,14 @@ protocol StarsRatingViewController: ObservableObject {
     func rateRecipe(_ rating: Int, continuation: @escaping (Double) -> ())
 }
 
-struct NewStarsRating: View {
-    @ObservedObject var viewController: NewRecipeDetailViewController
+struct StarsRating: View {
+    @ObservedObject var viewController: RecipeDetailViewController
     
     @State private var starNames: [String] = [String](repeating: "star", count: 5)
     @State private var starRotations: [Double] = [Double](repeating: 0, count: 5)
     @State private var starIndexAppeared: [Bool] = [Bool](repeating: false, count: 5)
     
-    init(viewController: NewRecipeDetailViewController) {
+    init(viewController: RecipeDetailViewController) {
         self.viewController = viewController
     }
     

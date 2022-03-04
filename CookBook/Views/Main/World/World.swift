@@ -39,7 +39,7 @@ struct WorldView: View {
     @ObservedObject var viewController: WorldViewController
     
     @State var displayRecipe = false
-    @State var chosenRecipeIndex = 0
+    @State var chosenRecipeIndex: Int? = nil
     
     @State var lastRegion: MKCoordinateRegion?
     
@@ -48,6 +48,12 @@ struct WorldView: View {
         
         NavigationView {
             ZStack(alignment: .bottom) {
+                NavigationLink(destination: RecipeDetail(chosenRecipeIndex != nil ? viewController.recipes[chosenRecipeIndex!] : RecipeMeta.empty, backendController: BackendController()), isActive: $displayRecipe) {
+                    EmptyView()
+                }
+                .opacity(0)
+                .frame(width: 0, height: 0)
+                
                 Map(coordinateRegion: $region, annotationItems: places) { place in
                     MapAnnotation(coordinate: place.coordinate) {
                         Button {
@@ -67,18 +73,6 @@ struct WorldView: View {
                 .onAppear {
                     viewController.fetchRecipes(region: region)
                 }
-                .popover(isPresented: $displayRecipe,content: {
-                    NavigationView {
-                        RecipeDetail(viewController: RecipeDetailViewController(recipeMeta: viewController.recipes[chosenRecipeIndex], backendController: viewController.backendController))
-                            .navigationBarItems(leading:
-                                                    Button(action: {
-                                displayRecipe = false
-                            }) {
-                                Image(systemName: "chevron.down")
-                            })
-                    }
-                    
-                })
                 
                 Button {
                     viewController.fetchRecipes(region: region)

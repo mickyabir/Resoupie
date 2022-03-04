@@ -2,132 +2,152 @@
 //  RecipeDetail.swift
 //  CookBook
 //
-//  Created by Michael Abir on 1/18/22.
+//  Created by Michael Abir on 2/27/22.
 //
 
 import SwiftUI
+import MapKit
 import Combine
 
-struct StarsRating: View {
-    @ObservedObject var viewController: RecipeDetailViewController
-    
-    @State private var starNames: [String] = [String](repeating: "star", count: 5)
-    @State private var starRotations: [Double] = [Double](repeating: 0, count: 5)
-    @State private var starIndexAppeared: [Bool] = [Bool](repeating: false, count: 5)
-
-    init(viewController: RecipeDetailViewController) {
-        self.viewController = viewController
-    }
-    
-    func rateRecipe(_ rating: Int) {
-        viewController.rateRecipe(rating) { newRating in
-            let halfStar = newRating.truncatingRemainder(dividingBy: 1) > 0.3
-            for index in 0..<5 {
-                if index < Int(floor(viewController.rating)) {
-                    starNames[index] = "star.fill"
-                } else if index == Int(floor(viewController.rating)) && halfStar {
-                    starNames[index] = "star.leadinghalf.fill"
-                } else {
-                    starNames[index] = "star"
-                }
-
-                starRotations[index] = 0
-            }
-        }
-    }
-    
-    var body: some View {
-        let halfStar = viewController.rating.truncatingRemainder(dividingBy: 1) > 0.3
-
-        ForEach(0..<5) { index in
-            if index < Int(floor(viewController.rating)) {
-                Image(systemName: starNames[index])
-                    .foregroundColor(Color.yellow)
-                    .rotation3DEffect(.degrees(starRotations[index]), axis: (x: 0, y: 1, z: 0))
-                    .onTapGesture {
-                        rateRecipe(index + 1)
-                    }
-                    .onAppear {
-                        if !starIndexAppeared[index] {
-                            starIndexAppeared[index] = true
-                            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5 + Double(index) * 0.2) {
-                                withAnimation(.linear(duration: 1.0)) {
-                                    starRotations[index] = 180
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
-                                    withAnimation(.linear(duration: 0.5)) {
-                                        starNames[index] = "star.fill"
-                                    }
-                                }
-                            }
-                        }
-                    }
-            } else if index == Int(floor(viewController.rating)) && halfStar {
-                Image(systemName: starNames[index])
-                    .foregroundColor(Color.yellow)
-                    .rotation3DEffect(.degrees(starRotations[index]), axis: (x: 0, y: 1, z: 0))
-                    .onTapGesture {
-                        rateRecipe(index + 1)
-                    }
-                    .onAppear {
-                        if !starIndexAppeared[index] {
-                            starIndexAppeared[index] = true
-                            
-                            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5 + Double(index) * 0.2) {
-                                withAnimation(.linear(duration: 1.0)) {
-                                    starRotations[index] = 360
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
-                                    withAnimation(.linear(duration: 0.5)) {
-                                        starNames[index] = "star.leadinghalf.fill"
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-            } else {
-                Image(systemName: "star")
-                    .foregroundColor(Color.yellow)
-                    .onTapGesture {
-                        rateRecipe(index + 1)
-                    }
-                    .onAppear {
-                        if !starIndexAppeared[index] {
-                            starIndexAppeared[index] = true
-                        }
-                    }
-            }
-        }
-    }
-}
-
 class RecipeDetailViewController: StarsRatingViewController {
+    @AppStorage("groceryLists") var groceries: [GroceryList] = []
+
     private var cancellables: Set<AnyCancellable> = Set()
-    let backendController: RecipeBackendController
+    typealias Backend = RecipeBackendController
+    let backendController: Backend
+    var recipeMeta: RecipeMeta
+    
+    @AppStorage("favorites") var favorites: [RecipeMeta] = []
+    @Published var favorited: Bool = false
+
     @Published var rating: Double
-    @Published var recipeMeta: RecipeMeta
-    @Published var forkInfo: ForkInfoModel?
+    @Published var forkInfo: ForkInfoModel? = nil
     @Published var showFork: Bool = false
+
     var forkViewController: RecipeDetailViewController?
     var forkRecipeMeta: RecipeMeta?
+
+    @State var coordinateRegion: MKCoordinateRegion
+
+    @Published var locationName: String = ""
+
+    @Published var hasSpecialTool: [Bool]
+    @Published var hasIngredient: [Bool]
+    @Published var completedStep: [Bool]
+    @Published var groceriesAdded = false
     
-    init(recipeMeta: RecipeMeta, backendController: RecipeBackendController) {
+    @Published var currentServings: Int?
+    
+    @Published var ingredientInGroceryList: [Bool]
+
+    init(_ recipeMeta: RecipeMeta, backendController: Backend) {
         self.recipeMeta = recipeMeta
+        rating = recipeMeta.rating
+        let center = recipeMeta.recipe.coordinate()
+        coordinateRegion = MKCoordinateRegion(center: center ?? CLLocationCoordinate2D(), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+        
+        hasSpecialTool = [Bool](repeating: false, count: recipeMeta.recipe.specialTools.count)
+        hasIngredient = [Bool](repeating: false, count: recipeMeta.recipe.ingredients.count)
+        completedStep = [Bool](repeating: false, count: recipeMeta.recipe.steps.count)
+        favorited = false
+        
         self.backendController = backendController
-        self.rating = recipeMeta.rating
+        
+//                ingredientInGroceryList =  recipeMeta.recipe.ingredients.map {
+//                    groceries.reduce([], { $0 + $1.items }).firstIndex(where: { $0.id == (recipeMeta.id + "_" + $0.id) }) != nil
+//                }
+        
+        ingredientInGroceryList =  recipeMeta.recipe.ingredients.map { ingredient in
+            false
+        }
+
+
+        let geo = CLGeocoder()
+        
+        if let location = recipeMeta.recipe.coordinate() {
+            geo.reverseGeocodeLocationCombine(location: CLLocation(latitude: location.latitude, longitude: location.longitude))
+                .receive(on: DispatchQueue.main)
+                .sink { country, locality in
+                    if let country = country {
+                        self.locationName = country
+                        
+                        if let locality = locality {
+                            self.locationName = locality + ", " + country
+                        }
+                    }
+                }
+                .store(in: &cancellables)
+        }
+        
+        groceriesAdded = groceries.firstIndex(where: { $0.id == recipeMeta.id }) != nil
+
+        checkFavorited()
+        getForkInfo()
     }
     
+    func specialToolPressed(_ index: Int) {
+        hasSpecialTool[index].toggle()
+    }
+    
+    func ingredientPressed(_ index: Int) {
+        hasIngredient[index].toggle()
+    }
+    
+    func ingredientAddPressed(_ ingredient: Ingredient) {
+        let groceryListIndex = groceries.firstIndex(where: { $0.id == recipeMeta.id })
+
+        if let groceryListIndex = groceryListIndex {
+            if let itemIndex = groceries[groceryListIndex].items.firstIndex(where: { $0.id == recipeMeta.id + "_" + ingredient.id }) {
+                groceries[groceryListIndex].items.remove(at: itemIndex)
+            }
+        } else {
+            groceries[0].items.append(GroceryListItem(id: recipeMeta.id + "_" + ingredient.id, ingredient: getIngredientString(ingredient: ingredient), check: false))
+            
+        }
+    }
+    
+    func getIngredientString(ingredient: Ingredient) -> String {
+        var currentQuantity = Double(ingredient.quantity) ?? 0
+        if let currentServings = currentServings {
+            currentQuantity = currentQuantity / Double(recipeMeta.recipe.servings) * Double(currentServings)
+        }
+        return ingredient.name + " (" + (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity) + " " + ingredient.unit +  ")"
+    }
+
+    func stepPressed(_ index: Int) {
+        completedStep[index].toggle()
+    }
+
+    func checkFavorited() {
+        if favorites.firstIndex(where: {$0.id == recipeMeta.id}) != nil {
+            favorited = true
+        } else {
+            favorited = false
+        }
+    }
+    
+    func getForkRecipe() -> RecipeMeta {
+        return forkRecipeMeta ?? RecipeMeta.empty
+    }
+
     func getForkInfo() {
         backendController.getForkInfo(recipe_id: recipeMeta.id)
             .receive(on: DispatchQueue.main)
+            .map { forkInfoModel -> ForkInfoModel in
+                self.forkInfo = forkInfoModel
+                return forkInfoModel
+            }
+            .flatMap{ forkInfoModel in
+                self.backendController.getRecipeById(recipe_id: forkInfoModel.parent_id)
+            }
             .sink(receiveCompletion: { _ in
-            }, receiveValue: { forkInfo in
-                self.forkInfo = forkInfo
+            }, receiveValue: { forkRecipe in
+                self.forkRecipeMeta = forkRecipe
+                self.forkViewController = RecipeDetailViewController(forkRecipe, backendController: self.backendController)
             })
             .store(in: &cancellables)
     }
-    
+
     func rateRecipe(_ rating: Int, continuation: @escaping (Double) -> ()) {
         backendController.rateRecipe(recipe_id: recipeMeta.id, rating: rating)
             .receive(on: DispatchQueue.main)
@@ -139,406 +159,592 @@ class RecipeDetailViewController: StarsRatingViewController {
             })
             .store(in: &cancellables)
     }
-    
-    func favoriteRecipe() {
+
+    func favoritePressed() {
+        if favorited {
+            unfavoriteRecipe()
+        } else {
+            favoriteRecipe()
+        }
+    }
+
+    private func favoriteRecipe() {
+        favorited = true
+
+        if favorites.firstIndex(where: {$0.id == recipeMeta.id }) == nil {
+            favorites.append(recipeMeta)
+        }
+
         backendController.favoriteRecipe(recipe_id: recipeMeta.id)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { success in
-                
+
             })
             .store(in: &cancellables)
     }
-    
-    func unfavoriteRecipe() {
+
+    private func unfavoriteRecipe() {
+        favorited = false
+        let index = favorites.firstIndex(where: {$0.id == recipeMeta.id })
+        if let index = index {
+            favorites.remove(at: index)
+        }
+
         backendController.unfavoriteRecipe(recipe_id: recipeMeta.id)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { success in
-                
+
             })
             .store(in: &cancellables)
-    }
-    
-    func presentFork() {
-        if let forkInfo = forkInfo {
-            backendController.getRecipeById(recipe_id: forkInfo.parent_id)
-                .receive(on: DispatchQueue.main)
-                .sink(receiveCompletion: { _ in
-                }, receiveValue: { forkRecipe in
-                    self.forkRecipeMeta = forkRecipe
-                    self.forkViewController = RecipeDetailViewController(recipeMeta: forkRecipe, backendController: self.backendController)
-                    self.showFork = true
-                })
-                .store(in: &cancellables)
-            
-        }
     }
 }
 
 struct RecipeDetail: View {
-    @State private var favorited: Bool = false
-    @AppStorage("favorites") var favorites: [RecipeMeta] = []
-    @AppStorage("groceryLists") var groceries: [GroceryList] = []
-    
-    @State var groceriesAdded = false
-    
-    @State var showLargeImage = false
-    
-    @State var currentServings: Int?
-    @State var xOff: CGFloat = 0.0
-    @State var yOff: CGFloat = 0.0
-    @State var lastXOff: CGFloat = 0.0
-    @State var lastYOff: CGFloat = 0.0
-    @State var scale: CGFloat = 1.0
-    @State var lastScaleValue: CGFloat = 1.0
-    
-    @ObservedObject var viewController: RecipeDetailViewController
-    
-    @State var showEditRecipe: Bool = false
-    
-    @State var showAuthorProfile: Bool = false
-    
-    var body: some View {
-        ZStack(alignment: .topLeading) {
-            NavigationLink(destination: ProfileView(viewController: ProfileViewController(viewController.backendController, name: viewController.recipeMeta.author, user_id: viewController.recipeMeta.user_id)), isActive: $showAuthorProfile) {
-                EmptyView()
-            }
-            .frame(width: 0, height: 0)
-            .opacity(0)
-            .onTapGesture {
-            }
+    @StateObject var viewController: RecipeDetailViewController
 
-            
+    let navbarHeight: CGFloat
+    let initialOffset: CGFloat
+    let recipeMeta: RecipeMeta
+    
+    @State private var navbarOpacity: CGFloat = 0.0
+    @State private var showNavBar: Bool = false
+    @State private var showNavBarItems: Bool = false
+    @State private var showNavBarEmoji: Bool = false
+        
+    @Environment(\.presentationMode) var presentation
+    
+    init(_ recipeMeta: RecipeMeta, backendController: BackendController) {
+        self.recipeMeta = recipeMeta
+        
+        navbarHeight = 100
+        initialOffset = -navbarHeight
+        
+        _viewController = StateObject(wrappedValue: RecipeDetailViewController(recipeMeta, backendController: backendController))
+
+    }
+    
+    @State var scroll: CGFloat = 0
+    
+    @State var imageBottom: CGFloat = 1000
+    @State var navbarTop: CGFloat = 0
+
+    var body: some View {
+        ZStack(alignment: .top) {
             Color.theme.background
             
-            List {
-                VStack(spacing: 10) {
-                    if let fork = viewController.forkInfo {
-                        NavigationLink(destination: RecipeDetail(viewController: viewController.forkViewController ?? viewController), isActive: $viewController.showFork) {
-                            EmptyView()
-                        }
-                        .frame(width: 0, height: 0)
-                        .opacity(0)
-                        
-                        HStack(spacing: 0) {
-                            Image(systemName: "fork.knife")
-                                .foregroundColor(Color.theme.lightText)
-                            Text(" from " + fork.parent_author + "'s ")
-                                .foregroundColor(Color.theme.lightText)
-                            Text(fork.parent_name)
-                                .foregroundColor(Color.theme.accent)
-                        }
-                        .padding(.bottom)
-                        .onTapGesture {
-                            viewController.presentFork()
-                        }
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 20) {
+                    header(offset: scroll)
+                    
+                    forkButtonSection
+                    
+                    if let location = recipeMeta.recipe
+                        .coordinate() {
+                        mapViewSection(location)
+                            .padding(.top)
                     }
                     
-                    CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width - 40, height: UIScreen.main.bounds.size.width - 40)
-                        .cornerRadius(10)
-                        .onTapGesture {
-                            withAnimation {
-                                showLargeImage = true
-                            }
-                        }
+                    if !recipeMeta.recipe.specialTools.isEmpty {
+                        specialToolsSection
+                    }
                     
-                    starsRating
+                    ingredientsSection
                     
-                    forkRecipeButton
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                
-                if !viewController.recipeMeta.recipe.specialTools.isEmpty {
-                    specialToolsSection
-                }
-                
-                ingredientSection
-                
-                methodSection
-                
-                if !viewController.recipeMeta.recipe.tags.isEmpty {
-                    tagsSection
-                }
-            }
-            .onAppear {
-                if favorites.firstIndex(where: {$0.id == viewController.recipeMeta.id}) != nil {
-                    favorited = true
-                } else {
-                    favorited = false
-                }
-                
-                groceriesAdded = groceries.firstIndex(where: { $0.id == viewController.recipeMeta.id }) != nil
-                
-                viewController.getForkInfo()
-            }
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    VStack {
-                        Text(viewController.recipeMeta.recipe.name).font(.headline).foregroundColor(Color.theme.navbarTitle)
-                        Text(viewController.recipeMeta.author).font(.subheadline).foregroundColor(Color.theme.lightText)
-                            .onTapGesture {
-                                showAuthorProfile = true
-                            }
+                    methodSection
+                    
+                    if !recipeMeta.recipe.tags.isEmpty {
+                        tagSection
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        favorited.toggle()
-                        
-                        if favorited {
-                            if favorites.firstIndex(where: {$0.id == viewController.recipeMeta.id }) == nil {
-                                favorites.append(viewController.recipeMeta)
-                            }
-                            viewController.favoriteRecipe()
-                        } else {
-                            if let offset = favorites.firstIndex(where: {$0.id == viewController.recipeMeta.id}) {
-                                favorites.remove(at: offset)
-                            }
-                            viewController.unfavoriteRecipe()
-                        }
-                    }) {
-                        Image(systemName: favorited ? "heart.fill" : "heart")
-                            .foregroundColor(Color.red)
+                .readScroll { scroll in
+                    self.scroll = scroll
+                    
+                    withAnimation {
+                        self.showNavBarItems = imageBottom < navbarTop + navbarHeight * 2
+                    }
+                    
+                    self.showNavBar = imageBottom < navbarTop + navbarHeight
+                    
+                    withAnimation {
+                        self.showNavBarEmoji = imageBottom < navbarTop + navbarHeight
                     }
                 }
+                .offset(y: initialOffset)
+                
             }
-            .navigationBarTitleDisplayMode(.inline)
+            .edgesIgnoringSafeArea(.bottom)
+            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
             
-            expandImage
-            
+            GeometryReader { proxy in
+                navigationBar
+                
+                let _ = DispatchQueue.main.async {
+                    navbarTop = proxy.frame(in: .global).minY
+                }
+            }
         }
+        .statusBar(hidden: !showNavBar)
+        .navigationBarHidden(true)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
 extension RecipeDetail {
-    private var forkRecipeButton: some View {        
-        return Group {
-            NavigationLink(destination: EditRecipeView(viewController.recipeMeta.recipe, parent_id: viewController.recipeMeta.id), isActive: $showEditRecipe) {
-                EmptyView()
-            }
-            .frame(width: 0, height: 0)
-            .opacity(0)
-            .onTapGesture {
-            }
-            
-            ZStack {
-                Rectangle()
-                    .foregroundColor(Color.white)
-                    .cornerRadius(20)
-                    .frame(width: 190, height: 40)
-                
-                HStack {
-                    Text("Fork This Recipe")
-                    Image(systemName: "fork.knife")
+    @ViewBuilder
+    private func header(offset: CGFloat) -> some View {
+        ZStack(alignment: .bottomTrailing) {
+            GeometryReader { proxy in
+                CustomAsyncImage(imageId: recipeMeta.recipe.image, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+                    .scaleEffect(getScaleFromOffset(offset: offset), anchor: .bottom)
+                let _ = DispatchQueue.main.async {
+                    imageBottom = proxy.frame(in: .global).maxY
                 }
-                .foregroundColor(Color.theme.accent)
-                .font(.headline)
+            }
+            .aspectRatio(1, contentMode: .fill)
 
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(recipeMeta.recipe.name)
+                        .foregroundColor(Color.white)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    
+                    Text(recipeMeta.author)
+                        .foregroundColor(Color.white)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                }
+                .padding()
+                
+                Spacer()
+                
+                StarsRating(viewController: viewController)
+                Text(String(recipeMeta.rating))
+                    .foregroundColor(Color.theme.light)
+                    .fontWeight(.semibold)
+                    .padding(.trailing)
             }
-            .padding(.bottom)
-            .onTapGesture {
-                showEditRecipe = true
+            .frame(maxWidth: .infinity)
+            .background(
+                LinearGradient(gradient: Gradient(colors: [Color.black, Color.clear]), startPoint: .bottom, endPoint: .top)
+                    .opacity(0.9)
+            )
+        }
+        .overlay(
+            Rectangle()
+                .foregroundColor(Color.clear)
+                .background(.ultraThinMaterial)
+                .opacity(getNavbarOpacity(offset))
+        )
+    }
+    
+    private var navigationBar: some View {
+        ZStack(alignment: .bottom) {
+            Rectangle()
+                .foregroundColor(Color.clear)
+                .frame(maxWidth: .infinity)
+                .frame(height: navbarHeight)
+                .opacity(0)
+
+            Text(recipeMeta.recipe.emoji)
+                .font(.title)
+                .padding(.bottom, 10)
+                .transition(.move(edge: .bottom))
+                .opacity(showNavBarEmoji ? 1.0 : 0.0)
+
+            HStack {
+                HStack {
+                    Image(systemName: "chevron.left")
+                        .font(Font.title3.weight(.medium))
+                        .foregroundColor(Color.theme.light)
+                        .colorMultiply(showNavBarItems ? Color.theme.accent : Color.theme.light)
+
+                    Text("Back")
+                        .foregroundColor(Color.theme.light)
+                        .colorMultiply(showNavBarItems ? Color.theme.accent : Color.theme.light)
+                }
+                .padding()
+                .onTapGesture {
+                    presentation.wrappedValue.dismiss()
+                }
+
+                Spacer()
+
+                Image(systemName: viewController.favorited ? "heart.fill" : "heart")
+                    .font(Font.title2.weight(.medium))
+                    .foregroundColor(Color.theme.red)
+                    .padding()
+                    .onTapGesture {
+                        viewController.favoritePressed()
+                    }
             }
+
+            Divider()
+                .opacity(showNavBar ? 1.0 : 0.0)
         }
+        .background(
+            Rectangle()
+                .foregroundColor(Color.clear)
+                .background(.ultraThinMaterial)
+                .frame(maxWidth: .infinity)
+                .frame(height: navbarHeight)
+                .opacity(showNavBar ? 1.0 : 0.0)
+        )
     }
-    private var expandImage: some View {
-        ZStack(alignment: .topLeading) {
-            Color.black.opacity(showLargeImage ? 0.7 : 0.0)
-            
-            CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.width)
-                .opacity(showLargeImage ? 1.0 : 0.0)
-                .offset(x: xOff / self.scale, y: 60 + yOff / self.scale)
-                .scaleEffect(self.scale)
-                .gesture(MagnificationGesture().onChanged { val in
-                    let delta = val / self.lastScaleValue
-                    self.lastScaleValue = val
-                    let newScale = max(1, self.scale * delta)
-                    self.scale = newScale
-                }.onEnded { val in
-                    self.lastScaleValue = 1.0
-                })
-                .simultaneousGesture(DragGesture().onChanged { val in
-                    self.xOff = val.translation.width + self.lastXOff
-                    self.yOff = val.translation.height + self.lastYOff
-                }.onEnded { _ in
-                    self.lastXOff = self.xOff
-                    self.lastYOff = self.yOff
-                })
-        }
-        .onTapGesture {
-            withAnimation {
-                showLargeImage = false
-                xOff = 0
-                yOff = 0
-                lastXOff = 0
-                lastYOff = 0
-                scale = 1.0
-            }
-        }
-    }
-    private var starsRating: some View {
-        HStack {
-            Spacer()
-            
-            StarsRating(viewController: viewController)
-            
-            Text(String(viewController.recipeMeta.rating))
-                .foregroundColor(Color.theme.lightText)
-            
-            Spacer()
-        }
-    }
+    
     private var specialToolsSection: some View {
-        Section(header: HStack {
-            Text("Special Tools").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)
-        }) {
-            ForEach(viewController.recipeMeta.recipe.specialTools.indices, id: \.self) { index in
-                Text(viewController.recipeMeta.recipe.specialTools[index])
-                    .foregroundColor(Color.theme.text)
-            }
-        }
-        .textCase(nil)
-    }
-    private var ingredientSection: some View {
-        Section(header:
-                    HStack {
-            Text("Ingredients")
-                .foregroundColor(Color.theme.title)
-                .font(.title2).fontWeight(.semibold)
-            
-            Spacer()
-            
+        RecipeDetailSection {
             VStack {
-                Text("Servings")
-                    .foregroundColor(Color.theme.lightText)
-                    .font(.system(size: 14))
-                    .font(.title2).fontWeight(.semibold)
+                HStack {
+                    Text("Special Tools")
+                        .foregroundColor(Color.theme.title3)
+                        .font(.title3)
+                    Spacer()
+                }
+                
+                Divider()
+                    .padding(.bottom)
                 
                 HStack {
-                    Image(systemName: "minus")
-                        .foregroundColor((currentServings ?? viewController.recipeMeta.recipe.servings) > 1 ? Color.theme.accent : Color.theme.lightText)
-                        .onTapGesture {
-                            if currentServings == nil {
-                                currentServings = viewController.recipeMeta.recipe.servings
+                    VStack {
+                        ForEach (recipeMeta.recipe.specialTools, id: \.self) { tool in
+                            let index = recipeMeta.recipe.specialTools.firstIndex(of: tool)!
+                            HStack {
+                                Image(systemName: viewController.hasSpecialTool[index] ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(Color.theme.accent)
+                                    .font(.system(size: 24))
+                                
+                                Text(tool)
+                                    .strikethrough(viewController.hasSpecialTool[index], color: Color.theme.lightText)
+                                    .foregroundColor(viewController.hasSpecialTool[index] ? Color.theme.lightText : Color.theme.text)
+                                    .padding(.vertical, 5)
                             }
-                            
-                            if currentServings! > 1 {
-                                currentServings! -= 1
+                            .onTapGesture {
+                                viewController.specialToolPressed(index)
                             }
-                            
                         }
+                    }
                     
-                    Text(String(currentServings ?? viewController.recipeMeta.recipe.servings))
-                        .foregroundColor(Color.theme.lightText)
-                        .font(.title2).fontWeight(.semibold)
-                    
-                    Image(systemName: "plus")
-                        .foregroundColor(Color.theme.accent)
-                        .onTapGesture {
-                            if currentServings == nil {
-                                currentServings = viewController.recipeMeta.recipe.servings
-                            }
-                            
-                            currentServings! += 1
-                        }
+                    Spacer()
                 }
             }
-            
-            Spacer()
-            Image(systemName: groceriesAdded ? "folder.fill.badge.plus" : "folder.badge.plus")
-                .font(.title2)
-                .padding(.trailing, 20)
-                .foregroundColor(Color.theme.accent)
-                .onTapGesture {
-                    withAnimation {
-                        groceriesAdded.toggle()
-                    }
-                    
-                    if groceriesAdded {
-                        groceries.append(GroceryList(id: viewController.recipeMeta.id, name: viewController.recipeMeta.recipe.name, items: []))
-                        groceries[groceries.count - 1].items = viewController.recipeMeta.recipe.ingredients.map { GroceryListItem(id: viewController.recipeMeta.id + "_" + $0.id, ingredient: $0.name + " (" + $0.quantity + " " + $0.unit +  ")", check: false)}
-                    } else {
-                        groceries.removeAll(where: { $0.id == viewController.recipeMeta.id })
-                    }
-                    
-                }
-        }) {
-            ForEach (viewController.recipeMeta.recipe.ingredients) { ingredient in
+            .padding(.horizontal, 30)
+            .padding(.vertical)
+        }
+    }
+    
+    private var ingredientsSection: some View {
+        RecipeDetailSection {
+            VStack {
                 HStack {
-                    let index = groceries.reduce([], { $0 + $1.items }).firstIndex(where: { $0.id == (viewController.recipeMeta.id + "_" + ingredient.id) })
+                    Text("Ingredients")
+                        .foregroundColor(Color.theme.title3)
+                        .font(.title3)
                     
-                    Image(systemName: index != nil ? "plus.circle.fill" : "plus.circle")
-                        .onTapGesture {
-                            if index == nil {
-                                var currentQuantity = Double(ingredient.quantity) ?? 0
-                                if let currentServings = currentServings {
-                                    currentQuantity = currentQuantity / Double(viewController.recipeMeta.recipe.servings) * Double(currentServings)
-                                }
-                                let ingredientString = ingredient.name + " (" + (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity) + " " + ingredient.unit +  ")"
-                                groceries[0].items.append(GroceryListItem(id: viewController.recipeMeta.id + "_" + ingredient.id, ingredient: ingredientString, check: false))
-                            } else if index != nil {
-                                for listIndex in 0..<groceries.count {
-                                    if let itemIndex = groceries[listIndex].items.firstIndex(where: { $0.id == viewController.recipeMeta.id + "_" + ingredient.id }) {
-                                        groceries[listIndex].items.remove(at: itemIndex)
+                    Spacer()
+                    
+                    VStack {
+                        Text("Servings")
+                            .foregroundColor(Color.theme.lightText)
+                            .font(.subheadline)
+                            .padding(.top, 5)
+                        
+                        HStack(spacing: 20) {
+                            Image(systemName: "minus")
+                                .font(.title2)
+                                .background(
+                                    Rectangle()
+                                        .frame(width: 40, height: 40)
+                                        .foregroundColor(Color.black.opacity(0.0001))
+                                )
+                                .foregroundColor((viewController.currentServings ?? recipeMeta.recipe.servings) > 1 ? Color.theme.accent : Color.theme.lightText)
+                                .onTapGesture {
+                                    if viewController.currentServings == nil {
+                                        viewController.currentServings = recipeMeta.recipe.servings
+                                    }
+                                    
+                                    if viewController.currentServings! > 1 {
+                                        viewController.currentServings! -= 1
                                     }
                                 }
-                            }
+                            
+                            Text(String(viewController.currentServings ?? recipeMeta.recipe.servings))
+                                .foregroundColor(Color.theme.text)
+                                .font(.title2)
+                            Image(systemName: "plus")
+                                .foregroundColor(Color.theme.accent)
+                                .font(.title2)
+                                .onTapGesture {
+                                    if viewController.currentServings == nil {
+                                        viewController.currentServings = recipeMeta.recipe.servings
+                                    }
+                                    
+                                    viewController.currentServings! += 1
+                                }
                         }
-                        .foregroundColor(Color.theme.accent)
-                        .font(.system(size: 18))
-                    
-                    var currentQuantity = Double(ingredient.quantity) ?? 0
-                    if let currentServings = currentServings {
-                        let _ = (currentQuantity = currentQuantity / Double(viewController.recipeMeta.recipe.servings) * Double(currentServings))
                     }
-                    let ingredientText = (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity) + " " + ingredient.unit + " " + ingredient.name
-                    Text(ingredientText)
-                        .foregroundColor(Color.theme.text)
+                    
+                    Spacer()
+                    
+                    Image(systemName: viewController.groceriesAdded ? "folder.fill.badge.plus" : "folder.badge.plus")
+                        .foregroundColor(Color.theme.accent)
+                        .font(.title2)
+                        .onTapGesture {
+                            withAnimation {
+                                viewController.groceriesAdded.toggle()
+                            }
+                            
+                            if viewController.groceriesAdded {
+                                viewController.groceries.append(GroceryList(id: recipeMeta.id, name: recipeMeta.recipe.name, items: []))
+                                viewController.groceries[viewController.groceries.count - 1].items = recipeMeta.recipe.ingredients.map {
+                                    return GroceryListItem(id: recipeMeta.id + "_" + $0.id, ingredient: viewController.getIngredientString(ingredient: $0), check: false)
+                                }
+                            } else {
+                                viewController.groceries.removeAll(where: { $0.id == recipeMeta.id })
+                            }
+                            
+                        }
                 }
-                .padding(.vertical, 5)
+                
+                Divider()
+                
+                ForEach (recipeMeta.recipe.ingredients) { ingredient in
+                    let ingredientIndex = recipeMeta.recipe.ingredients.firstIndex(of: ingredient)!
+                    HStack {
+                        Image(systemName: viewController.ingredientInGroceryList[ingredientIndex] ? "plus.circle.fill" : "plus.circle")
+                            .foregroundColor(Color.theme.accent)
+                            .font(.system(size: 24))
+                            .onTapGesture {
+                                viewController.ingredientAddPressed(ingredient)
+                            }
+                        
+                        var currentQuantity = Double(ingredient.quantity) ?? 0
+                        if let currentServings = viewController.currentServings {
+                            let _ = (currentQuantity = currentQuantity / Double(recipeMeta.recipe.servings) * Double(currentServings))
+                        }
+                        let ingredientText = (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity) + " " + ingredient.unit + " " + ingredient.name
+                        
+                        Text(ingredientText)
+                            .strikethrough(viewController.hasIngredient[ingredientIndex], color: Color.theme.lightText)
+                            .foregroundColor(viewController.hasIngredient[ingredientIndex] ? Color.theme.lightText : Color.theme.text)
+                            .onTapGesture {
+                                viewController.ingredientPressed(ingredientIndex)
+                            }
+                        
+                        Spacer()
+                    }
+                    .padding(.vertical, 5)
+                }
             }
+            .padding(.bottom)
+            .padding(.horizontal, 30)
         }
-        .textCase(nil)
     }
     
     private var methodSection: some View {
-        Section(header: Text("Method").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)) {
-            ForEach (viewController.recipeMeta.recipe.steps, id: \.self) { step in
-                let index = viewController.recipeMeta.recipe.steps.firstIndex(of: step)!
+        RecipeDetailSection {
+            VStack {
                 HStack {
-                    Image(systemName: String(index + 1) + ".circle.fill")
-                        .foregroundColor(Color.theme.accent)
-                        .font(.system(size: 24))
-                    
-                    Text(step)
-                        .foregroundColor(Color.theme.text)
-                        .padding(.vertical, 5)
+                    Text("Method")
+                        .foregroundColor(Color.theme.title3)
+                        .font(.title3)
+                    Spacer()
+                }
+                
+                Divider()
+                    .padding(.bottom)
+                
+                VStack(spacing: 10) {
+                    ForEach (recipeMeta.recipe.steps, id: \.self) { step in
+                        let index = recipeMeta.recipe.steps.firstIndex(of: step)!
+                        HStack {
+                            Image(systemName: String(index + 1) + ".circle" + (viewController.completedStep[index] ? ".fill" : ""))
+                                .foregroundColor(Color.theme.accent)
+                                .font(.system(size: 24))
+                            
+                            Text(step)
+                                .strikethrough(viewController.completedStep[index], color: Color.theme.lightText)
+                                .foregroundColor(viewController.completedStep[index] ? Color.theme.lightText : Color.theme.text)
+                                .padding(.vertical, 5)
+                            
+                            Spacer()
+                        }
+                        .onTapGesture {
+                            viewController.stepPressed(index)
+                        }
+                        
+                        Divider().opacity(index < recipeMeta.recipe.steps.count - 1 ? 1.0 : 0.0)
+                    }
                 }
             }
+            .padding(.horizontal, 30)
+            .padding(.vertical)
         }
-        .textCase(nil)
     }
     
-    private var tagsSection: some View {
-        Section(header: Text("Tags").foregroundColor(Color.theme.title).font(.title2).fontWeight(.semibold)) {
-            FlexibleView(
-                data: viewController.recipeMeta.recipe.tags,
-                spacing: 15,
-                alignment: .leading
-            ) { item in
-                HStack {
-                    Text(verbatim: item)
-                        .foregroundColor(Color.theme.text)
+    private var tagSection: some View {
+        RecipeDetailSection {
+            HStack {
+                Spacer()
+                
+                FlexibleView(
+                    data: recipeMeta.recipe.tags,
+                    spacing: 15,
+                    alignment: .leading
+                ) { item in
+                    HStack {
+                        Text(verbatim: item)
+                            .foregroundColor(Color.theme.text)
+                    }
+                    .padding(8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.gray.opacity(0.1))
+                    )
                 }
-                .padding(8)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.gray.opacity(0.1))
-                )
+                .frame(minHeight: 20)
+                
+                Spacer()
             }
-            .frame(minHeight: 20)
+            .padding(.vertical, 15)
+            .padding(.horizontal, 20)
         }
-        .textCase(nil)
+    }
+    
+    private var forkButtonSection: some View {        
+        return Group {
+            RecipeDetailSection {
+                VStack(spacing: 20) {
+                    
+                    VStack {
+                        HStack {
+                            Text("About This Recipe")
+                                .foregroundColor(Color.theme.title)
+                                .font(.title3)
+                            Spacer()
+                        }
+                                     
+                        Spacer()
+                        
+                        HStack {
+                            Text(recipeMeta.recipe.about)
+                                .foregroundColor(Color.theme.lightText)
+                                .font(.body)
+                            
+                            Spacer()
+                        }
+                        .padding(.bottom)
+                        
+                        if let fork = viewController.forkInfo {
+                            NavigationLink(destination: RecipeDetail(viewController.getForkRecipe(), backendController: BackendController())) {
+                                HStack(spacing: 0) {
+                                    Text("Forked from \(fork.parent_author)'s \(Text(fork.parent_name).foregroundColor(Color.theme.accent))")
+                                        .foregroundColor(Color.theme.lightText)
+                                        .font(.footnote)
+                                    
+                                    Spacer()
+                                }
+                                .disabled(viewController.forkRecipeMeta == nil)
+                            }
+                        }
+                    }
+                    
+                    Divider()
+                    
+                    NavigationLink(destination: EditRecipeView(recipeMeta.recipe, parent_id: recipeMeta.id)) {
+                        HStack {
+                            Spacer ()
+                            Text("Fork This Recipe")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                        }
+                    }
+                    
+                }
+                .padding(.horizontal, 30)
+                .padding(.vertical)
+            }
+            .foregroundColor(Color.theme.tint)
+        }
+    }
+    
+    
+    private func mapView(_ location: CLLocationCoordinate2D) -> some View {
+        Map(coordinateRegion: $viewController.coordinateRegion, annotationItems: [Place(id: "", emoji: recipeMeta.recipe.emoji, coordinate: location)]) { place in
+            
+            MapAnnotation(coordinate: place.coordinate) {
+                
+                PlaceAnnotationEmojiView(title: place.emoji)
+            }
+            
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(recipeMeta.recipe.name)
+    }
+    
+    private func mapViewSection(_ location: CLLocationCoordinate2D) -> some View {
+        NavigationLink(destination: mapView(location)) {
+            RecipeDetailSection {
+                VStack {
+                    ZStack {
+                        LocationMapSnapshot(location: location, width: UIScreen.main.bounds.width - 20, height: 200) {
+                            Text(recipeMeta.recipe.emoji)
+                                .font(.system(size: 32))
+                        }
+                    }
+                    .cornerRadius(12, corners: [.topLeft, .topRight])
+                    
+                    HStack {
+                        Text(viewController.locationName)
+                            .foregroundColor(Color.theme.lightText)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(Color.theme.lightText)
+                    }
+                    .padding(.horizontal, 30)
+                }
+                .padding(.bottom)
+            }
+        }
+    }
+    
+    private func getScaleFromOffset(offset: CGFloat) -> CGFloat {
+        let offset = offset + 97
+        if offset > 50 {
+            return 1.0 + (offset - 50) / 250
+        } else if offset > 100 {
+            return 1.2
+        }
+        
+        return 1.0
+    }
+    
+    private func getNavbarOpacity(_ offset: CGFloat) -> CGFloat {
+        if imageBottom < navbarTop + navbarHeight {
+            return 1.0
+        } else {
+            return (offset + 119) / (-175)
+        }
+    }
+}
+
+struct RecipeDetail_Previews: PreviewProvider {
+    static var previews: some View {
+        let ingredients: [Ingredient] = [
+            Ingredient(id: "0", name: "Test", quantity: "1", unit: "Unit"),
+            Ingredient(id: "1", name: "Test", quantity: "2", unit: "Unit"),
+            Ingredient(id: "2", name: "Test", quantity: "3", unit: "Unit")
+        ]
+        let location = CLLocationCoordinate2D(latitude: 37.332077, longitude: -122.02962) // Apple Park, California
+        
+        let steps = [
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        ]
+        
+        let recipe = Recipe(about: "", image: "621c33b12cfadc340f1c20bd", name: "Spaghetti", ingredients: ingredients, steps: steps, coordinate_lat: location.latitude, coordinate_long: location.longitude, emoji: "🍝", servings: 2, tags: ["vegan", "italian", "pasta", "easy", "t"], time: "25 min", specialTools: ["Tool 1"], parent_id: nil)
+        
+        let recipeMeta = RecipeMeta(id: "", author: "Micky Abir", user_id: "", recipe: recipe, rating: 4.3, favorited: 82)
+        RecipeDetail(recipeMeta, backendController: BackendController())
     }
 }

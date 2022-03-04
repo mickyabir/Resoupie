@@ -74,7 +74,7 @@ struct RecipeCard: View {
             }
             
             NavigationLink(destination:
-                            NewRecipeDetail(viewController.recipeMeta, backendController: viewController.backendController as! BackendController).navigationBarTitleDisplayMode(.inline), isActive: $presentRecipe) {
+                            RecipeDetail(viewController.recipeMeta, backendController: BackendController()).navigationBarTitleDisplayMode(.inline), isActive: $presentRecipe) {
                 EmptyView()
             }
                             

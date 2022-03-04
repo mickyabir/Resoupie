@@ -55,3 +55,61 @@ fileprivate struct ImageCache: ImageCacher {
         set { newValue == nil ? cache.removeObject(forKey: key as NSURL) : cache.setObject(newValue!, forKey: key as NSURL) }
     }
 }
+
+//fileprivate class ImageCache {
+//    class Key {
+//        let key: URL
+//        
+//        init(_ key: URL) {
+//            self.key = key
+//        }
+//    }
+//    class Entry {
+//        let key: URL
+//        let image: UIImage
+//        
+//        init(key: URL, image: UIImage) {
+//            self.key = key
+//            self.image = image
+//        }
+//    }
+//    
+//    private let cache = NSCache<Key, Entry>()
+//    private let delegate: ImageCacheDelegate = ImageCacheDelegate()
+//    
+//    init() {
+//        cache.delegate = delegate
+//    }
+//    
+//    subscript(_ key: URL) -> UIImage? {
+//        get { cache.object(forKey: Key(key))?.image }
+//        set {
+//            if newValue == nil {
+//                cache.removeObject(forKey: Key(key))
+//            } else {
+//                insert(Entry(key: key, image: newValue!))
+////                cache.setObject(Entry(key: key, image: newValue!), forKey: Key(key))
+//            }
+//        }
+//    }
+//    
+//    func insert(_ entry: Entry) {
+//        cache.setObject(entry, forKey: Key(entry.key))
+//        delegate.keys.insert(entry.key)
+//    }
+//}
+//
+//fileprivate extension ImageCache {
+//    final class ImageCacheDelegate: NSObject, NSCacheDelegate {
+//        var keys = Set<URL>()
+//        
+//        func cache(_ cache: NSCache<AnyObject, AnyObject>,
+//                   willEvictObject object: Any) {
+//            guard let entry = object as? Entry else {
+//                return
+//            }
+//            
+//            keys.remove(entry.key)
+//        }
+//    }
+//}
