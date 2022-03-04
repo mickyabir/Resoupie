@@ -312,11 +312,9 @@ struct RecipeDetail: View {
 }
 
 extension RecipeDetail {
-    private var forkRecipeButton: some View {
-        let editRecipeViewController: EditRecipeViewController = EditRecipeViewController(viewController.backendController as! RecipeBackendController & ImageBackendController, recipe: viewController.recipeMeta.recipe, parent_id: viewController.recipeMeta.id)
-        
+    private var forkRecipeButton: some View {        
         return Group {
-            NavigationLink(destination: EditRecipeView(viewController: editRecipeViewController), isActive: $showEditRecipe) {
+            NavigationLink(destination: EditRecipeView(viewController.recipeMeta.recipe, parent_id: viewController.recipeMeta.id), isActive: $showEditRecipe) {
                 EmptyView()
             }
             .frame(width: 0, height: 0)

@@ -38,12 +38,12 @@ class EditRecipeViewController: ObservableObject {
             self.servings = String(recipe.servings)
             self.recipe.parent_id = parent_id
         } else {
-            self.recipe = Recipe(image: "", name: "", ingredients: [Ingredient(id: "0", name: "", quantity: "", unit: "")], steps: [""], coordinate_lat: nil, coordinate_long: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
+            self.recipe = Recipe(about: "", image: "", name: "", ingredients: [Ingredient(id: "0", name: "", quantity: "", unit: "")], steps: [""], coordinate_lat: nil, coordinate_long: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
         }
     }
     
     func reset() {
-        self.recipe = Recipe(image: "", name: "", ingredients: [], steps: [], coordinate_lat: nil, coordinate_long: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
+        self.recipe = Recipe(about: "", image: "", name: "", ingredients: [], steps: [], coordinate_lat: nil, coordinate_long: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
 
         emoji = ""
         servings = ""
@@ -84,7 +84,7 @@ struct EditRecipeView: View {
     @State private var recipeImage: UIImage?
     @State private var showImageLibrary = false
         
-    @ObservedObject var viewController: EditRecipeViewController
+    @StateObject var viewController: EditRecipeViewController
     
     @State private var editMode = EditMode.inactive
         
@@ -95,6 +95,10 @@ struct EditRecipeView: View {
     @State var currentTag: String = ""
     
     @State var displayEmojiWarning: Bool = false
+    
+    init(_ recipe: Recipe? = nil, parent_id: String? = nil) {
+        _viewController = StateObject(wrappedValue: EditRecipeViewController(BackendController(), recipe: recipe, parent_id: parent_id))
+    }
 
     var body: some View {
         ZStack {
@@ -111,6 +115,9 @@ struct EditRecipeView: View {
                         .foregroundColor(Color.theme.text)
                     
                     TextField("Time", text: $viewController.recipe.time)
+                        .foregroundColor(Color.theme.text)
+
+                    TextEditor(text: $viewController.recipe.about)
                         .foregroundColor(Color.theme.text)
                     
                     TextField("Emoji", text: $viewController.emoji)

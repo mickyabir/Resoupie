@@ -176,7 +176,7 @@ struct ProfileOwnerView: View {
             }
             .sheet(isPresented: $viewController.presentNewRecipe) {
                 NavigationView {
-                    EditRecipeView(viewController: editRecipeViewController)
+                    EditRecipeView()
                         .toolbar {
                             ToolbarItem(placement: .navigationBarLeading) {
                                 Button {

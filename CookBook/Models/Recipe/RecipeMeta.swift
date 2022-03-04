@@ -22,3 +22,11 @@ extension RecipeMeta {
         return author.lowercased().contains(searchText) || recipe.name.lowercased().contains(searchText) || !recipe.ingredients.filter({ $0.name.lowercased().contains(searchText) }).isEmpty || !recipe.specialTools.filter({ $0.lowercased().contains(searchText) }).isEmpty || !recipe.specialTools.filter({ $0.lowercased().contains(searchText) }).isEmpty
     }
 }
+
+extension RecipeMeta {
+    static var empty: RecipeMeta {
+        get {
+            RecipeMeta(id: "", author: "", user_id: "", recipe: Recipe.empty, rating: 0, favorited: 0)
+        }
+    }
+}

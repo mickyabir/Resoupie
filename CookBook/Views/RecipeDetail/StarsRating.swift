@@ -13,13 +13,13 @@ protocol StarsRatingViewController: ObservableObject {
 }
 
 struct NewStarsRating: View {
-    @ObservedObject var viewController: NewRecipeDetailViewModel
+    @ObservedObject var viewController: NewRecipeDetailViewController
     
     @State private var starNames: [String] = [String](repeating: "star", count: 5)
     @State private var starRotations: [Double] = [Double](repeating: 0, count: 5)
     @State private var starIndexAppeared: [Bool] = [Bool](repeating: false, count: 5)
     
-    init(viewController: NewRecipeDetailViewModel) {
+    init(viewController: NewRecipeDetailViewController) {
         self.viewController = viewController
     }
     

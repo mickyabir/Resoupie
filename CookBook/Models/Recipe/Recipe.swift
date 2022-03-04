@@ -9,6 +9,7 @@ import Foundation
 import MapKit
 
 struct Recipe: Hashable, Codable {
+    var about: String
     var image: String
     var name: String
     var ingredients: [Ingredient]
@@ -28,5 +29,13 @@ struct Recipe: Hashable, Codable {
         }
         
         return nil
+    }
+}
+
+extension Recipe {
+    static var empty: Recipe {
+        get {
+            Recipe(about: "", image: "", name: "", ingredients: [], steps: [], coordinate_lat: nil, coordinate_long: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
+        }
     }
 }
