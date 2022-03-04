@@ -296,7 +296,7 @@
 		814C8D20279764B50056A7D2 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				818D399B27CAE38F008F4A47 /* Main */,
+				818D399B27CAE38F008F4A47 /* Tabs */,
 				81B1BF83279F84FB00EC85BB /* Utility */,
 				819E4E0D27C22ECF004068A3 /* UserSignIn.swift */,
 				8179715B27AA7F1B00DE1753 /* RecipeCard.swift */,
@@ -421,7 +421,7 @@
 			path = SwiftUI;
 			sourceTree = "<group>";
 		};
-		818D399B27CAE38F008F4A47 /* Main */ = {
+		818D399B27CAE38F008F4A47 /* Tabs */ = {
 			isa = PBXGroup;
 			children = (
 				818D398627CAE151008F4A47 /* World */,
@@ -430,7 +430,7 @@
 				818D398327CAE126008F4A47 /* Recipes */,
 				818D398227CAE11A008F4A47 /* Profile */,
 			);
-			path = Main;
+			path = Tabs;
 			sourceTree = "<group>";
 		};
 		818D399E27CAF9EE008F4A47 /* Utility */ = {

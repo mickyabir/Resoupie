@@ -706,6 +706,7 @@ extension RecipeDetail {
                 .padding(.bottom)
             }
         }
+        .buttonStyle(.plain)
     }
     
     private func getScaleFromOffset(offset: CGFloat) -> CGFloat {
