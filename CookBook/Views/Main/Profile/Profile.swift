@@ -101,7 +101,7 @@ struct ProfileView: View {
             ScrollView {
                 VStack {
                     ForEach(viewController.recipes) { recipeMeta in
-                        RecipeCard(RecipeCardViewController(recipeMeta: recipeMeta, width: UIScreen.main.bounds.width - 40, backendController: viewController.backendController))
+                        RecipeCard(recipeMeta, width: UIScreen.main.bounds.width - 40)
                     }
                 }
                 .padding(.top)

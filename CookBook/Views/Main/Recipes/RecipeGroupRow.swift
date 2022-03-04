@@ -31,7 +31,7 @@ struct RecipeGroupRow: View {
                 LazyHStack {
                     ForEach(recipes) { recipe in
                         ZStack(alignment: .topTrailing) {
-                            RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: 250, backendController: backendController))
+                            RecipeCard(recipe, width: 250)
                             
                             let favorited = (favorites.firstIndex(where: { $0.id == recipe.id }) != nil)
                             Image(systemName: favorited ? "heart.fill" : "heart")

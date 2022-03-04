@@ -7,43 +7,30 @@
 
 import SwiftUI
 
-class RecipeCardViewController: ObservableObject {
-    var backendController: RecipeBackendController
-    @Published var recipeMeta: RecipeMeta
-    @Published var width: CGFloat
-
-    init(recipeMeta: RecipeMeta, width: CGFloat, backendController: RecipeBackendController) {
-        self.recipeMeta = recipeMeta
-        self.width = width
-        self.backendController = backendController
-    }
-}
-
 struct RecipeCard: View {
     @State var presentRecipe = false
     @State var image: UIImage?
     
-    @ObservedObject var viewController: RecipeCardViewController
+    let width: CGFloat
+    let recipeMeta: RecipeMeta
     
-    init(_ viewController: RecipeCardViewController) {
-        self.viewController = viewController
+    init(_ recipeMeta: RecipeMeta, width: CGFloat) {
+        self.recipeMeta = recipeMeta
+        self.width = width
     }
     
     var body: some View {
         ZStack(alignment: .top) {
-            RoundedRectangle(cornerRadius: 10)
-                .foregroundColor(Color.white)
-                .shadow(color: Color.black.opacity(0.2), radius: 8)
             VStack(alignment: .leading) {
-                CustomAsyncImage(imageId: viewController.recipeMeta.recipe.image, width: viewController.width)
+                CustomAsyncImage(imageId: recipeMeta.recipe.image, width: width)
                     .cornerRadius(10, corners: [.topLeft, .topRight])
                 
                 HStack {
                     VStack(alignment: .leading) {
-                        Text(viewController.recipeMeta.recipe.name)
+                        Text(recipeMeta.recipe.name)
                             .font(.headline)
                             .foregroundColor(Color.theme.text)
-                        Text(viewController.recipeMeta.author)
+                        Text(recipeMeta.author)
                             .font(.subheadline)
                             .foregroundColor(Color.theme.lightText)
                     }
@@ -52,7 +39,7 @@ struct RecipeCard: View {
                     
                     VStack(alignment: .trailing) {
                         HStack {
-                            Text(String(viewController.recipeMeta.rating))
+                            Text(String(recipeMeta.rating))
                                 .font(.subheadline)
                                 .foregroundColor(Color.theme.lightText)
                             Image(systemName: "star.fill")
@@ -60,7 +47,7 @@ struct RecipeCard: View {
                                 .font(.system(size: 12))
                         }
                         HStack {
-                            Text(String(viewController.recipeMeta.favorited))
+                            Text(String(recipeMeta.favorited))
                                 .font(.subheadline)
                                 .foregroundColor(Color.theme.lightText)
                             Image(systemName: "heart.fill")
@@ -72,27 +59,23 @@ struct RecipeCard: View {
                 .padding(.horizontal, 15)
                 .padding(.bottom, 5)
             }
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .foregroundColor(Color.white)
+                    .shadow(color: Color.black.opacity(0.1), radius: 10)
+            )
             
             NavigationLink(destination:
-                            RecipeDetail(viewController.recipeMeta, backendController: BackendController()).navigationBarTitleDisplayMode(.inline), isActive: $presentRecipe) {
+                            RecipeDetail(recipeMeta, backendController: BackendController()).navigationBarTitleDisplayMode(.inline), isActive: $presentRecipe) {
                 EmptyView()
             }
                             
         }
-        .frame(width: viewController.width, height: viewController.width + 50)
+        .frame(width: width, height: width + 50)
         .onTapGesture {
             presentRecipe = true
         }
         .padding(.horizontal, 5)
-//        .popover(isPresented: $presentRecipe, content: {
-//                RecipeDetail(viewController: RecipeDetailViewController(recipeMeta: viewController.recipeMeta, backendController: viewController.backendController))
-//                    .navigationBarItems(leading:
-//                                            Button(action: {
-//                        presentRecipe = false
-//                    }) {
-//                        Image(systemName: "chevron.down")
-//                    })
-//        })
         .padding(.bottom)
     }
 }

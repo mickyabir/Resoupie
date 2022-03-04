@@ -87,7 +87,7 @@ struct FavoritesView: View {
                 ScrollView(showsIndicators: false) {
                     LazyVStack(spacing: 20) {
                         ForEach(viewController.displayedFavorites.sorted(by: sortingMethod[sort]!)) { recipe in
-                            RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: UIScreen.main.bounds.width - 20, backendController: viewController.backendController))
+                            RecipeCard(recipe, width: UIScreen.main.bounds.width - 20)
                         }
                     }
                     .padding(.horizontal)
