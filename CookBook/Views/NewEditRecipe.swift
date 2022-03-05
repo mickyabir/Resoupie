@@ -29,6 +29,8 @@ class NewEditRecipeViewController: ObservableObject {
     }
     
     func publishRecipe(_ recipe: Recipe, image: UIImage) {
+        // TODO: Don't keep location if location disabled
+        
         if recipe.name == "" || recipe.ingredients.isEmpty || recipe.steps.isEmpty {
             return
         }
@@ -100,37 +102,7 @@ struct NewEditRecipeView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 20) {
-                RecipeDetailSectionInset {
-                    VStack(spacing: 20) {
-                        HStack {
-                            Text("About This Recipe")
-                                .foregroundColor(Color.theme.title)
-                                .font(.title3)
-                            Spacer()
-                        }
-                        
-                        Divider()
-                        
-                        TextField("Name", text: $title)
-                            .foregroundColor(Color.theme.text)
-                        
-                        TextField("Servings", value: $servings, formatter: NumberFormatter())
-                            .foregroundColor(Color.theme.text)
-                            .keyboardType(.numberPad)
-                        
-                        TextField("Time", text: $time)
-                            .foregroundColor(Color.theme.text)
-                            .keyboardType(.numberPad)
-                        
-                        TextField("Emoji", text: $emoji)
-                            .foregroundColor(Color.theme.text)
-                            .keyboardType(.numberPad)
-                        
-                        Divider()
-                        
-                        aboutEditorSection
-                    }
-                }
+                aboutSection
                 
                 locationSection
             }
@@ -168,6 +140,40 @@ extension NewEditRecipeView {
                     .padding(.horizontal, 5)
                     .padding(.vertical, 9)
                     .allowsHitTesting(false)
+            }
+        }
+    }
+    
+    private var aboutSection: some View {
+        RecipeDetailSectionInset {
+            VStack(spacing: 20) {
+                HStack {
+                    Text("About This Recipe")
+                        .foregroundColor(Color.theme.title)
+                        .font(.title3)
+                    Spacer()
+                }
+                
+                Divider()
+                
+                TextField("Name", text: $title)
+                    .foregroundColor(Color.theme.text)
+                
+                TextField("Servings", value: $servings, formatter: NumberFormatter())
+                    .foregroundColor(Color.theme.text)
+                    .keyboardType(.numberPad)
+                
+                TextField("Time", text: $time)
+                    .foregroundColor(Color.theme.text)
+                    .keyboardType(.numberPad)
+                
+                TextField("Emoji", text: $emoji)
+                    .foregroundColor(Color.theme.text)
+                    .keyboardType(.numberPad)
+                
+                Divider()
+                
+                aboutEditorSection
             }
         }
     }

@@ -238,10 +238,8 @@ struct RecipeDetail: View {
                     
                     forkButtonSection
                     
-                    if let location = recipeMeta.recipe
-                        .coordinate() {
+                    if let location = recipeMeta.recipe.coordinate() {
                         mapViewSection(location)
-                            .padding(.top)
                     }
                     
                     if !recipeMeta.recipe.specialTools.isEmpty {
