@@ -45,6 +45,10 @@
 		815E82712798CAC800530BA2 /* RecipesMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 815E82702798CAC800530BA2 /* RecipesMain.swift */; };
 		8172715927C6CBDE00C78801 /* EditRecipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8172715827C6CBDE00C78801 /* EditRecipe.swift */; };
 		8179715C27AA7F1B00DE1753 /* RecipeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179715B27AA7F1B00DE1753 /* RecipeCard.swift */; };
+		8179D67827D1F00D00A48E58 /* CustomNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179D67727D1F00D00A48E58 /* CustomNavigationView.swift */; };
+		8179D67A27D1F07600A48E58 /* CustomNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179D67927D1F07600A48E58 /* CustomNavigationBar.swift */; };
+		8179D67C27D2C4C100A48E58 /* NewEditRecipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179D67B27D2C4C100A48E58 /* NewEditRecipe.swift */; };
+		8179D67E27D2C9DF00A48E58 /* RecipeDetailSectionInset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179D67D27D2C9DF00A48E58 /* RecipeDetailSectionInset.swift */; };
 		81862D9027AC6C13006C947F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81862D8F27AC6C13006C947F /* Theme.swift */; };
 		818D398127CAE092008F4A47 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818D398027CAE092008F4A47 /* Color.swift */; };
 		818D398827CAE193008F4A47 /* CLLocationCoordinate2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818D398727CAE193008F4A47 /* CLLocationCoordinate2D.swift */; };
@@ -125,6 +129,10 @@
 		815E82702798CAC800530BA2 /* RecipesMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipesMain.swift; sourceTree = "<group>"; };
 		8172715827C6CBDE00C78801 /* EditRecipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditRecipe.swift; sourceTree = "<group>"; };
 		8179715B27AA7F1B00DE1753 /* RecipeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeCard.swift; sourceTree = "<group>"; };
+		8179D67727D1F00D00A48E58 /* CustomNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomNavigationView.swift; sourceTree = "<group>"; };
+		8179D67927D1F07600A48E58 /* CustomNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomNavigationBar.swift; sourceTree = "<group>"; };
+		8179D67B27D2C4C100A48E58 /* NewEditRecipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewEditRecipe.swift; sourceTree = "<group>"; };
+		8179D67D27D2C9DF00A48E58 /* RecipeDetailSectionInset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeDetailSectionInset.swift; sourceTree = "<group>"; };
 		81862D8F27AC6C13006C947F /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		818D398027CAE092008F4A47 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		818D398727CAE193008F4A47 /* CLLocationCoordinate2D.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLLocationCoordinate2D.swift; sourceTree = "<group>"; };
@@ -177,6 +185,7 @@
 			isa = PBXGroup;
 			children = (
 				815BDC0527CC74D4004E7A17 /* RecipeDetail.swift */,
+				8179D67D27D2C9DF00A48E58 /* RecipeDetailSectionInset.swift */,
 				8128CF1E27D02D3800EFDFC7 /* RecipeDetailSection.swift */,
 				8128CF2027D0315800EFDFC7 /* StarsRating.swift */,
 			);
@@ -296,11 +305,13 @@
 		814C8D20279764B50056A7D2 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				8179D67627D1EF1200A48E58 /* CustomNavigation */,
 				818D399B27CAE38F008F4A47 /* Tabs */,
 				81B1BF83279F84FB00EC85BB /* Utility */,
 				819E4E0D27C22ECF004068A3 /* UserSignIn.swift */,
 				8179715B27AA7F1B00DE1753 /* RecipeCard.swift */,
 				8172715827C6CBDE00C78801 /* EditRecipe.swift */,
+				8179D67B27D2C4C100A48E58 /* NewEditRecipe.swift */,
 				8128CF1D27D02D1800EFDFC7 /* RecipeDetail */,
 			);
 			path = Views;
@@ -324,6 +335,15 @@
 				815BDC0D27CDB2D5004E7A17 /* CLGeocoder.swift */,
 			);
 			path = CoreLocation;
+			sourceTree = "<group>";
+		};
+		8179D67627D1EF1200A48E58 /* CustomNavigation */ = {
+			isa = PBXGroup;
+			children = (
+				8179D67727D1F00D00A48E58 /* CustomNavigationView.swift */,
+				8179D67927D1F07600A48E58 /* CustomNavigationBar.swift */,
+			);
+			path = CustomNavigation;
 			sourceTree = "<group>";
 		};
 		818D397F27CADF4B008F4A47 /* Extensions */ = {
@@ -594,6 +614,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8179D67E27D2C9DF00A48E58 /* RecipeDetailSectionInset.swift in Sources */,
 				818D398D27CAE21C008F4A47 /* View.swift in Sources */,
 				8128CF1C27CF6DDD00EFDFC7 /* UINavigationController.swift in Sources */,
 				818D399527CAE2EE008F4A47 /* Data.swift in Sources */,
@@ -601,7 +622,9 @@
 				815E82712798CAC800530BA2 /* RecipesMain.swift in Sources */,
 				8172715927C6CBDE00C78801 /* EditRecipe.swift in Sources */,
 				819E4E0E27C22ECF004068A3 /* UserSignIn.swift in Sources */,
+				8179D67827D1F00D00A48E58 /* CustomNavigationView.swift in Sources */,
 				813F156627A20F8700214CE0 /* ImageBackendController.swift in Sources */,
+				8179D67A27D1F07600A48E58 /* CustomNavigationBar.swift in Sources */,
 				812F175427CB4FB30095F7D0 /* Ingredient.swift in Sources */,
 				812F175227CB4F8A0095F7D0 /* RecipeMeta.swift in Sources */,
 				818D399D27CAF8ED008F4A47 /* ImageLoader.swift in Sources */,
@@ -642,6 +665,7 @@
 				812F175D27CB509E0095F7D0 /* GroceryList.swift in Sources */,
 				815E826F2798CA8800530BA2 /* Groceries.swift in Sources */,
 				818D398B27CAE1E0008F4A47 /* MKCoordinateRegion.swift in Sources */,
+				8179D67C27D2C4C100A48E58 /* NewEditRecipe.swift in Sources */,
 				812F176C27CB54D50095F7D0 /* Profile.swift in Sources */,
 				8141EA2527A3740E008BE746 /* CustomAsyncImage.swift in Sources */,
 				81933FEF27BF0E5E00E9BB10 /* UserBackendController.swift in Sources */,

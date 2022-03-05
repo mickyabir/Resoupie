@@ -14,7 +14,7 @@ struct PinLocation: Identifiable {
 }
 
 class CoordinatePickerViewModel: ObservableObject {
-    var chosenRegion: CLLocationCoordinate2D?
+    @Published var chosenRegion: CLLocationCoordinate2D?
     var region: MKCoordinateRegion?
     @Published var country: String?
     @Published var locality: String?

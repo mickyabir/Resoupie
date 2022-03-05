@@ -29,14 +29,13 @@ class EditRecipeViewController: ObservableObject {
     
     let backendController: EditRecipeBackendController
     
-    init(_ backendController: EditRecipeBackendController, recipe: Recipe? = nil, parent_id: String? = nil, image: UIImage? = nil) {
+    init(_ backendController: EditRecipeBackendController, recipe: Recipe? = nil, image: UIImage? = nil) {
         self.backendController = backendController
         
         if let recipe = recipe {
             self.recipe = recipe
             self.emoji = recipe.emoji
             self.servings = String(recipe.servings)
-            self.recipe.parent_id = parent_id
         } else {
             self.recipe = Recipe(about: "", image: "", name: "", ingredients: [Ingredient(id: "0", name: "", quantity: "", unit: "")], steps: [""], coordinate_lat: nil, coordinate_long: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
         }
@@ -96,8 +95,8 @@ struct EditRecipeView: View {
     
     @State var displayEmojiWarning: Bool = false
     
-    init(_ recipe: Recipe? = nil, parent_id: String? = nil) {
-        _viewController = StateObject(wrappedValue: EditRecipeViewController(BackendController(), recipe: recipe, parent_id: parent_id))
+    init(_ recipe: Recipe? = nil) {
+        _viewController = StateObject(wrappedValue: EditRecipeViewController(BackendController(), recipe: recipe))
     }
 
     var body: some View {

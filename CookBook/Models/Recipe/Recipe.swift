@@ -30,6 +30,12 @@ struct Recipe: Hashable, Codable {
         
         return nil
     }
+    
+    func childOf(parent_id: String) -> Recipe {
+        var child = self
+        child.parent_id = parent_id
+        return child
+    }
 }
 
 extension Recipe {

@@ -393,7 +393,7 @@ extension RecipeDetail {
     }
     
     private var specialToolsSection: some View {
-        RecipeDetailSection {
+        RecipeDetailSectionInset {
             VStack {
                 HStack {
                     Text("Special Tools")
@@ -406,7 +406,7 @@ extension RecipeDetail {
                     .padding(.bottom)
                 
                 HStack {
-                    VStack {
+                    VStack(alignment: .leading) {
                         ForEach (recipeMeta.recipe.specialTools, id: \.self) { tool in
                             let index = recipeMeta.recipe.specialTools.firstIndex(of: tool)!
                             HStack {
@@ -428,13 +428,11 @@ extension RecipeDetail {
                     Spacer()
                 }
             }
-            .padding(.horizontal, 30)
-            .padding(.vertical)
         }
     }
     
     private var ingredientsSection: some View {
-        RecipeDetailSection {
+        RecipeDetailSectionInset {
             VStack {
                 HStack {
                     Text("Ingredients")
@@ -536,13 +534,11 @@ extension RecipeDetail {
                     .padding(.vertical, 5)
                 }
             }
-            .padding(.bottom)
-            .padding(.horizontal, 30)
         }
     }
     
     private var methodSection: some View {
-        RecipeDetailSection {
+        RecipeDetailSectionInset {
             VStack {
                 HStack {
                     Text("Method")
@@ -577,8 +573,6 @@ extension RecipeDetail {
                     }
                 }
             }
-            .padding(.horizontal, 30)
-            .padding(.vertical)
         }
     }
     
@@ -611,61 +605,57 @@ extension RecipeDetail {
         }
     }
     
-    private var forkButtonSection: some View {        
-        return Group {
-            RecipeDetailSection {
-                VStack(spacing: 20) {
-                    
-                    VStack {
-                        HStack {
-                            Text("About This Recipe")
-                                .foregroundColor(Color.theme.title)
-                                .font(.title3)
-                            Spacer()
-                        }
-                                     
+    private var forkButtonSection: some View {
+        RecipeDetailSectionInset {
+            VStack(spacing: 20) {
+                
+                VStack {
+                    HStack {
+                        Text("About This Recipe")
+                            .foregroundColor(Color.theme.title)
+                            .font(.title3)
                         Spacer()
+                    }
+                    
+                    Spacer()
+                    
+                    HStack {
+                        Text(recipeMeta.recipe.about)
+                            .foregroundColor(Color.theme.lightText)
+                            .font(.body)
                         
-                        HStack {
-                            Text(recipeMeta.recipe.about)
-                                .foregroundColor(Color.theme.lightText)
-                                .font(.body)
-                            
-                            Spacer()
-                        }
-                        .padding(.bottom)
-                        
-                        if let fork = viewController.forkInfo {
-                            NavigationLink(destination: RecipeDetail(viewController.getForkRecipe(), backendController: BackendController())) {
-                                HStack(spacing: 0) {
-                                    Text("Forked from \(fork.parent_author)'s \(Text(fork.parent_name).foregroundColor(Color.theme.accent))")
-                                        .foregroundColor(Color.theme.lightText)
-                                        .font(.footnote)
-                                    
-                                    Spacer()
-                                }
-                                .disabled(viewController.forkRecipeMeta == nil)
+                        Spacer()
+                    }
+                    .padding(.bottom)
+                    
+                    if let fork = viewController.forkInfo {
+                        NavigationLink(destination: RecipeDetail(viewController.getForkRecipe(), backendController: BackendController())) {
+                            HStack(spacing: 0) {
+                                Text("Forked from \(fork.parent_author)'s \(Text(fork.parent_name).foregroundColor(Color.theme.accent))")
+                                    .foregroundColor(Color.theme.lightText)
+                                    .font(.footnote)
+                                
+                                Spacer()
                             }
+                            .disabled(viewController.forkRecipeMeta == nil)
                         }
                     }
-                    
-                    Divider()
-                    
-                    NavigationLink(destination: EditRecipeView(recipeMeta.recipe, parent_id: recipeMeta.id)) {
-                        HStack {
-                            Spacer ()
-                            Text("Fork This Recipe")
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                        }
-                    }
-                    
                 }
-                .padding(.horizontal, 30)
-                .padding(.vertical)
+                
+                Divider()
+                
+                NavigationLink(destination: NewEditRecipeView(recipeMeta.recipe.childOf(parent_id: recipeMeta.id))) {
+                    HStack {
+                        Spacer ()
+                        Text("Fork This Recipe")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                    }
+                }
+                
             }
-            .foregroundColor(Color.theme.tint)
         }
+        .foregroundColor(Color.theme.tint)
     }
     
     
