@@ -12,7 +12,7 @@ struct RecipeDetailSection<Content: View>: View {
 
     var body: some View {
         content()
-            .background(sectionRectangle)
+            .background(sectionRectangle)        
     }
     
     private var sectionRectangle: some View {

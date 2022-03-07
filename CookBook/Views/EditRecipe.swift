@@ -37,7 +37,7 @@ class EditRecipeViewController: ObservableObject {
             self.emoji = recipe.emoji
             self.servings = String(recipe.servings)
         } else {
-            self.recipe = Recipe(about: "", image: "", name: "", ingredients: [Ingredient(id: "0", name: "", quantity: "", unit: "")], steps: [""], coordinate_lat: nil, coordinate_long: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
+            self.recipe = Recipe(about: "", image: "", name: "", ingredients: [Ingredient(name: "", quantity: "", unit: "")], steps: [""], coordinate_lat: nil, coordinate_long: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
         }
     }
     
@@ -145,7 +145,7 @@ struct EditRecipeView: View {
                     Toggle("", isOn: $locationEnabled.animation())
                 }) {
                     if locationEnabled {
-                        NavigationLink(destination: CoordinatePicker(viewModel: viewController.coordinatePickerViewModel), isActive: $viewController.coordinatePickerActive) {
+                        NavigationLink(destination: CoordinatePicker(viewController.coordinatePickerViewModel), isActive: $viewController.coordinatePickerActive) {
                             HStack {
                                 Spacer()
                                 
@@ -321,7 +321,7 @@ struct EditRecipeView: View {
                             .foregroundColor(Color.theme.accent)
                             .onTapGesture {
                                 withAnimation {
-                                    viewController.recipe.ingredients.append(Ingredient(id: String(viewController.recipe.ingredients.count), name: "", quantity: "", unit: ""))
+                                    viewController.recipe.ingredients.append(Ingredient(name: "", quantity: "", unit: ""))
                                 }
                             }
                         

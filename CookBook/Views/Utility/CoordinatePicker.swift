@@ -14,7 +14,7 @@ struct PinLocation: Identifiable {
 }
 
 class CoordinatePickerViewModel: ObservableObject {
-    @Published var chosenRegion: CLLocationCoordinate2D?
+    var chosenRegion: CLLocationCoordinate2D?
     var region: MKCoordinateRegion?
     @Published var country: String?
     @Published var locality: String?
@@ -70,6 +70,10 @@ struct CoordinatePicker: View {
     @ObservedObject var viewModel: CoordinatePickerViewModel
     
     @State var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 0.07, longitudeDelta: 0.07))
+    
+    init(_ viewModel: CoordinatePickerViewModel) {
+        self.viewModel = viewModel
+    }
     
     var body: some View {
         ZStack {

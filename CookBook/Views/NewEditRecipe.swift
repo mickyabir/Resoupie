@@ -11,7 +11,7 @@ import Combine
 
 class NewEditRecipeViewController: ObservableObject {
     @Environment(\.presentationMode) var presentationMode
-    
+
     @ObservedObject var coordinatePickerViewModel = CoordinatePickerViewModel()
     
     @Published var location: CLLocationCoordinate2D?
@@ -28,13 +28,11 @@ class NewEditRecipeViewController: ObservableObject {
         self.backendController = backendController
     }
     
-    func publishRecipe(_ recipe: Recipe, image: UIImage) {
-        // TODO: Don't keep location if location disabled
-        
+    func publishRecipe(_ recipe: Recipe, image: UIImage) -> Bool {
         if recipe.name == "" || recipe.ingredients.isEmpty || recipe.steps.isEmpty {
-            return
+            return false
         }
-        
+                
         var publishRecipe = recipe
         backendController.uploadImageToServer(image: image)
             .receive(on: DispatchQueue.main)
@@ -47,9 +45,11 @@ class NewEditRecipeViewController: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { success in
-                self.presentationMode.wrappedValue.dismiss()
+//                self.presentationMode.wrappedValue.dismiss()
             })
             .store(in: &cancellables)
+        
+        return true
     }
     
     func checkLocation() {
@@ -78,25 +78,26 @@ class NewEditRecipeViewController: ObservableObject {
 struct NewEditRecipeView: View {
     @StateObject var viewController = NewEditRecipeViewController(BackendController())
     
-    let recipe: Recipe
+    @State var recipe: Recipe
     let parent_id: String?
     
-    @State var title: String = ""
-    @State var servings: Int?
-    @State var time: String = ""
-    @State var emoji: String = ""
-    @State var about: String = ""
-    
-    @State var image: UIImage?
     @State var locationEnabled: Bool = false
+    
+    @State private var image: UIImage?
+    @State private var recipeImage: UIImage?
+    @State private var showImageLibrary = false
+
+    
+    @State var editSpecialTools: Bool = false
+    @State var editIngredients: Bool = false
+    @State var editMethod: Bool = false
+    
+    @State var newTag: String = ""
+    @FocusState var tagEditorFocused: Bool
     
     init(_ recipe: Recipe?, parent_id: String? = nil) {
         self.recipe = recipe ?? Recipe.empty
         self.parent_id = parent_id
-        
-        if let recipe = recipe {
-            title = recipe.name
-        }
     }
     
     var body: some View {
@@ -104,24 +105,55 @@ struct NewEditRecipeView: View {
             VStack(spacing: 20) {
                 aboutSection
                 
+                imageSection
+                
                 locationSection
+                
+                tagSection
+                
+                specialToolsSection
+                
+                ingredientsSection
+                
+                methodSection
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical)
         }
         .background(Color.theme.background)
         .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle(title)
+        .navigationTitle(recipe.name)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
+                    viewController.presentationMode.wrappedValue.dismiss()
                     if let image = image {
-                        viewController.publishRecipe(recipe, image: image)
+                        if !locationEnabled {
+                            recipe.coordinate_lat = nil
+                            recipe.coordinate_long = nil
+                        }
+                        if viewController.publishRecipe(recipe, image: image) {
+                            
+                        }
+                        
                     }
                 } label: {
                     Text("Publish")
                 }
             }
+            
+            ToolbarItemGroup(placement: .keyboard) {
+                HStack {
+                    Spacer()
+                    Button("Done") {
+                        let resign = #selector(UIResponder.resignFirstResponder)
+                        UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showImageLibrary) {
+            PhotoPicker(image: $image)
         }
         .onAppear {
             viewController.checkLocation()
@@ -132,9 +164,12 @@ struct NewEditRecipeView: View {
 extension NewEditRecipeView {
     private var aboutEditorSection: some View {
         ZStack(alignment: .topLeading) {
-            TextEditor(text: $about)
+            TextEditor(text: $recipe.about)
+                .foregroundColor(Color.theme.text)
+                .frame(minHeight: 80)
             
-            if about.isEmpty {
+            
+            if recipe.about.isEmpty {
                 Text("What makes this recipe special")
                     .foregroundColor(Color(UIColor.placeholderText))
                     .padding(.horizontal, 5)
@@ -156,24 +191,61 @@ extension NewEditRecipeView {
                 
                 Divider()
                 
-                TextField("Name", text: $title)
+                TextField("Name", text: $recipe.name)
                     .foregroundColor(Color.theme.text)
                 
-                TextField("Servings", value: $servings, formatter: NumberFormatter())
-                    .foregroundColor(Color.theme.text)
-                    .keyboardType(.numberPad)
-                
-                TextField("Time", text: $time)
+                TextField("Servings", value: $recipe.servings, formatter: NumberFormatter())
                     .foregroundColor(Color.theme.text)
                     .keyboardType(.numberPad)
                 
-                TextField("Emoji", text: $emoji)
+                TextField("Time", text: $recipe.time)
+                    .foregroundColor(Color.theme.text)
+                    .keyboardType(.numberPad)
+                
+                TextField("Emoji", text: $recipe.emoji)
                     .foregroundColor(Color.theme.text)
                     .keyboardType(.numberPad)
                 
                 Divider()
                 
                 aboutEditorSection
+            }
+        }
+    }
+    
+    private var imageSection: some View {
+        RecipeDetailSection {
+            VStack(spacing: 20) {
+                HStack {
+                    Text("Image")
+                        .foregroundColor(Color.theme.title)
+                        .font(.title3)
+                    
+                    Spacer()
+                }
+                .padding(.top)
+                .padding(.horizontal, 30)
+                
+                Divider()
+                    .padding(.horizontal, 30)
+                
+                if let image = image {
+                    VStack {
+                        Image(uiImage: image.cropsToSquare())
+                            .resizable()
+                            .scaledToFit()
+                            .clipped()
+                    }
+                    .frame(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
+                }
+
+                Button {
+                    showImageLibrary = true
+                } label: {
+                    Text("\(Image(systemName: "camera")) \(image == nil ? "New" : "Edit") Image")
+                }
+                .foregroundColor(Color.theme.tint)
+                .padding(.bottom)
             }
         }
     }
@@ -192,7 +264,7 @@ extension NewEditRecipeView {
                 }
                 .padding(.horizontal, 30)
                 
-                NavigationLink(destination: CoordinatePicker(viewModel: viewController.coordinatePickerViewModel)) {
+                NavigationLink(destination: CoordinatePicker(viewController.coordinatePickerViewModel)) {
                     if locationEnabled {
                         if let _ = viewController.location {
                             VStack {
@@ -219,7 +291,7 @@ extension NewEditRecipeView {
                             
                             HStack {
                                 Spacer()
-                                Text("Choose Location")
+                                Text("\(Image(systemName: "mappin")) Choose Location")
                                     .foregroundColor(Color.theme.accent)
                                 Spacer()
                                 Image(systemName: "chevron.right")
@@ -234,11 +306,348 @@ extension NewEditRecipeView {
             .padding(.vertical)
         }
     }
+    
+    private var specialToolsSection: some View {
+        RecipeDetailSectionInset {
+            VStack(spacing: 20) {
+                HStack {
+                    Text("Special Tools")
+                        .foregroundColor(Color.theme.title)
+                        .font(.title3)
+                    
+                    Spacer()
+                    
+                    Button {
+                        if editSpecialTools {
+                            withAnimation(.easeOut(duration: 0.1)) {
+                                editSpecialTools.toggle()
+                            }
+                        } else {
+                            withAnimation(.spring()) {
+                                editSpecialTools.toggle()
+                            }
+                        }
+                    } label: {
+                        Image(systemName: editSpecialTools ? "checkmark" : "pencil")
+                            .foregroundColor(Color.theme.lightText)
+                            .font(.title3)
+                    }
+                }
+                
+                Divider()
+                
+                VStack(spacing: 20) {
+                    ForEach(recipe.specialTools.indices, id: \.self) { index in
+                        HStack {
+                            if editSpecialTools {
+                                Button {
+                                    recipe.specialTools.remove(at: index)
+                                } label: {
+                                    Image(systemName: "minus.circle.fill")
+                                        .foregroundColor(Color.theme.red)
+                                        .font(.title3)
+                                }
+                                .transition(.move(edge: .leading))
+                            }
+                            TextField("Tool", text: $recipe.specialTools[index])
+                                .foregroundColor(Color.theme.text)
+                            
+                            Spacer()
+                            
+                            if editSpecialTools {
+                            Button {
+                                recipe.specialTools.insert("", at: index + 1)
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(Color.theme.tint)
+                                    .font(.title3)
+                            }
+                            .transition(.move(edge: .trailing))
+                            }
+                        }
+                    }
+                    
+                    HStack {
+                        Spacer()
+                        Button {
+                            recipe.specialTools.append("")
+                        } label: {
+                            Image(systemName: "plus")
+                                .foregroundColor(Color.theme.tint)
+                                .font(.title2)
+                        }
+                        Spacer()
+                    }
+                }
+            }
+        }
+    }
+    
+    private var ingredientsSection: some View {
+        RecipeDetailSectionInset {
+            VStack(spacing: 20) {
+                HStack {
+                    Text("Ingredients")
+                        .foregroundColor(Color.theme.title)
+                        .font(.title3)
+                    
+                    Spacer()
+                    
+                    Button {
+                        if editIngredients {
+                            withAnimation(.easeOut(duration: 0.1)) {
+                                editIngredients.toggle()
+                            }
+                        } else {
+                            withAnimation(.spring()) {
+                                editIngredients.toggle()
+                            }
+                        }
+                    } label: {
+                        Image(systemName: editIngredients ? "checkmark" : "pencil")
+                            .foregroundColor(Color.theme.lightText)
+                            .font(.title3)
+                    }
+                }
+                
+                Divider()
+                
+                VStack(spacing: 20) {
+                    ForEach(recipe.ingredients.indices, id: \.self) { index in
+                        HStack {
+                            if editIngredients {
+                                Button {
+                                    recipe.ingredients.remove(at: index)
+                                } label: {
+                                    Image(systemName: "minus.circle.fill")
+                                        .foregroundColor(Color.theme.red)
+                                        .font(.title3)
+                                }
+                                .transition(.move(edge: .leading))
+                            }
+
+                            VStack {
+                                TextField("Ingredient name", text: $recipe.ingredients[index].name)
+                                    .foregroundColor(Color.theme.text)
+                                
+                                HStack {
+                                    TextField("Quantity", text: $recipe.ingredients[index].quantity)
+                                        .foregroundColor(Color.theme.text)
+                                        .keyboardType(.decimalPad)
+
+                                    TextField("Unit", text: $recipe.ingredients[index].unit)
+                                        .foregroundColor(Color.theme.text)
+                                }
+                            }
+                            
+                            Spacer()
+                            
+                            if editIngredients {
+                            Button {
+                                recipe.ingredients.insert(Ingredient(name: "", quantity: "", unit: ""), at: index + 1)
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(Color.theme.tint)
+                                    .font(.title3)
+                            }
+                            .transition(.move(edge: .trailing))
+                            }
+                        }
+                        
+                        if index < recipe.ingredients.count - 1 {
+                            Divider()
+                        }
+                    }
+                    
+                    HStack {
+                        Spacer()
+                        Button {
+                            recipe.ingredients.append(Ingredient(name: "", quantity: "", unit: ""))
+                        } label: {
+                            Image(systemName: "plus")
+                                .foregroundColor(Color.theme.tint)
+                                .font(.title2)
+                        }
+                        Spacer()
+                    }
+                }
+            }
+        }
+    }
+    
+    private func stepEditor(_ index: Int) -> some View {
+        ZStack(alignment: .topLeading) {
+            let placeHolders = [
+                "First, you need to...",
+                "Next, you...",
+                "In this step...."
+            ]
+
+            TextEditor(text: $recipe.steps[index])
+                .foregroundColor(Color.theme.text)
+                .frame(minHeight: 40)
+            
+            if recipe.steps[index].isEmpty {
+                Text("\(placeHolders[min(index, placeHolders.count - 1)])")
+                    .foregroundColor(Color(UIColor.placeholderText))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 9)
+                    .allowsHitTesting(false)
+            }
+        }
+    }
+    
+    private var methodSection: some View {
+        RecipeDetailSectionInset {
+            VStack(spacing: 20) {
+                HStack {
+                    Text("Method")
+                        .foregroundColor(Color.theme.title)
+                        .font(.title3)
+                    
+                    Spacer()
+                    
+                    Button {
+                        if editMethod {
+                            withAnimation(.easeOut(duration: 0.1)) {
+                                editMethod.toggle()
+                            }
+                        } else {
+                            withAnimation(.spring()) {
+                                editMethod.toggle()
+                            }
+                        }
+                    } label: {
+                        Image(systemName: editMethod ? "checkmark" : "pencil")
+                            .foregroundColor(Color.theme.lightText)
+                            .font(.title3)
+                    }
+                }
+                
+                Divider()
+                
+                VStack(spacing: 20) {
+                    ForEach(recipe.steps.indices, id: \.self) { index in
+                        HStack {
+                            if editMethod {
+                                Button {
+                                    recipe.steps.remove(at: index)
+                                } label: {
+                                    Image(systemName: "minus.circle.fill")
+                                        .foregroundColor(Color.theme.red)
+                                        .font(.title3)
+                                }
+                                .transition(.move(edge: .leading))
+                            }
+
+                            HStack {
+                                Image(systemName: "\(min(index + 1, 50) ).circle.fill")
+                                    .foregroundColor(Color.theme.lightText)
+                                    .font(.title3)
+                                stepEditor(index)
+                            }
+                            
+                            Spacer()
+                            
+                            if editMethod {
+                            Button {
+                                recipe.steps.insert("", at: index + 1)
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(Color.theme.tint)
+                                    .font(.title3)
+                            }
+                            .transition(.move(edge: .trailing))
+                            }
+                        }
+                        
+                        if index < recipe.steps.count - 1 {
+                            Divider()
+                        }
+                    }
+                    
+                    HStack {
+                        Spacer()
+                        Button {
+                            recipe.steps.append("")
+                        } label: {
+                            Image(systemName: "plus")
+                                .foregroundColor(Color.theme.tint)
+                                .font(.title2)
+                        }
+                        Spacer()
+                    }
+                }
+            }
+        }
+    }
+    
+    private var tagSection: some View {
+        RecipeDetailSectionInset {
+            VStack {
+                HStack {
+                    Text("Tags")
+                        .foregroundColor(Color.theme.title)
+                        .font(.title3)
+                    
+                    Spacer()
+                }
+                
+                Divider()
+                    .padding(.vertical, 10)
+                
+                FlexibleView(
+                    data: recipe.tags,
+                    spacing: 8,
+                    alignment: .leading
+                ) { item in
+                    HStack {
+                        Text(verbatim: item)
+                            .foregroundColor(Color.theme.text)
+                        Image(systemName: "x.circle.fill")
+                            .foregroundColor(Color.theme.lightText)
+                            .onTapGesture {
+                                recipe.tags.removeAll(where: { $0 == item })
+                            }
+                    }
+                    .padding(8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.gray.opacity(0.1))
+                    )
+                }
+                .frame(minHeight: 20)
+                
+                Divider()
+                    .padding(.vertical, 10)
+                
+                TextField("New Tag", text: $newTag)
+                    .foregroundColor(Color.theme.text)
+                    .focused($tagEditorFocused)
+                    .submitLabel(.next)
+                    .onSubmit {
+                        let componentTags = newTag
+                            .lowercased()
+                            .components(separatedBy: " ")
+                            .filter({ recipe.tags.firstIndex(of: $0) == nil })
+                            .filter({ !$0.isEmpty })
+                            .map({ String($0.prefix(20)) })
+                        recipe.tags += componentTags
+                        recipe.tags = Array(recipe.tags[0..<min(5, recipe.tags.count)])
+                        newTag = ""
+                        tagEditorFocused = true
+                    }
+
+            }
+        }
+    }
 }
 
 struct NewEditRecipe_Previews: PreviewProvider {
     static var previews: some View {
-        let recipe = Recipe.empty.childOf(parent_id: "Parent!")
+        var recipe = Recipe.empty.childOf(parent_id: "Parent!")
+        let _ = (recipe.specialTools = ["Whisk", "Blender"])
+        let _ = (recipe.tags = ["yummy", "easy", "italian"])
         NavigationView {
             NewEditRecipeView(recipe)
         }

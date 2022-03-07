@@ -97,11 +97,11 @@ class RecipeDetailViewController: StarsRatingViewController {
         let groceryListIndex = groceries.firstIndex(where: { $0.id == recipeMeta.id })
 
         if let groceryListIndex = groceryListIndex {
-            if let itemIndex = groceries[groceryListIndex].items.firstIndex(where: { $0.id == recipeMeta.id + "_" + ingredient.id }) {
+            if let itemIndex = groceries[groceryListIndex].items.firstIndex(where: { $0.id == recipeMeta.id + "_" + ingredient.name }) {
                 groceries[groceryListIndex].items.remove(at: itemIndex)
             }
         } else {
-            groceries[0].items.append(GroceryListItem(id: recipeMeta.id + "_" + ingredient.id, ingredient: getIngredientString(ingredient: ingredient), check: false))
+            groceries[0].items.append(GroceryListItem(id: recipeMeta.id + "_" + ingredient.name, ingredient: getIngredientString(ingredient: ingredient), check: false))
             
         }
     }
@@ -493,7 +493,7 @@ extension RecipeDetail {
                             if viewController.groceriesAdded {
                                 viewController.groceries.append(GroceryList(id: recipeMeta.id, name: recipeMeta.recipe.name, items: []))
                                 viewController.groceries[viewController.groceries.count - 1].items = recipeMeta.recipe.ingredients.map {
-                                    return GroceryListItem(id: recipeMeta.id + "_" + $0.id, ingredient: viewController.getIngredientString(ingredient: $0), check: false)
+                                    return GroceryListItem(id: recipeMeta.id + "_" + $0.name, ingredient: viewController.getIngredientString(ingredient: $0), check: false)
                                 }
                             } else {
                                 viewController.groceries.removeAll(where: { $0.id == recipeMeta.id })
@@ -504,10 +504,10 @@ extension RecipeDetail {
                 
                 Divider()
                 
-                ForEach (recipeMeta.recipe.ingredients) { ingredient in
-                    let ingredientIndex = recipeMeta.recipe.ingredients.firstIndex(of: ingredient)!
+                ForEach (recipeMeta.recipe.ingredients.indices) { index in
+                    let ingredient = recipeMeta.recipe.ingredients[index]
                     HStack {
-                        Image(systemName: viewController.ingredientInGroceryList[ingredientIndex] ? "plus.circle.fill" : "plus.circle")
+                        Image(systemName: viewController.ingredientInGroceryList[index] ? "plus.circle.fill" : "plus.circle")
                             .foregroundColor(Color.theme.accent)
                             .font(.system(size: 24))
                             .onTapGesture {
@@ -521,10 +521,10 @@ extension RecipeDetail {
                         let ingredientText = (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity) + " " + ingredient.unit + " " + ingredient.name
                         
                         Text(ingredientText)
-                            .strikethrough(viewController.hasIngredient[ingredientIndex], color: Color.theme.lightText)
-                            .foregroundColor(viewController.hasIngredient[ingredientIndex] ? Color.theme.lightText : Color.theme.text)
+                            .strikethrough(viewController.hasIngredient[index], color: Color.theme.lightText)
+                            .foregroundColor(viewController.hasIngredient[index] ? Color.theme.lightText : Color.theme.text)
                             .onTapGesture {
-                                viewController.ingredientPressed(ingredientIndex)
+                                viewController.ingredientPressed(index)
                             }
                         
                         Spacer()
@@ -720,9 +720,9 @@ extension RecipeDetail {
 struct RecipeDetail_Previews: PreviewProvider {
     static var previews: some View {
         let ingredients: [Ingredient] = [
-            Ingredient(id: "0", name: "Test", quantity: "1", unit: "Unit"),
-            Ingredient(id: "1", name: "Test", quantity: "2", unit: "Unit"),
-            Ingredient(id: "2", name: "Test", quantity: "3", unit: "Unit")
+            Ingredient(name: "Test", quantity: "1", unit: "Unit"),
+            Ingredient(name: "Test", quantity: "2", unit: "Unit"),
+            Ingredient(name: "Test", quantity: "3", unit: "Unit")
         ]
         let location = CLLocationCoordinate2D(latitude: 37.332077, longitude: -122.02962) // Apple Park, California
         
