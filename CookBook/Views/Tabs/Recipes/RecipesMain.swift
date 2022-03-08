@@ -15,6 +15,7 @@ class RecipeMainViewController: ObservableObject {
     var cancellables: Set<AnyCancellable> = Set<AnyCancellable>()
     
     @Published var isLoading: Bool = false
+    @Published var searchRecipes: [RecipeMeta]? = nil
 
     init(_ backendController: RecipeBackendController) {
         self.backendController = backendController
@@ -62,6 +63,22 @@ class RecipeMainViewController: ObservableObject {
             })
             .store(in: &cancellables)
     }
+    
+    func search(_ searchText: String) {
+        if searchText.isEmpty {
+            self.searchRecipes = nil
+        } else {
+            backendController.searchRecipes(searchString: searchText)
+                .receive(on: DispatchQueue.main)
+                .sink { _ in
+                } receiveValue: { recipes in
+                    withAnimation {
+                        self.searchRecipes = recipes
+                    }
+                }
+                .store(in: &cancellables)
+        }
+    }
 }
 
 struct RecipesMainView: View {
@@ -91,10 +108,14 @@ struct RecipesMainView: View {
                 ScrollView(showsIndicators: false) {
                     VStack {
                         Group {
-                            if continuous {
-                                RecipeMainContinuousView(viewController: viewController)
+                            if searchText.isEmpty {
+                                if continuous {
+                                    RecipeMainContinuousView(viewController: viewController)
+                                } else {
+                                    RecipeMainDefaultView(viewController: viewController)
+                                }
                             } else {
-                                RecipeMainDefaultView(viewController: viewController)
+                                RecipeMainSearchView(viewController: viewController)
                             }
                         }
                         .onTapGesture {
@@ -127,7 +148,9 @@ struct RecipesMainView: View {
                 }
             }
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always)) {
-                Text("Example search").searchCompletion("Example search")
+            }
+            .onChange(of: searchText) { newValue in
+                viewController.search(searchText)
             }
         }
     }

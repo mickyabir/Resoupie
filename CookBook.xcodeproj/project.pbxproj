@@ -61,6 +61,7 @@
 		818D399727CAE32D008F4A47 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818D399627CAE32D008F4A47 /* UIImage.swift */; };
 		818D399D27CAF8ED008F4A47 /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818D399C27CAF8ED008F4A47 /* ImageLoader.swift */; };
 		81933FEF27BF0E5E00E9BB10 /* UserBackendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81933FEE27BF0E5E00E9BB10 /* UserBackendController.swift */; };
+		8196C2A227D80D9800901F02 /* RecipeMainSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8196C2A127D80D9800901F02 /* RecipeMainSearchView.swift */; };
 		819E4E0E27C22ECF004068A3 /* UserSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 819E4E0D27C22ECF004068A3 /* UserSignIn.swift */; };
 		81B1BF87279F852200EC85BB /* PhotoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF86279F852200EC85BB /* PhotoPicker.swift */; };
 		81B1BF90279FA6CA00EC85BB /* CoordinatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B1BF8F279FA6CA00EC85BB /* CoordinatePicker.swift */; };
@@ -145,6 +146,7 @@
 		818D399627CAE32D008F4A47 /* UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		818D399C27CAF8ED008F4A47 /* ImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoader.swift; sourceTree = "<group>"; };
 		81933FEE27BF0E5E00E9BB10 /* UserBackendController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserBackendController.swift; sourceTree = "<group>"; };
+		8196C2A127D80D9800901F02 /* RecipeMainSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeMainSearchView.swift; sourceTree = "<group>"; };
 		819E4E0D27C22ECF004068A3 /* UserSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSignIn.swift; sourceTree = "<group>"; };
 		81B1BF86279F852200EC85BB /* PhotoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoPicker.swift; sourceTree = "<group>"; };
 		81B1BF8F279FA6CA00EC85BB /* CoordinatePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatePicker.swift; sourceTree = "<group>"; };
@@ -370,8 +372,9 @@
 			isa = PBXGroup;
 			children = (
 				815E82702798CAC800530BA2 /* RecipesMain.swift */,
-				812F176027CB50F70095F7D0 /* RecipeMainContinuous.swift */,
 				812F176227CB50FF0095F7D0 /* RecipeMainDefault.swift */,
+				812F176027CB50F70095F7D0 /* RecipeMainContinuous.swift */,
+				8196C2A127D80D9800901F02 /* RecipeMainSearchView.swift */,
 				812F176427CB513C0095F7D0 /* RecipeGroupRow.swift */,
 			);
 			path = Recipes;
@@ -657,6 +660,7 @@
 				812F175F27CB50AF0095F7D0 /* GroceryListItem.swift in Sources */,
 				815BDC0627CC74D4004E7A17 /* RecipeDetail.swift in Sources */,
 				812F176127CB50F70095F7D0 /* RecipeMainContinuous.swift in Sources */,
+				8196C2A227D80D9800901F02 /* RecipeMainSearchView.swift in Sources */,
 				818D399327CAE2E3008F4A47 /* Character.swift in Sources */,
 				812F176A27CB51CD0095F7D0 /* FlexibleView.swift in Sources */,
 				81B1BF90279FA6CA00EC85BB /* CoordinatePicker.swift in Sources */,

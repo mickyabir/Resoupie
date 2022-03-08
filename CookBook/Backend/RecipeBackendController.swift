@@ -34,6 +34,14 @@ protocol RecipeBackendController {
     func loadAllRecipes() -> AnyPublisher<[RecipeMeta], Error>
     func getForkInfo(recipe_id: String) -> AnyPublisher<ForkInfoModel, Error>
     func uploadRecipeToServer(recipe: Recipe) -> AnyPublisher<Bool, Error>
+    func searchRecipes(searchString: String, limit: Int) -> AnyPublisher<[RecipeMeta], Error>
+}
+
+
+extension RecipeBackendController {
+    func searchRecipes(searchString: String) -> AnyPublisher<[RecipeMeta], Error> {
+        return searchRecipes(searchString: searchString, limit: 10)
+    }
 }
 
 extension BackendController: RecipeBackendController {
@@ -142,6 +150,16 @@ extension BackendController: RecipeBackendController {
             .tryMap { response in
                 response.success
             }
+            .eraseToAnyPublisher()
+    }
+    
+    func searchRecipes(searchString: String, limit: Int) -> AnyPublisher<[RecipeMeta], Error> {
+        let params = [
+            URLQueryItem(name: "search_string", value: searchString),
+            URLQueryItem(name: "limit", value: String(limit))
+        ]
+        
+        return request(path: RecipeBackend.path + "search", method: "GET", modelType: [RecipeMeta].self, params: params)
             .eraseToAnyPublisher()
     }
 }
