@@ -45,7 +45,7 @@ class NewEditRecipeViewController: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { success in
-//                self.presentationMode.wrappedValue.dismiss()
+                self.presentationMode.wrappedValue.dismiss()
             })
             .store(in: &cancellables)
         
@@ -87,7 +87,9 @@ struct NewEditRecipeView: View {
     @State private var recipeImage: UIImage?
     @State private var showImageLibrary = false
 
-    
+    @State private var servings: Int? = nil
+    @State private var emoji: String = ""
+
     @State var editSpecialTools: Bool = false
     @State var editIngredients: Bool = false
     @State var editMethod: Bool = false
@@ -95,8 +97,8 @@ struct NewEditRecipeView: View {
     @State var newTag: String = ""
     @FocusState var tagEditorFocused: Bool
     
-    init(_ recipe: Recipe?, parent_id: String? = nil) {
-        self.recipe = recipe ?? Recipe.empty
+    init(_ recipe: Recipe = .empty, parent_id: String? = nil) {
+        self.recipe = recipe
         self.parent_id = parent_id
     }
     
@@ -157,6 +159,7 @@ struct NewEditRecipeView: View {
         }
         .onAppear {
             viewController.checkLocation()
+            servings = recipe.servings > 0 ? recipe.servings : nil
         }
     }
 }
@@ -194,17 +197,21 @@ extension NewEditRecipeView {
                 TextField("Name", text: $recipe.name)
                     .foregroundColor(Color.theme.text)
                 
-                TextField("Servings", value: $recipe.servings, formatter: NumberFormatter())
+                TextField("Servings", value: $servings, formatter: NumberFormatter())
                     .foregroundColor(Color.theme.text)
                     .keyboardType(.numberPad)
+                    .onChange(of: servings) { newServings in
+                        recipe.servings = newServings ?? 0
+                    }
                 
                 TextField("Time", text: $recipe.time)
                     .foregroundColor(Color.theme.text)
-                    .keyboardType(.numberPad)
                 
-                TextField("Emoji", text: $recipe.emoji)
+                EmojiTextField(text: $recipe.emoji, placeholder: "Emoji")
                     .foregroundColor(Color.theme.text)
-                    .keyboardType(.numberPad)
+                    .onChange(of: recipe.emoji) { _ in
+                        recipe.emoji = String(recipe.emoji.onlyEmoji().prefix(1))
+                    }
                 
                 Divider()
                 
@@ -596,30 +603,32 @@ extension NewEditRecipeView {
                 Divider()
                     .padding(.vertical, 10)
                 
-                FlexibleView(
-                    data: recipe.tags,
-                    spacing: 8,
-                    alignment: .leading
-                ) { item in
-                    HStack {
-                        Text(verbatim: item)
-                            .foregroundColor(Color.theme.text)
-                        Image(systemName: "x.circle.fill")
-                            .foregroundColor(Color.theme.lightText)
-                            .onTapGesture {
-                                recipe.tags.removeAll(where: { $0 == item })
-                            }
+                if !recipe.tags.isEmpty {
+                    FlexibleView(
+                        data: recipe.tags,
+                        spacing: 8,
+                        alignment: .leading
+                    ) { item in
+                        HStack {
+                            Text(verbatim: item)
+                                .foregroundColor(Color.theme.text)
+                            Image(systemName: "x.circle.fill")
+                                .foregroundColor(Color.theme.lightText)
+                                .onTapGesture {
+                                    recipe.tags.removeAll(where: { $0 == item })
+                                }
+                        }
+                        .padding(8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.gray.opacity(0.1))
+                        )
                     }
-                    .padding(8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.gray.opacity(0.1))
-                    )
+                    .frame(minHeight: 20)
+                    
+                    Divider()
+                        .padding(.vertical, 10)
                 }
-                .frame(minHeight: 20)
-                
-                Divider()
-                    .padding(.vertical, 10)
                 
                 TextField("New Tag", text: $newTag)
                     .foregroundColor(Color.theme.text)

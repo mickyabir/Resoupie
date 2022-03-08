@@ -153,7 +153,6 @@ class ProfileOwnerViewController: UserSignInViewController {
 
 struct ProfileOwnerView: View {
     @ObservedObject var viewController: ProfileOwnerViewController
-    @ObservedObject var editRecipeViewController: EditRecipeViewController
     @State var isPresenting = false
 
     var body: some View {
@@ -176,7 +175,7 @@ struct ProfileOwnerView: View {
             }
             .sheet(isPresented: $viewController.presentNewRecipe) {
                 NavigationView {
-                    EditRecipeView()
+                    NewEditRecipeView()
                         .toolbar {
                             ToolbarItem(placement: .navigationBarLeading) {
                                 Button {

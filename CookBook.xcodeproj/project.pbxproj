@@ -49,6 +49,7 @@
 		8179D67A27D1F07600A48E58 /* CustomNavigationBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179D67927D1F07600A48E58 /* CustomNavigationBar.swift */; };
 		8179D67C27D2C4C100A48E58 /* NewEditRecipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179D67B27D2C4C100A48E58 /* NewEditRecipe.swift */; };
 		8179D67E27D2C9DF00A48E58 /* RecipeDetailSectionInset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179D67D27D2C9DF00A48E58 /* RecipeDetailSectionInset.swift */; };
+		8179D68027D59A3700A48E58 /* EmojiTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179D67F27D59A3700A48E58 /* EmojiTextField.swift */; };
 		81862D9027AC6C13006C947F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81862D8F27AC6C13006C947F /* Theme.swift */; };
 		818D398127CAE092008F4A47 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818D398027CAE092008F4A47 /* Color.swift */; };
 		818D398827CAE193008F4A47 /* CLLocationCoordinate2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818D398727CAE193008F4A47 /* CLLocationCoordinate2D.swift */; };
@@ -133,6 +134,7 @@
 		8179D67927D1F07600A48E58 /* CustomNavigationBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomNavigationBar.swift; sourceTree = "<group>"; };
 		8179D67B27D2C4C100A48E58 /* NewEditRecipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewEditRecipe.swift; sourceTree = "<group>"; };
 		8179D67D27D2C9DF00A48E58 /* RecipeDetailSectionInset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeDetailSectionInset.swift; sourceTree = "<group>"; };
+		8179D67F27D59A3700A48E58 /* EmojiTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiTextField.swift; sourceTree = "<group>"; };
 		81862D8F27AC6C13006C947F /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		818D398027CAE092008F4A47 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		818D398727CAE193008F4A47 /* CLLocationCoordinate2D.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLLocationCoordinate2D.swift; sourceTree = "<group>"; };
@@ -472,6 +474,7 @@
 				815B2E6F27C1BF8800F1CA2D /* CustomList.swift */,
 				812F176927CB51CD0095F7D0 /* FlexibleView.swift */,
 				815BDC0727CD9B8C004E7A17 /* LocationMapSnapshot.swift */,
+				8179D67F27D59A3700A48E58 /* EmojiTextField.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -650,6 +653,7 @@
 				812F176527CB513C0095F7D0 /* RecipeGroupRow.swift in Sources */,
 				813F156927A2161D00214CE0 /* RecipeBackendController.swift in Sources */,
 				8179715C27AA7F1B00DE1753 /* RecipeCard.swift in Sources */,
+				8179D68027D59A3700A48E58 /* EmojiTextField.swift in Sources */,
 				8128CF2127D0315800EFDFC7 /* StarsRating.swift in Sources */,
 				818D399127CAE2C0008F4A47 /* String.swift in Sources */,
 				81BAF3EE2799FDBB004B0767 /* World.swift in Sources */,
