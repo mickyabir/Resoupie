@@ -13,20 +13,23 @@ class ImageLoader: ObservableObject {
     
     private var imageCache = ImageCache()
     private var publishers: [URL:AnyPublisher<UIImage?, Never>] = [:]
+    private var reloadImage: [URL:Bool] = [:]
 
     func getImagePublisher(_ url: URL) -> AnyPublisher<UIImage?, Never> {
         if let image = imageCache[url] {
+            reloadImage[url] = true
             return Just(image)
                 .share()
                 .eraseToAnyPublisher()
         }
         
-        if let publisher = publishers[url] {
+        if reloadImage[url] != true, let publisher = publishers[url] {
             return publisher
         }
         
         let publisher = load(url)
         publishers[url] = publisher
+        reloadImage[url] = false
         return publisher
     }
     
@@ -49,7 +52,7 @@ fileprivate protocol ImageCacher {
 
 fileprivate struct ImageCache: ImageCacher {
     private let cache = NSCache<NSURL, UIImage>()
-    
+
     subscript(_ key: URL) -> UIImage? {
         get { cache.object(forKey: key as NSURL) }
         set { newValue == nil ? cache.removeObject(forKey: key as NSURL) : cache.setObject(newValue!, forKey: key as NSURL) }
@@ -59,7 +62,7 @@ fileprivate struct ImageCache: ImageCacher {
 //fileprivate class ImageCache {
 //    class Key {
 //        let key: URL
-//        
+//
 //        init(_ key: URL) {
 //            self.key = key
 //        }
@@ -67,20 +70,20 @@ fileprivate struct ImageCache: ImageCacher {
 //    class Entry {
 //        let key: URL
 //        let image: UIImage
-//        
+//
 //        init(key: URL, image: UIImage) {
 //            self.key = key
 //            self.image = image
 //        }
 //    }
-//    
+//
 //    private let cache = NSCache<Key, Entry>()
 //    private let delegate: ImageCacheDelegate = ImageCacheDelegate()
-//    
+//
 //    init() {
 //        cache.delegate = delegate
 //    }
-//    
+//
 //    subscript(_ key: URL) -> UIImage? {
 //        get { cache.object(forKey: Key(key))?.image }
 //        set {
@@ -92,7 +95,7 @@ fileprivate struct ImageCache: ImageCacher {
 //            }
 //        }
 //    }
-//    
+//
 //    func insert(_ entry: Entry) {
 //        cache.setObject(entry, forKey: Key(entry.key))
 //        delegate.keys.insert(entry.key)
@@ -102,13 +105,13 @@ fileprivate struct ImageCache: ImageCacher {
 //fileprivate extension ImageCache {
 //    final class ImageCacheDelegate: NSObject, NSCacheDelegate {
 //        var keys = Set<URL>()
-//        
+//
 //        func cache(_ cache: NSCache<AnyObject, AnyObject>,
 //                   willEvictObject object: Any) {
 //            guard let entry = object as? Entry else {
 //                return
 //            }
-//            
+//
 //            keys.remove(entry.key)
 //        }
 //    }

@@ -552,7 +552,7 @@ extension RecipeDetail {
                 
                 Divider()
                 
-                ForEach (recipeMeta.recipe.ingredients.indices) { index in
+                ForEach (recipeMeta.recipe.ingredients.indices, id: \.self) { index in
                     let ingredient = recipeMeta.recipe.ingredients[index]
                     HStack {
                         Image(systemName: viewController.ingredientInGroceryList[index] ? "plus.circle.fill" : "plus.circle")
