@@ -11,7 +11,7 @@ import Combine
 
 class RecipeDetailViewController: StarsRatingViewController {
     @AppStorage("groceryLists") var groceries: [GroceryList] = []
-
+    
     private var cancellables: Set<AnyCancellable> = Set()
     typealias Backend = RecipeBackendController
     let backendController: Backend
@@ -19,18 +19,18 @@ class RecipeDetailViewController: StarsRatingViewController {
     
     @AppStorage("favorites") var favorites: [RecipeMeta] = []
     @Published var favorited: Bool = false
-
+    
     @Published var rating: Double
     @Published var forkInfo: ForkInfoModel? = nil
     @Published var showFork: Bool = false
-
+    
     var forkViewController: RecipeDetailViewController?
     var forkRecipeMeta: RecipeMeta?
-
+    
     @State var coordinateRegion: MKCoordinateRegion
-
+    
     @Published var locationName: String = ""
-
+    
     @Published var hasSpecialTool: [Bool]
     @Published var hasIngredient: [Bool]
     @Published var completedStep: [Bool]
@@ -39,7 +39,7 @@ class RecipeDetailViewController: StarsRatingViewController {
     @Published var currentServings: Int?
     
     @Published var ingredientInGroceryList: [Bool]
-
+    
     init(_ recipeMeta: RecipeMeta, backendController: Backend) {
         self.recipeMeta = recipeMeta
         rating = recipeMeta.rating
@@ -52,16 +52,17 @@ class RecipeDetailViewController: StarsRatingViewController {
         favorited = false
         
         self.backendController = backendController
+
         
-//                ingredientInGroceryList =  recipeMeta.recipe.ingredients.map {
-//                    groceries.reduce([], { $0 + $1.items }).firstIndex(where: { $0.id == (recipeMeta.id + "_" + $0.id) }) != nil
-//                }
-        
+//        ingredientInGroceryList =  recipeMeta.recipe.ingredients.map {
+//            groceries.reduce([], { $0 + $1.items }).firstIndex(where: { $0.id == (recipeMeta.id + "_" + $0.id) }) != nil
+//        }
+//
         ingredientInGroceryList =  recipeMeta.recipe.ingredients.map { ingredient in
             false
         }
-
-
+//
+        
         let geo = CLGeocoder()
         
         if let location = recipeMeta.recipe.coordinate() {
@@ -80,9 +81,16 @@ class RecipeDetailViewController: StarsRatingViewController {
         }
         
         groceriesAdded = groceries.firstIndex(where: { $0.id == recipeMeta.id }) != nil
-
+        
         checkFavorited()
         getForkInfo()
+        checkIngredientsInGroceryList()
+    }
+    
+    func checkIngredientsInGroceryList() {
+        ingredientInGroceryList = recipeMeta.recipe.ingredients.map { ingredient in
+            groceries.reduce([], { $0 + $1.items }).firstIndex(where: { $0.id == (self.recipeMeta.id + "_" + $0.id) }) != nil
+        }
     }
     
     func specialToolPressed(_ index: Int) {
@@ -95,14 +103,30 @@ class RecipeDetailViewController: StarsRatingViewController {
     
     func ingredientAddPressed(_ ingredient: Ingredient) {
         let groceryListIndex = groceries.firstIndex(where: { $0.id == recipeMeta.id })
-
+        
+        let ingredientIndex = recipeMeta.recipe.ingredients.firstIndex(of: ingredient)
+        
         if let groceryListIndex = groceryListIndex {
             if let itemIndex = groceries[groceryListIndex].items.firstIndex(where: { $0.id == recipeMeta.id + "_" + ingredient.name }) {
                 groceries[groceryListIndex].items.remove(at: itemIndex)
+                
+                if let ingredientIndex = ingredientIndex {
+                    ingredientInGroceryList[ingredientIndex] = false
+                }
+            } else {
+                groceries[groceryListIndex].items.append(GroceryListItem(id: recipeMeta.id + "_" + ingredient.name, ingredient: getIngredientString(ingredient: ingredient), check: false))
+                if let ingredientIndex = ingredientIndex {
+                    ingredientInGroceryList[ingredientIndex] = true
+                }
             }
         } else {
+            if groceries.isEmpty {
+                groceries.append(GroceryList(id: recipeMeta.id, name: recipeMeta.recipe.name, items: []))
+            }
             groceries[0].items.append(GroceryListItem(id: recipeMeta.id + "_" + ingredient.name, ingredient: getIngredientString(ingredient: ingredient), check: false))
-            
+            if let ingredientIndex = ingredientIndex {
+                ingredientInGroceryList[ingredientIndex] = true
+            }
         }
     }
     
@@ -113,11 +137,11 @@ class RecipeDetailViewController: StarsRatingViewController {
         }
         return ingredient.name + " (" + (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity) + " " + ingredient.unit +  ")"
     }
-
+    
     func stepPressed(_ index: Int) {
         completedStep[index].toggle()
     }
-
+    
     func checkFavorited() {
         if favorites.firstIndex(where: {$0.id == recipeMeta.id}) != nil {
             favorited = true
@@ -129,7 +153,7 @@ class RecipeDetailViewController: StarsRatingViewController {
     func getForkRecipe() -> RecipeMeta {
         return forkRecipeMeta ?? RecipeMeta.empty
     }
-
+    
     func getForkInfo() {
         backendController.getForkInfo(recipe_id: recipeMeta.id)
             .receive(on: DispatchQueue.main)
@@ -147,7 +171,7 @@ class RecipeDetailViewController: StarsRatingViewController {
             })
             .store(in: &cancellables)
     }
-
+    
     func rateRecipe(_ rating: Int, continuation: @escaping (Double) -> ()) {
         backendController.rateRecipe(recipe_id: recipeMeta.id, rating: rating)
             .receive(on: DispatchQueue.main)
@@ -159,7 +183,7 @@ class RecipeDetailViewController: StarsRatingViewController {
             })
             .store(in: &cancellables)
     }
-
+    
     func favoritePressed() {
         if favorited {
             unfavoriteRecipe()
@@ -167,33 +191,33 @@ class RecipeDetailViewController: StarsRatingViewController {
             favoriteRecipe()
         }
     }
-
+    
     private func favoriteRecipe() {
         favorited = true
-
+        
         if favorites.firstIndex(where: {$0.id == recipeMeta.id }) == nil {
             favorites.append(recipeMeta)
         }
-
+        
         backendController.favoriteRecipe(recipe_id: recipeMeta.id)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { success in
-
+                
             })
             .store(in: &cancellables)
     }
-
+    
     private func unfavoriteRecipe() {
         favorited = false
         let index = favorites.firstIndex(where: {$0.id == recipeMeta.id })
         if let index = index {
             favorites.remove(at: index)
         }
-
+        
         backendController.unfavoriteRecipe(recipe_id: recipeMeta.id)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { success in
-
+                
             })
             .store(in: &cancellables)
     }
@@ -201,7 +225,7 @@ class RecipeDetailViewController: StarsRatingViewController {
 
 struct RecipeDetail: View {
     @StateObject var viewController: RecipeDetailViewController
-
+    
     let navbarHeight: CGFloat
     let initialOffset: CGFloat
     let recipeMeta: RecipeMeta
@@ -212,7 +236,7 @@ struct RecipeDetail: View {
     @State private var showNavBarEmoji: Bool = false
     
     @State private var presentEditRecipe: Bool = false
-        
+    
     @Environment(\.presentationMode) var presentation
     
     init(_ recipeMeta: RecipeMeta, backendController: BackendController) {
@@ -222,14 +246,14 @@ struct RecipeDetail: View {
         initialOffset = -navbarHeight
         
         _viewController = StateObject(wrappedValue: RecipeDetailViewController(recipeMeta, backendController: backendController))
-
+        
     }
     
     @State var scroll: CGFloat = 0
     
     @State var imageBottom: CGFloat = 1000
     @State var navbarTop: CGFloat = 0
-
+    
     var body: some View {
         ZStack(alignment: .top) {
             Color.theme.background
@@ -288,7 +312,7 @@ struct RecipeDetail: View {
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $presentEditRecipe) {
             NavigationView {
-                NewEditRecipeView(isPresented: $presentEditRecipe)
+                EditRecipeView(isPresented: $presentEditRecipe)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {
                             Button {
@@ -315,7 +339,7 @@ extension RecipeDetail {
                 }
             }
             .aspectRatio(1, contentMode: .fill)
-
+            
             HStack {
                 VStack(alignment: .leading) {
                     Text(recipeMeta.recipe.name)
@@ -359,20 +383,20 @@ extension RecipeDetail {
                 .frame(maxWidth: .infinity)
                 .frame(height: navbarHeight)
                 .opacity(0)
-
+            
             Text(recipeMeta.recipe.emoji)
                 .font(.title)
                 .padding(.bottom, 10)
                 .transition(.move(edge: .bottom))
                 .opacity(showNavBarEmoji ? 1.0 : 0.0)
-
+            
             HStack {
                 HStack {
                     Image(systemName: "chevron.left")
                         .font(Font.title3.weight(.medium))
                         .foregroundColor(Color.theme.light)
                         .colorMultiply(showNavBarItems ? Color.theme.accent : Color.theme.light)
-
+                    
                     Text("Back")
                         .foregroundColor(Color.theme.light)
                         .colorMultiply(showNavBarItems ? Color.theme.accent : Color.theme.light)
@@ -381,9 +405,9 @@ extension RecipeDetail {
                 .onTapGesture {
                     presentation.wrappedValue.dismiss()
                 }
-
+                
                 Spacer()
-
+                
                 Image(systemName: viewController.favorited ? "heart.fill" : "heart")
                     .font(Font.title2.weight(.medium))
                     .foregroundColor(Color.theme.red)
@@ -392,7 +416,7 @@ extension RecipeDetail {
                         viewController.favoritePressed()
                     }
             }
-
+            
             Divider()
                 .opacity(showNavBar ? 1.0 : 0.0)
         }
@@ -507,11 +531,19 @@ extension RecipeDetail {
                             }
                             
                             if viewController.groceriesAdded {
+                                viewController.ingredientInGroceryList =  recipeMeta.recipe.ingredients.map { ingredient in
+                                    true
+                                }
+
                                 viewController.groceries.append(GroceryList(id: recipeMeta.id, name: recipeMeta.recipe.name, items: []))
                                 viewController.groceries[viewController.groceries.count - 1].items = recipeMeta.recipe.ingredients.map {
                                     return GroceryListItem(id: recipeMeta.id + "_" + $0.name, ingredient: viewController.getIngredientString(ingredient: $0), check: false)
                                 }
                             } else {
+                                viewController.ingredientInGroceryList =  recipeMeta.recipe.ingredients.map { ingredient in
+                                    false
+                                }
+
                                 viewController.groceries.removeAll(where: { $0.id == recipeMeta.id })
                             }
                             
@@ -658,17 +690,17 @@ extension RecipeDetail {
                 
                 Divider()
                 
-//                NavigationLink(destination: NewEditRecipeView(recipeMeta.recipe.childOf(parent_id: recipeMeta.id), isPresented: $presentEditRecipe), isActive: $presentEditRecipe) {
-                    HStack {
-                        Spacer ()
-                        Text("Fork This Recipe")
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                    }
-                    .onTapGesture {
-                        presentEditRecipe = true
-                    }
-//                }
+                //                NavigationLink(destination: NewEditRecipeView(recipeMeta.recipe.childOf(parent_id: recipeMeta.id), isPresented: $presentEditRecipe), isActive: $presentEditRecipe) {
+                HStack {
+                    Spacer ()
+                    Text("Fork This Recipe")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                }
+                .onTapGesture {
+                    presentEditRecipe = true
+                }
+                //                }
                 
             }
         }
