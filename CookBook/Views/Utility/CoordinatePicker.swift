@@ -71,6 +71,10 @@ struct CoordinatePicker: View {
     
     @State var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 0.07, longitudeDelta: 0.07))
     
+    init(_ viewModel: CoordinatePickerViewModel) {
+        self.viewModel = viewModel
+    }
+    
     var body: some View {
         ZStack {
             Map(coordinateRegion: $region, annotationItems: viewModel.locations) { place in
@@ -82,10 +86,12 @@ struct CoordinatePicker: View {
             .onTapGesture {
                 
             }
+
             Circle()
                 .strokeBorder(Color.white, lineWidth: 4)
                 .background(Circle().foregroundColor(Color.blue).opacity(0.1))
                 .frame(width: 300, height: 300)
+                .allowsHitTesting(false)
         }
         .navigationBarTitle("Location", displayMode: .inline)
         .toolbar {
@@ -95,7 +101,6 @@ struct CoordinatePicker: View {
                 }
             } label: {
                 Text("Select")
-                    .foregroundColor(Color.theme.accent)
             }
         }
     }

@@ -10,15 +10,13 @@ import CoreLocation
 import SwiftUI
 import Combine
 
-struct UserBackendModel: Codable {
-    var name: String
-    var username: String
-    var followers: Int
-}
-
 struct SignInTokenModel: Codable {
     var access_token: String
     var refresh_token: String
+}
+
+struct FollowingResponse: Codable {
+    var following: Bool
 }
 
 enum UserError: Error {
@@ -27,10 +25,14 @@ enum UserError: Error {
 
 protocol UserBackendController {
     func verifyToken() -> AnyPublisher<Bool, Error>
-    func getUser() -> AnyPublisher<User, Error>
+    func getUser(user_id: String) -> AnyPublisher<User, Error>
+    func getCurrentUser() -> AnyPublisher<User, Error>
     func signIn(username: String, password: String) -> AnyPublisher<Bool, Error>
     func signUp(name: String, username: String, password: String) -> AnyPublisher<Bool, Error>
     func signOut() -> AnyPublisher<Bool, Error>
+    func checkFollowing(user_id: String) -> AnyPublisher<Bool, Error>
+    func follow(user_id: String) -> AnyPublisher<Bool, Error>
+    func unfollow(user_id: String) -> AnyPublisher<Bool, Error>
 }
 
 extension BackendController: UserBackendController {
@@ -46,11 +48,56 @@ extension BackendController: UserBackendController {
             .eraseToAnyPublisher()
     }
     
-    func getUser() -> AnyPublisher<User, Error> {
-        return authorizedRequest(path: UserBackend.path + "me/", method: "GET", modelType: UserBackendModel.self)
-            .tryMap { user in
-                return User(name: user.name, username: user.username, followers: user.followers)
+    func checkFollowing(user_id: String) -> AnyPublisher<Bool, Error> {
+        let params = [
+            URLQueryItem(name: "follow_id", value: String(user_id)),
+        ]
+
+        return authorizedRequest(path: UserBackend.path + "following/", method: "GET", modelType: FollowingResponse.self, params: params)
+            .receive(on: DispatchQueue.main)
+            .tryMap { response in
+                return response.following
             }
+            .eraseToAnyPublisher()
+    }
+    
+    func follow(user_id: String) -> AnyPublisher<Bool, Error> {
+        let params = [
+            URLQueryItem(name: "follow_id", value: String(user_id)),
+        ]
+
+        return authorizedRequest(path: UserBackend.path + "follow/", method: "POST", modelType: SuccessResponse.self, params: params)
+            .receive(on: DispatchQueue.main)
+            .tryMap { response in
+                return response.success
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func unfollow(user_id: String) -> AnyPublisher<Bool, Error> {
+        let params = [
+            URLQueryItem(name: "follow_id", value: String(user_id)),
+        ]
+
+        return authorizedRequest(path: UserBackend.path + "unfollow/", method: "POST", modelType: SuccessResponse.self, params: params)
+            .receive(on: DispatchQueue.main)
+            .tryMap { response in
+                return response.success
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func getUser(user_id: String) -> AnyPublisher<User, Error> {
+        let params = [
+            URLQueryItem(name: "user_id", value: String(user_id)),
+        ]
+
+        return authorizedRequest(path: UserBackend.path + "get/", method: "GET", modelType: User.self, params: params)
+            .eraseToAnyPublisher()
+    }
+    
+    func getCurrentUser() -> AnyPublisher<User, Error> {
+        return authorizedRequest(path: UserBackend.path + "me/", method: "GET", modelType: User.self)
             .eraseToAnyPublisher()
     }
     
@@ -76,6 +123,7 @@ extension BackendController: UserBackendController {
             .tryMap { response in
                 KeychainWrapper.main.saveAccessToken(accessToken: response.access_token)
                 KeychainWrapper.main.saveRefreshToken(refreshToken: response.refresh_token)
+                AppStorageContainer.main.username = username
                 return true
             }
             .eraseToAnyPublisher()        
@@ -104,6 +152,7 @@ extension BackendController: UserBackendController {
             .tryMap { response in
                 KeychainWrapper.main.saveAccessToken(accessToken: response.access_token)
                 KeychainWrapper.main.saveRefreshToken(refreshToken: response.refresh_token)
+                AppStorageContainer.main.username = username
                 return true
             }
             .eraseToAnyPublisher()
@@ -114,6 +163,7 @@ extension BackendController: UserBackendController {
             .receive(on: DispatchQueue.main)
             .tryMap { response in
                 KeychainWrapper.main.deleteTokens()
+                AppStorageContainer.main.username = ""
                 return response.success
             }
             .eraseToAnyPublisher()

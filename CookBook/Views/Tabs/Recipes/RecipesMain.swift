@@ -123,7 +123,6 @@ struct RecipesMainView: View {
                     } label: {
                         Image(systemName: continuous ? "infinity.circle.fill" : "infinity.circle")
                             .font(.system(size: 22))
-                            .foregroundColor(Color.theme.accent)
                     }
                 }
             }

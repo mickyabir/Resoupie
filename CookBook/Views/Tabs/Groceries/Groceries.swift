@@ -196,7 +196,6 @@ struct GroceriesView: View {
                 groceries.append(GroceryList(id: UUID().uuidString, name: "", items: []))
             } label: {
                 Image(systemName: "folder.badge.plus")
-                    .foregroundColor(Color.theme.accent)
             })
             .onAppear {
                 if groceries.count == 0 {

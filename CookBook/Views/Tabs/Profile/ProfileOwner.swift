@@ -8,8 +8,8 @@
 import SwiftUI
 import Combine
 
-class ProfileViewController: UserSignInViewController {
-    typealias ProfileBackendController = RecipeBackendController & UserBackendController & ImageBackendController
+class ProfileOwnerViewController: UserSignInViewController {
+    typealias ProfileOwnerBackendController = RecipeBackendController & UserBackendController & ImageBackendController
     
     @Published var emptyWarning: Bool = false
     @Published var recipes: [RecipeMeta] = []
@@ -26,11 +26,11 @@ class ProfileViewController: UserSignInViewController {
     
     private var cancellables: Set<AnyCancellable> = Set()
     
-    let backendController: ProfileBackendController
+    let backendController: ProfileOwnerBackendController
     
-    init(_ backendController: ProfileBackendController) {
+    init(_ backendController: ProfileOwnerBackendController) {
         self.backendController = backendController
-        self.reloadProfile()
+        self.loadProfile()
     }
     
     func submit() {
@@ -69,7 +69,7 @@ class ProfileViewController: UserSignInViewController {
             }, receiveValue: { success in
                 self.reset()
                 self.userAccess = false
-                self.reloadProfile()
+                self.loadProfile()
             })
             .store(in: &cancellables)
     }
@@ -81,7 +81,7 @@ class ProfileViewController: UserSignInViewController {
             }, receiveValue: { success in
                 self.reset()
                 self.userAccess = false
-                self.reloadProfile()
+                self.loadProfile()
             })
             .store(in: &cancellables)
     }
@@ -93,7 +93,7 @@ class ProfileViewController: UserSignInViewController {
         accessState = .signIn
     }
     
-    func reloadProfile() {
+    func loadProfile() {
         backendController.verifyToken()
             .receive(on: DispatchQueue.main)
             .filter { $0 == true }
@@ -105,7 +105,7 @@ class ProfileViewController: UserSignInViewController {
 
                 return ()
             }
-            .flatMap(backendController.getUser)
+            .flatMap(backendController.getCurrentUser)
             .receive(on: DispatchQueue.main)
             .map { user in
                 self.name = user.name
@@ -124,17 +124,8 @@ class ProfileViewController: UserSignInViewController {
             .store(in: &cancellables)
     }
     
-    func loadProfile() {
-        backendController.getUser()
-            .receive(on: DispatchQueue.main)
-            .map { user in
-                self.name = user.name
-                self.username = user.username
-                self.signedIn = true
-                
-                return user.username
-            }
-            .flatMap(backendController.getUserRecipes)
+    func reloadProfile() {
+        backendController.getUserRecipes(username: username)
             .eraseToAnyPublisher()
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
@@ -160,9 +151,8 @@ class ProfileViewController: UserSignInViewController {
     }
 }
 
-struct ProfileView: View {
-    @ObservedObject var viewController: ProfileViewController
-    @ObservedObject var editRecipeViewController: EditRecipeViewController
+struct ProfileOwnerView: View {
+    @ObservedObject var viewController: ProfileOwnerViewController
     @State var isPresenting = false
 
     var body: some View {
@@ -173,7 +163,7 @@ struct ProfileView: View {
                 ScrollView {
                     VStack {
                         ForEach(viewController.recipes) { recipeMeta in
-                            RecipeCard(RecipeCardViewController(recipeMeta: recipeMeta, width: UIScreen.main.bounds.width - 40, backendController: viewController.backendController))
+                            RecipeCard(recipeMeta, width: UIScreen.main.bounds.width - 40)
                         }
                     }
                     .padding(.top)
@@ -185,7 +175,7 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $viewController.presentNewRecipe) {
                 NavigationView {
-                    EditRecipeView(viewController: editRecipeViewController)
+                    EditRecipeView(isPresented: $viewController.presentNewRecipe)
                         .toolbar {
                             ToolbarItem(placement: .navigationBarLeading) {
                                 Button {
@@ -230,10 +220,10 @@ struct ProfileView: View {
                     .opacity(viewController.signedIn ? 1.0 : 0.0)
                 }
             }
-            .onAppear {
-                viewController.loadProfile()
-            }
             .navigationBarTitleDisplayMode(.inline)
+        }
+        .onAppear {
+            viewController.reloadProfile()
         }
     }
 }

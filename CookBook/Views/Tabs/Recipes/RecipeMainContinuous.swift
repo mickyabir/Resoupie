@@ -13,7 +13,7 @@ struct RecipeMainContinuousView: View {
     var body: some View {
         LazyVStack {
             ForEach(viewController.recipes) { recipe in
-                RecipeCard(RecipeCardViewController(recipeMeta: recipe, width: UIScreen.main.bounds.size.width - 40, backendController: viewController.backendController))
+                RecipeCard(recipe, width: UIScreen.main.bounds.size.width - 40)
                     .onAppear {
                         if viewController.recipes.last == recipe {
                             let _ = viewController.loadMoreRecipes()

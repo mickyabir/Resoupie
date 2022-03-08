@@ -24,6 +24,7 @@ struct RecipeRateResponse: Codable {
 protocol RecipeBackendController {
     func getRecipesWorld(position: CLLocationCoordinate2D, latDelta: Double, longDelta: Double) -> AnyPublisher<[RecipeMeta], Error>
     func getUserFavorites() -> AnyPublisher<[RecipeMeta], Error>
+    func getUserIdRecipes(user_id: String) -> AnyPublisher<[RecipeMeta], Error>
     func getUserRecipes(username: String) -> AnyPublisher<[RecipeMeta], Error>
     func getRecipeById(recipe_id: String) -> AnyPublisher<RecipeMeta, Error>
     func rateRecipe(recipe_id: String, rating: Int) -> AnyPublisher<Double, Error>
@@ -53,9 +54,14 @@ extension BackendController: RecipeBackendController {
             URLQueryItem(name: "long_delta", value: String(longDelta)),
         ]
         return request(path: RecipeBackend.path + "world", method: "GET", modelType: [RecipeMeta].self, params: params)
-            .tryMap { recipeModels in
-                return self.mapRecipeMetas(recipeModels: recipeModels)
-            }
+            .eraseToAnyPublisher()
+    }
+
+    func getUserIdRecipes(user_id: String) -> AnyPublisher<[RecipeMeta], Error> {
+        let params = [
+            URLQueryItem(name: "user_id", value: String(user_id)),
+        ]
+        return authorizedRequest(path: RecipeBackend.path + "user_id", method: "GET", modelType: [RecipeMeta].self, params: params)
             .eraseToAnyPublisher()
     }
     
@@ -63,26 +69,17 @@ extension BackendController: RecipeBackendController {
         let params = [
             URLQueryItem(name: "username", value: String(username)),
         ]
-        return authorizedRequest(path: RecipeBackend.path, method: "GET", modelType: [RecipeMeta].self, params: params)
-            .tryMap { recipeModels in
-                return self.mapRecipeMetas(recipeModels: recipeModels)
-            }
+        return authorizedRequest(path: RecipeBackend.path + "username", method: "GET", modelType: [RecipeMeta].self, params: params)
             .eraseToAnyPublisher()
     }
     
     func getRecipeById(recipe_id: String) -> AnyPublisher<RecipeMeta, Error> {
         return authorizedRequest(path: RecipeBackend.path + "get/" + recipe_id, method: "GET", modelType: RecipeMeta.self)
-            .tryMap { recipeModel in
-                return self.mapRecipeMeta(recipeModel: recipeModel)
-            }
             .eraseToAnyPublisher()
     }
     
     func getUserFavorites() -> AnyPublisher<[RecipeMeta], Error> {
         return authorizedRequest(path: RecipeBackend.path + "favorites", method: "GET", modelType: [RecipeMeta].self)
-            .tryMap { recipeModels in
-                return self.mapRecipeMetas(recipeModels: recipeModels)
-            }
             .eraseToAnyPublisher()
     }
     
@@ -121,17 +118,11 @@ extension BackendController: RecipeBackendController {
         ]
         
         return request(path: RecipeBackend.path + "get", method: "GET", modelType: [RecipeMeta].self, params: params)
-            .tryMap { recipes in
-                return self.mapRecipeMetas(recipeModels: recipes)
-            }
             .eraseToAnyPublisher()
     }
     
     func loadAllRecipes() -> AnyPublisher<[RecipeMeta], Error> {
         return request(path: RecipeBackend.path + "get", method: "GET", modelType: [RecipeMeta].self)
-            .tryMap { recipes in
-                return self.mapRecipeMetas(recipeModels: recipes)
-            }
             .eraseToAnyPublisher()
     }
     
@@ -152,16 +143,5 @@ extension BackendController: RecipeBackendController {
                 response.success
             }
             .eraseToAnyPublisher()
-    }
-}
-
-extension RecipeBackendController {
-    fileprivate func mapRecipeMeta(recipeModel: RecipeMeta) -> RecipeMeta {
-        return RecipeMeta(id: recipeModel.id, author: recipeModel.author, recipe: recipeModel.recipe, rating: recipeModel.rating, favorited: recipeModel.favorited)
-    }
-
-    fileprivate func mapRecipeMetas(recipeModels: [RecipeMeta]) -> [RecipeMeta] {
-        let recipeModels = recipeModels.map(mapRecipeMeta)
-        return recipeModels
     }
 }
