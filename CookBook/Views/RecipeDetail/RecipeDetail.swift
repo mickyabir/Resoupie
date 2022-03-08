@@ -210,6 +210,8 @@ struct RecipeDetail: View {
     @State private var showNavBar: Bool = false
     @State private var showNavBarItems: Bool = false
     @State private var showNavBarEmoji: Bool = false
+    
+    @State private var presentEditRecipe: Bool = false
         
     @Environment(\.presentationMode) var presentation
     
@@ -284,6 +286,20 @@ struct RecipeDetail: View {
         .statusBar(hidden: !showNavBar)
         .navigationBarHidden(true)
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $presentEditRecipe) {
+            NavigationView {
+                NewEditRecipeView(isPresented: $presentEditRecipe)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button {
+                                presentEditRecipe = false
+                            } label: {
+                                Text("Cancel")
+                            }
+                        }
+                    }
+            }
+        }
     }
 }
 
@@ -642,14 +658,17 @@ extension RecipeDetail {
                 
                 Divider()
                 
-                NavigationLink(destination: NewEditRecipeView(recipeMeta.recipe.childOf(parent_id: recipeMeta.id))) {
+//                NavigationLink(destination: NewEditRecipeView(recipeMeta.recipe.childOf(parent_id: recipeMeta.id), isPresented: $presentEditRecipe), isActive: $presentEditRecipe) {
                     HStack {
                         Spacer ()
                         Text("Fork This Recipe")
                         Spacer()
                         Image(systemName: "chevron.right")
                     }
-                }
+                    .onTapGesture {
+                        presentEditRecipe = true
+                    }
+//                }
                 
             }
         }

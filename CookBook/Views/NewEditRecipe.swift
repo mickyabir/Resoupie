@@ -10,8 +10,6 @@ import MapKit
 import Combine
 
 class NewEditRecipeViewController: ObservableObject {
-    @Environment(\.presentationMode) var presentationMode
-
     @ObservedObject var coordinatePickerViewModel = CoordinatePickerViewModel()
     
     @Published var location: CLLocationCoordinate2D?
@@ -45,7 +43,7 @@ class NewEditRecipeViewController: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { success in
-                self.presentationMode.wrappedValue.dismiss()
+//                self.presentationMode.wrappedValue.dismiss()
             })
             .store(in: &cancellables)
         
@@ -97,9 +95,12 @@ struct NewEditRecipeView: View {
     @State var newTag: String = ""
     @FocusState var tagEditorFocused: Bool
     
-    init(_ recipe: Recipe = .empty, parent_id: String? = nil) {
+    @Binding var isPresented: Bool
+    
+    init(_ recipe: Recipe = .empty, parent_id: String? = nil, isPresented: Binding<Bool>) {
         self.recipe = recipe
         self.parent_id = parent_id
+        self._isPresented = isPresented
     }
     
     var body: some View {
@@ -128,14 +129,13 @@ struct NewEditRecipeView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    viewController.presentationMode.wrappedValue.dismiss()
                     if let image = image {
                         if !locationEnabled {
                             recipe.coordinate_lat = nil
                             recipe.coordinate_long = nil
                         }
                         if viewController.publishRecipe(recipe, image: image) {
-                            
+                            isPresented = false
                         }
                         
                     }
@@ -658,7 +658,7 @@ struct NewEditRecipe_Previews: PreviewProvider {
         let _ = (recipe.specialTools = ["Whisk", "Blender"])
         let _ = (recipe.tags = ["yummy", "easy", "italian"])
         NavigationView {
-            NewEditRecipeView(recipe)
+            NewEditRecipeView(recipe, isPresented: .constant(true))
         }
     }
 }
