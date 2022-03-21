@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		810365B927E932B300B70344 /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810365B827E932B300B70344 /* Sequence.swift */; };
 		8128CF1627CF48F000EFDFC7 /* Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128CF1527CF48F000EFDFC7 /* Double.swift */; };
 		8128CF1C27CF6DDD00EFDFC7 /* UINavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128CF1B27CF6DDD00EFDFC7 /* UINavigationController.swift */; };
 		8128CF1F27D02D3800EFDFC7 /* RecipeDetailSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128CF1E27D02D3800EFDFC7 /* RecipeDetailSection.swift */; };
@@ -89,6 +90,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		810365B827E932B300B70344 /* Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
 		8128CF1527CF48F000EFDFC7 /* Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Double.swift; sourceTree = "<group>"; };
 		8128CF1B27CF6DDD00EFDFC7 /* UINavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UINavigationController.swift; sourceTree = "<group>"; };
 		8128CF1E27D02D3800EFDFC7 /* RecipeDetailSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeDetailSection.swift; sourceTree = "<group>"; };
@@ -308,12 +310,12 @@
 			isa = PBXGroup;
 			children = (
 				8179D67627D1EF1200A48E58 /* CustomNavigation */,
+				8128CF1D27D02D1800EFDFC7 /* RecipeDetail */,
 				818D399B27CAE38F008F4A47 /* Tabs */,
 				81B1BF83279F84FB00EC85BB /* Utility */,
 				819E4E0D27C22ECF004068A3 /* UserSignIn.swift */,
 				8179715B27AA7F1B00DE1753 /* RecipeCard.swift */,
 				8179D67B27D2C4C100A48E58 /* EditRecipe.swift */,
-				8128CF1D27D02D1800EFDFC7 /* RecipeDetail */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -430,6 +432,7 @@
 				818D399227CAE2E3008F4A47 /* Character.swift */,
 				818D399427CAE2EE008F4A47 /* Data.swift */,
 				8128CF1527CF48F000EFDFC7 /* Double.swift */,
+				810365B827E932B300B70344 /* Sequence.swift */,
 			);
 			path = Foundation;
 			sourceTree = "<group>";
@@ -652,6 +655,7 @@
 				812F176527CB513C0095F7D0 /* RecipeGroupRow.swift in Sources */,
 				813F156927A2161D00214CE0 /* RecipeBackendController.swift in Sources */,
 				8179715C27AA7F1B00DE1753 /* RecipeCard.swift in Sources */,
+				810365B927E932B300B70344 /* Sequence.swift in Sources */,
 				8179D68027D59A3700A48E58 /* EmojiTextField.swift in Sources */,
 				8128CF2127D0315800EFDFC7 /* StarsRating.swift in Sources */,
 				818D399127CAE2C0008F4A47 /* String.swift in Sources */,

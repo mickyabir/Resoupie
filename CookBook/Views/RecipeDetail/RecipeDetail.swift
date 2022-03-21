@@ -9,9 +9,16 @@ import SwiftUI
 import MapKit
 import Combine
 
+func tryIntString(d: Double) -> String {
+    if floor(d) == d {
+        let intD = Int(d)
+        return String(intD)
+    } else {
+        return String(d)
+    }
+}
+
 class RecipeDetailViewController: StarsRatingViewController {
-    @AppStorage("groceryLists") var groceries: [GroceryList] = []
-    
     private var cancellables: Set<AnyCancellable> = Set()
     typealias Backend = RecipeBackendController
     let backendController: Backend
@@ -54,14 +61,7 @@ class RecipeDetailViewController: StarsRatingViewController {
         self.backendController = backendController
 
         
-//        ingredientInGroceryList =  recipeMeta.recipe.ingredients.map {
-//            groceries.reduce([], { $0 + $1.items }).firstIndex(where: { $0.id == (recipeMeta.id + "_" + $0.id) }) != nil
-//        }
-//
-        ingredientInGroceryList =  recipeMeta.recipe.ingredients.map { ingredient in
-            false
-        }
-//
+        ingredientInGroceryList =  AppStorageContainer.main.ingredientsInGroceryList(recipeMeta)
         
         let geo = CLGeocoder()
         
@@ -80,16 +80,19 @@ class RecipeDetailViewController: StarsRatingViewController {
                 .store(in: &cancellables)
         }
         
-        groceriesAdded = groceries.firstIndex(where: { $0.id == recipeMeta.id }) != nil
+        groceriesAdded = AppStorageContainer.main.recipeListExists(recipeMeta)
         
         checkFavorited()
         getForkInfo()
-        checkIngredientsInGroceryList()
     }
     
-    func checkIngredientsInGroceryList() {
-        ingredientInGroceryList = recipeMeta.recipe.ingredients.map { ingredient in
-            groceries.reduce([], { $0 + $1.items }).firstIndex(where: { $0.id == (self.recipeMeta.id + "_" + $0.id) }) != nil
+    func folderBadgeTapped() {
+        if AppStorageContainer.main.recipeListExists(recipeMeta) {
+            AppStorageContainer.main.removeRecipeList(recipeMeta)
+            ingredientInGroceryList = ingredientInGroceryList.map { _ in false }
+        } else {
+            AppStorageContainer.main.insertListFromRecipe(recipeMeta)
+            ingredientInGroceryList = ingredientInGroceryList.map { _ in true }
         }
     }
     
@@ -102,32 +105,16 @@ class RecipeDetailViewController: StarsRatingViewController {
     }
     
     func ingredientAddPressed(_ ingredient: Ingredient) {
-        let groceryListIndex = groceries.firstIndex(where: { $0.id == recipeMeta.id })
-        
         let ingredientIndex = recipeMeta.recipe.ingredients.firstIndex(of: ingredient)
+        ingredientInGroceryList[ingredientIndex!].toggle()
         
-        if let groceryListIndex = groceryListIndex {
-            if let itemIndex = groceries[groceryListIndex].items.firstIndex(where: { $0.id == recipeMeta.id + "_" + ingredient.name }) {
-                groceries[groceryListIndex].items.remove(at: itemIndex)
-                
-                if let ingredientIndex = ingredientIndex {
-                    ingredientInGroceryList[ingredientIndex] = false
-                }
-            } else {
-                groceries[groceryListIndex].items.append(GroceryListItem(id: recipeMeta.id + "_" + ingredient.name, ingredient: getIngredientString(ingredient: ingredient), check: false))
-                if let ingredientIndex = ingredientIndex {
-                    ingredientInGroceryList[ingredientIndex] = true
-                }
-            }
+        if AppStorageContainer.main.ingredientInList(ingredient, recipeMeta: recipeMeta) {
+            AppStorageContainer.main.removeIngredient(ingredient, recipeMeta: recipeMeta)
         } else {
-            if groceries.isEmpty {
-                groceries.append(GroceryList(id: recipeMeta.id, name: recipeMeta.recipe.name, items: []))
-            }
-            groceries[0].items.append(GroceryListItem(id: recipeMeta.id + "_" + ingredient.name, ingredient: getIngredientString(ingredient: ingredient), check: false))
-            if let ingredientIndex = ingredientIndex {
-                ingredientInGroceryList[ingredientIndex] = true
-            }
+            AppStorageContainer.main.insertIngredient(ingredient, recipeMeta: recipeMeta)
         }
+        
+        groceriesAdded = AppStorageContainer.main.recipeListExists(recipeMeta)
     }
     
     func getIngredientString(ingredient: Ingredient) -> String {
@@ -312,7 +299,7 @@ struct RecipeDetail: View {
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $presentEditRecipe) {
             NavigationView {
-                EditRecipeView(isPresented: $presentEditRecipe)
+                EditRecipeView(recipeMeta.recipe.childOf(parent_id: recipeMeta.id), isPresented: $presentEditRecipe)
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {
                             Button {
@@ -530,23 +517,7 @@ extension RecipeDetail {
                                 viewController.groceriesAdded.toggle()
                             }
                             
-                            if viewController.groceriesAdded {
-                                viewController.ingredientInGroceryList =  recipeMeta.recipe.ingredients.map { ingredient in
-                                    true
-                                }
-
-                                viewController.groceries.append(GroceryList(id: recipeMeta.id, name: recipeMeta.recipe.name, items: []))
-                                viewController.groceries[viewController.groceries.count - 1].items = recipeMeta.recipe.ingredients.map {
-                                    return GroceryListItem(id: recipeMeta.id + "_" + $0.name, ingredient: viewController.getIngredientString(ingredient: $0), check: false)
-                                }
-                            } else {
-                                viewController.ingredientInGroceryList =  recipeMeta.recipe.ingredients.map { ingredient in
-                                    false
-                                }
-
-                                viewController.groceries.removeAll(where: { $0.id == recipeMeta.id })
-                            }
-                            
+                            viewController.folderBadgeTapped()
                         }
                 }
                 
@@ -566,7 +537,11 @@ extension RecipeDetail {
                         if let currentServings = viewController.currentServings {
                             let _ = (currentQuantity = currentQuantity / Double(recipeMeta.recipe.servings) * Double(currentServings))
                         }
-                        let ingredientText = (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity) + " " + ingredient.unit + " " + ingredient.name
+                        
+                        let doubleQuantityString = (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity)
+                        let doubleQuantity = Double(doubleQuantityString) ?? 0
+                        let finalQuantity = tryIntString(d: doubleQuantity)
+                        let ingredientText = finalQuantity + " " + ingredient.unit + " " + ingredient.name
                         
                         Text(ingredientText)
                             .strikethrough(viewController.hasIngredient[index], color: Color.theme.lightText)
@@ -690,7 +665,6 @@ extension RecipeDetail {
                 
                 Divider()
                 
-                //                NavigationLink(destination: NewEditRecipeView(recipeMeta.recipe.childOf(parent_id: recipeMeta.id), isPresented: $presentEditRecipe), isActive: $presentEditRecipe) {
                 HStack {
                     Spacer ()
                     Text("Fork This Recipe")
@@ -700,8 +674,6 @@ extension RecipeDetail {
                 .onTapGesture {
                     presentEditRecipe = true
                 }
-                //                }
-                
             }
         }
         .foregroundColor(Color.theme.tint)

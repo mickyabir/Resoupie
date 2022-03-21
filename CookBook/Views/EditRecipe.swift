@@ -133,6 +133,9 @@ struct EditRecipeView: View {
                         if !locationEnabled {
                             recipe.coordinate_lat = nil
                             recipe.coordinate_long = nil
+                        } else {
+                            recipe.coordinate_lat = viewController.location?.latitude
+                            recipe.coordinate_long = viewController.location?.longitude
                         }
                         if viewController.publishRecipe(recipe, image: image) {
                             isPresented = false
@@ -492,7 +495,7 @@ extension EditRecipeView {
 
             TextEditor(text: $recipe.steps[index])
                 .foregroundColor(Color.theme.text)
-                .frame(minHeight: 40)
+                .frame(minHeight: 80)
             
             if recipe.steps[index].isEmpty {
                 Text("\(placeHolders[min(index, placeHolders.count - 1)])")

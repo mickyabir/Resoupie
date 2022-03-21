@@ -28,7 +28,7 @@ struct RecipeGroupRow: View {
             
             
             ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack {
+                HStack {
                     ForEach(recipes) { recipe in
                         ZStack(alignment: .topTrailing) {
                             RecipeCard(recipe, width: 250)

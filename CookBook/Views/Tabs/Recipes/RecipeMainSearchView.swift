@@ -11,7 +11,7 @@ struct RecipeMainSearchView: View {
     @ObservedObject var viewController: RecipeMainViewController
     
     var body: some View {
-        LazyVStack {
+        VStack {
             if let searchRecipes = viewController.searchRecipes {
                 ForEach(searchRecipes) { recipe in
                     RecipeCard(recipe, width: UIScreen.main.bounds.size.width - 40)

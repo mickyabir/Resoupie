@@ -18,7 +18,7 @@ struct RecipeMainDefaultView: View {
     }
 
     var body: some View {
-        LazyVStack {
+        VStack {
             RecipeGroupRow(title: "Popular", recipes: viewController.recipes, backendController: viewController.backendController)
                    
             sectionDivider

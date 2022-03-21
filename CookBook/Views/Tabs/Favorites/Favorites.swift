@@ -85,7 +85,7 @@ struct FavoritesView: View {
                 Color.theme.background
                 
                 ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: 20) {
+                    VStack(spacing: 20) {
                         ForEach(viewController.displayedFavorites.sorted(by: sortingMethod[sort]!)) { recipe in
                             RecipeCard(recipe, width: UIScreen.main.bounds.width - 20)
                         }

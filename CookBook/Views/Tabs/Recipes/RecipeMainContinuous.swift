@@ -11,7 +11,7 @@ struct RecipeMainContinuousView: View {
     @ObservedObject var viewController: RecipeMainViewController
 
     var body: some View {
-        LazyVStack {
+        VStack {
             ForEach(viewController.recipes) { recipe in
                 RecipeCard(recipe, width: UIScreen.main.bounds.size.width - 40)
                     .onAppear {
