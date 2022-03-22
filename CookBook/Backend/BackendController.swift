@@ -50,9 +50,7 @@ class BackendController: ObservableObject {
             }
         }
     }
-    
-    static private var cancellables: Set<AnyCancellable> = Set()
-    
+
     func verifyJWT(_ accessToken: String) -> Bool {
         if accessToken == "" {
             return false

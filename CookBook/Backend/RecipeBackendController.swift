@@ -33,6 +33,7 @@ protocol RecipeBackendController {
     func loadNextRecipes(skip: Int, limit: Int) -> AnyPublisher<[RecipeMeta], Error>
     func loadPopularRecipes(skip: Int, limit: Int) -> AnyPublisher<[RecipeMeta], Error>
     func loadCategoryRecipesPopular(category: String, skip: Int, limit: Int) -> AnyPublisher<[RecipeMeta], Error>
+    func loadDefaultPageRecipes() -> AnyPublisher<[String:[RecipeMeta]], Error>
     func loadAllRecipes() -> AnyPublisher<[RecipeMeta], Error>
     func getForkInfo(recipe_id: String) -> AnyPublisher<ForkInfoModel, Error>
     func uploadRecipeToServer(recipe: Recipe) -> AnyPublisher<Bool, Error>
@@ -148,7 +149,12 @@ extension BackendController: RecipeBackendController {
             URLQueryItem(name: "limit", value: String(limit))
         ]
         
-        return request(path: RecipeBackend.path + category, method: "GET", modelType: [RecipeMeta].self, params: params)
+        return request(path: RecipeBackend.path + "category", method: "GET", modelType: [RecipeMeta].self, params: params)
+            .eraseToAnyPublisher()
+    }
+    
+    func loadDefaultPageRecipes() -> AnyPublisher<[String:[RecipeMeta]], Error> {
+        return request(path: RecipeBackend.path + "default", method: "GET", modelType: [String:[RecipeMeta]].self)
             .eraseToAnyPublisher()
     }
     

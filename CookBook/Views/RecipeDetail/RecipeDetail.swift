@@ -334,10 +334,13 @@ extension RecipeDetail {
                         .font(.title2)
                         .fontWeight(.bold)
                     
-                    Text(recipeMeta.author)
-                        .foregroundColor(Color.white)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
+                    
+                    NavigationLink(destination: ProfileView(name: recipeMeta.author, user_id: recipeMeta.user_id)) {
+                        Text(recipeMeta.author)
+                            .foregroundColor(Color.white)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                    }
                 }
                 .padding()
                 
@@ -638,6 +641,8 @@ extension RecipeDetail {
                         Spacer()
                     }
                     
+                    Divider()
+                    
                     Spacer()
                     
                     HStack {
@@ -647,7 +652,7 @@ extension RecipeDetail {
                         
                         Spacer()
                     }
-                    .padding(.bottom)
+                    .padding(.vertical)
                     
                     if let fork = viewController.forkInfo {
                         NavigationLink(destination: RecipeDetail(viewController.getForkRecipe(), backendController: BackendController())) {
@@ -663,7 +668,7 @@ extension RecipeDetail {
                     }
                 }
                 
-                Divider()
+//                Divider()
                 
                 HStack {
                     Spacer ()

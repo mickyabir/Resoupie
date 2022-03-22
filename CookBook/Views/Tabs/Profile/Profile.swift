@@ -92,7 +92,11 @@ class ProfileViewController: ObservableObject {
 }
 
 struct ProfileView: View {
-    @ObservedObject var viewController: ProfileViewController
+    @StateObject var viewController: ProfileViewController
+    
+    init(name: String, user_id: String) {
+        self._viewController = StateObject(wrappedValue: ProfileViewController(BackendController(), name: name, user_id: user_id))
+    }
 
     var body: some View {
         ZStack {
@@ -100,6 +104,53 @@ struct ProfileView: View {
             
             ScrollView {
                 VStack {
+                    RectangleSectionInset(width: UIScreen.main.bounds.width - 40) {
+                        VStack(spacing: 20) {
+                            
+                            VStack {
+                                RectangleSectionRow {
+                                    Text("From a small town in Israel, I have traveled the world and have experienced delicious cuisines. I'm here to share my experiences!")
+                                        .foregroundColor(Color.theme.lightText)
+                                        .font(.body)
+                                }
+                                
+                                HStack(spacing: 4) {
+                                    VStack(spacing: 10) {
+                                        Text("\(Image(systemName: "house.fill"))")
+                                            .foregroundColor(Color.theme.lightText)
+                                            .font(.body)
+                                        
+                                        Text("\(Image(systemName: "book.fill"))")
+                                            .foregroundColor(Color.theme.lightText)
+                                            .font(.body)
+
+                                        Text("\(Image(systemName: "person.3.fill"))")
+                                            .foregroundColor(Color.theme.lightText)
+                                            .font(.body)
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 10) {
+                                        Text("Los Angeles, California")
+                                            .foregroundColor(Color.theme.lightText)
+                                            .font(.body)
+
+                                        Text("3 recipes")
+                                            .foregroundColor(Color.theme.lightText)
+                                            .font(.body)
+
+                                        Text("\(viewController.followers) followers")
+                                            .foregroundColor(Color.theme.lightText)
+                                            .font(.body)
+                                    }
+                                    
+                                    Spacer()
+                                }
+                                .padding(.top, 10)
+                            }
+                        }
+                    }
+                    .padding(.bottom)
+                    
                     ForEach(viewController.recipes) { recipeMeta in
                         RecipeCard(recipeMeta, width: UIScreen.main.bounds.width - 40)
                     }
@@ -113,7 +164,6 @@ struct ProfileView: View {
             ToolbarItem(placement: .principal) {
                 VStack {
                     Text(viewController.name).font(.title3).fontWeight(.semibold).foregroundColor(Color.theme.title3)
-                    Text(String(viewController.followers)).font(.subheadline).foregroundColor(Color.theme.lightText)
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {

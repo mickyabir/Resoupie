@@ -21,7 +21,7 @@ struct ContentView: View {
         profileOwnerViewController = ProfileOwnerViewController(backendController)
         recipeMainViewController = RecipeMainViewController(backendController)
         favoritesViewController = FavoritesViewController(backendController)
-        worldViewController = WorldViewController(backendController)
+        worldViewController = WorldViewController(backendController)        
     }
     
     var body: some View {
@@ -55,18 +55,6 @@ struct ContentView: View {
                     Label("Groceries", systemImage: "checklist")
                 }
                 .tag(4)
-            
-//            let ingredients: [Ingredient] = [
-//
-//            ]
-//            let recipe = Recipe(image: "621c33b12cfadc340f1c20bd", name: "Spaghetti", ingredients: ingredients, steps: ["Step 1", "Step 2"], coordinate_lat: nil, coordinate_long: nil, emoji: "🍝", servings: 2, tags: ["vegan", "italian"], time: "25 min", specialTools: ["Tool 1"], parent_id: nil)
-//            let recipeMeta = RecipeMeta(id: "", author: "Micky Abir", user_id: "", recipe: recipe, rating: 4.3, favorited: 82)
-//            NewRecipeDetail(viewController: RecipeDetailViewController(recipeMeta: recipeMeta, backendController: BackendController()))
-//                .tabItem {
-//                    Label("Test", systemImage: "testtube.2")
-//                        .tag(1)
-//                }
-            
         }
     }
 }

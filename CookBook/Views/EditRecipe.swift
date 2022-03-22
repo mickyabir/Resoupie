@@ -172,8 +172,7 @@ extension EditRecipeView {
         ZStack(alignment: .topLeading) {
             TextEditor(text: $recipe.about)
                 .foregroundColor(Color.theme.text)
-                .frame(minHeight: 80)
-            
+                .frame(height: 40)
             
             if recipe.about.isEmpty {
                 Text("What makes this recipe special")
@@ -495,7 +494,7 @@ extension EditRecipeView {
 
             TextEditor(text: $recipe.steps[index])
                 .foregroundColor(Color.theme.text)
-                .frame(minHeight: 80)
+                .frame(height: 40)
             
             if recipe.steps[index].isEmpty {
                 Text("\(placeHolders[min(index, placeHolders.count - 1)])")

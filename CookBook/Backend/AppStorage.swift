@@ -12,6 +12,7 @@ class AppStorageContainer {
     static var main = AppStorageContainer()
     
     @AppStorage("username") var username: String = ""
+    @AppStorage("user_id") var user_id: String = ""
     @AppStorage("groceryLists") var groceries: [GroceryList] = []
 }
 

@@ -70,6 +70,9 @@
 		81BAF3EE2799FDBB004B0767 /* World.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BAF3ED2799FDBB004B0767 /* World.swift */; };
 		81BAF3F2279A035B004B0767 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 81BAF3F1279A035B004B0767 /* MapKit.framework */; };
 		81BAF3F6279CB8DB004B0767 /* ProfileOwner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BAF3F5279CB8DB004B0767 /* ProfileOwner.swift */; };
+		81DC90D827EA795E00F32201 /* RectangleSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81DC90D727EA795E00F32201 /* RectangleSection.swift */; };
+		81DC90DB27EA79C700F32201 /* RectangleSectionInset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81DC90DA27EA79C700F32201 /* RectangleSectionInset.swift */; };
+		81DC90DD27EA7A8900F32201 /* RectangleSectionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81DC90DC27EA7A8900F32201 /* RectangleSectionRow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -157,6 +160,9 @@
 		81BAF3EF279A02D0004B0767 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		81BAF3F1279A035B004B0767 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		81BAF3F5279CB8DB004B0767 /* ProfileOwner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileOwner.swift; sourceTree = "<group>"; };
+		81DC90D727EA795E00F32201 /* RectangleSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RectangleSection.swift; sourceTree = "<group>"; };
+		81DC90DA27EA79C700F32201 /* RectangleSectionInset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RectangleSectionInset.swift; sourceTree = "<group>"; };
+		81DC90DC27EA7A8900F32201 /* RectangleSectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RectangleSectionRow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -239,6 +245,7 @@
 				8141EA2227A3707C008BE746 /* BackendController.swift */,
 				81933FEE27BF0E5E00E9BB10 /* UserBackendController.swift */,
 				812F176D27CC69EB0095F7D0 /* AppStorage.swift */,
+				81332AF127C35E9E00564A6C /* KeychainWrapper.swift */,
 			);
 			path = Backend;
 			sourceTree = "<group>";
@@ -364,8 +371,8 @@
 		818D398227CAE11A008F4A47 /* Profile */ = {
 			isa = PBXGroup;
 			children = (
-				81BAF3F5279CB8DB004B0767 /* ProfileOwner.swift */,
 				812F176B27CB54D50095F7D0 /* Profile.swift */,
+				81BAF3F5279CB8DB004B0767 /* ProfileOwner.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -461,7 +468,6 @@
 		818D399E27CAF9EE008F4A47 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
-				81332AF127C35E9E00564A6C /* KeychainWrapper.swift */,
 				81862D8F27AC6C13006C947F /* Theme.swift */,
 				818D399C27CAF8ED008F4A47 /* ImageLoader.swift */,
 			);
@@ -471,6 +477,7 @@
 		81B1BF83279F84FB00EC85BB /* Utility */ = {
 			isa = PBXGroup;
 			children = (
+				81DC90D927EA79B800F32201 /* RectangleSection */,
 				81B1BF86279F852200EC85BB /* PhotoPicker.swift */,
 				81B1BF8F279FA6CA00EC85BB /* CoordinatePicker.swift */,
 				8141EA2427A3740E008BE746 /* CustomAsyncImage.swift */,
@@ -488,6 +495,16 @@
 				81BAF3F1279A035B004B0767 /* MapKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		81DC90D927EA79B800F32201 /* RectangleSection */ = {
+			isa = PBXGroup;
+			children = (
+				81DC90D727EA795E00F32201 /* RectangleSection.swift */,
+				81DC90DA27EA79C700F32201 /* RectangleSectionInset.swift */,
+				81DC90DC27EA7A8900F32201 /* RectangleSectionRow.swift */,
+			);
+			path = RectangleSection;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -630,6 +647,7 @@
 				8179D67827D1F00D00A48E58 /* CustomNavigationView.swift in Sources */,
 				813F156627A20F8700214CE0 /* ImageBackendController.swift in Sources */,
 				8179D67A27D1F07600A48E58 /* CustomNavigationBar.swift in Sources */,
+				81DC90DD27EA7A8900F32201 /* RectangleSectionRow.swift in Sources */,
 				812F175427CB4FB30095F7D0 /* Ingredient.swift in Sources */,
 				812F175227CB4F8A0095F7D0 /* RecipeMeta.swift in Sources */,
 				818D399D27CAF8ED008F4A47 /* ImageLoader.swift in Sources */,
@@ -655,6 +673,7 @@
 				812F176527CB513C0095F7D0 /* RecipeGroupRow.swift in Sources */,
 				813F156927A2161D00214CE0 /* RecipeBackendController.swift in Sources */,
 				8179715C27AA7F1B00DE1753 /* RecipeCard.swift in Sources */,
+				81DC90DB27EA79C700F32201 /* RectangleSectionInset.swift in Sources */,
 				810365B927E932B300B70344 /* Sequence.swift in Sources */,
 				8179D68027D59A3700A48E58 /* EmojiTextField.swift in Sources */,
 				8128CF2127D0315800EFDFC7 /* StarsRating.swift in Sources */,
@@ -677,6 +696,7 @@
 				812F176C27CB54D50095F7D0 /* Profile.swift in Sources */,
 				8141EA2527A3740E008BE746 /* CustomAsyncImage.swift in Sources */,
 				81933FEF27BF0E5E00E9BB10 /* UserBackendController.swift in Sources */,
+				81DC90D827EA795E00F32201 /* RectangleSection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

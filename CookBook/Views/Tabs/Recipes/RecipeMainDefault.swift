@@ -8,23 +8,12 @@
 import SwiftUI
 
 extension RecipeMainViewController {
-    func getPopularRecipes() {
-        backendController.loadPopularRecipes(skip: 0, limit: 10)
+    func getDefaultRecipes() {
+        backendController.loadDefaultPageRecipes()
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
-            }, receiveValue: { recipes in
-                self.popularRecipes = recipes
-                self.isLoading = false
-            })
-            .store(in: &cancellables)
-    }
-    
-    func getVeganRecipes() {
-        backendController.loadPopularRecipes(skip: 0, limit: 10)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { _ in
-            }, receiveValue: { recipes in
-                self.categoryRecipes["vegan"] = recipes
+            }, receiveValue: { recipesCategories in
+                self.categoryRecipes = recipesCategories
             })
             .store(in: &cancellables)
     }
@@ -42,15 +31,13 @@ struct RecipeMainDefaultView: View {
 
     var body: some View {
         VStack {
-            RecipeGroupRow(title: "Popular", recipes: viewController.popularRecipes, backendController: viewController.backendController)
-                   
-            sectionDivider
-            
-            RecipeGroupRow(title: "Vegan", recipes: viewController.categoryRecipes["vegan"] ?? [], backendController: viewController.backendController)
+            ForEach(viewController.categoryRecipes.sorted(by: { $0.key < $1.key }), id: \.key) { category in
+                RecipeGroupRow(title: category.key.capitalized, recipes: category.value, backendController: viewController.backendController)
+                sectionDivider
+            }
         }
         .onAppear() {
-            viewController.getPopularRecipes()
-            viewController.getVeganRecipes()
+            viewController.getDefaultRecipes()
         }
     }
 }
