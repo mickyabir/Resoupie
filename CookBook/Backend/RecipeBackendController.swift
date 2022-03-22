@@ -31,6 +31,8 @@ protocol RecipeBackendController {
     func favoriteRecipe(recipe_id: String) -> AnyPublisher<Bool, Error>
     func unfavoriteRecipe(recipe_id: String) -> AnyPublisher<Bool, Error>
     func loadNextRecipes(skip: Int, limit: Int) -> AnyPublisher<[RecipeMeta], Error>
+    func loadPopularRecipes(skip: Int, limit: Int) -> AnyPublisher<[RecipeMeta], Error>
+    func loadCategoryRecipesPopular(category: String, skip: Int, limit: Int) -> AnyPublisher<[RecipeMeta], Error>
     func loadAllRecipes() -> AnyPublisher<[RecipeMeta], Error>
     func getForkInfo(recipe_id: String) -> AnyPublisher<ForkInfoModel, Error>
     func uploadRecipeToServer(recipe: Recipe) -> AnyPublisher<Bool, Error>
@@ -126,6 +128,27 @@ extension BackendController: RecipeBackendController {
         ]
         
         return request(path: RecipeBackend.path + "get", method: "GET", modelType: [RecipeMeta].self, params: params)
+            .eraseToAnyPublisher()
+    }
+    
+    func loadPopularRecipes(skip: Int, limit: Int) -> AnyPublisher<[RecipeMeta], Error> {
+        let params = [
+            URLQueryItem(name: "skip", value: String(skip)),
+            URLQueryItem(name: "limit", value: String(limit))
+        ]
+        
+        return request(path: RecipeBackend.path + "popular", method: "GET", modelType: [RecipeMeta].self, params: params)
+            .eraseToAnyPublisher()
+    }
+    
+    func loadCategoryRecipesPopular(category: String, skip: Int, limit: Int) -> AnyPublisher<[RecipeMeta], Error> {
+        let params = [
+            URLQueryItem(name: "category", value: String(category)),
+            URLQueryItem(name: "skip", value: String(skip)),
+            URLQueryItem(name: "limit", value: String(limit))
+        ]
+        
+        return request(path: RecipeBackend.path + category, method: "GET", modelType: [RecipeMeta].self, params: params)
             .eraseToAnyPublisher()
     }
     

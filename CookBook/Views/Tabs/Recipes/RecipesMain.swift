@@ -10,6 +10,8 @@ import Combine
 
 class RecipeMainViewController: ObservableObject {
     @Published var recipes: [RecipeMeta] = [RecipeMeta]()
+    @Published var popularRecipes: [RecipeMeta] = [RecipeMeta]()
+    @Published var categoryRecipes: [String:[RecipeMeta]] = [:]
 
     let backendController: RecipeBackendController
     var cancellables: Set<AnyCancellable> = Set<AnyCancellable>()

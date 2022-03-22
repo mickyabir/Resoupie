@@ -7,6 +7,29 @@
 
 import SwiftUI
 
+extension RecipeMainViewController {
+    func getPopularRecipes() {
+        backendController.loadPopularRecipes(skip: 0, limit: 10)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { recipes in
+                self.popularRecipes = recipes
+                self.isLoading = false
+            })
+            .store(in: &cancellables)
+    }
+    
+    func getVeganRecipes() {
+        backendController.loadPopularRecipes(skip: 0, limit: 10)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { recipes in
+                self.categoryRecipes["vegan"] = recipes
+            })
+            .store(in: &cancellables)
+    }
+}
+
 struct RecipeMainDefaultView: View {
     @ObservedObject var viewController: RecipeMainViewController
     
@@ -19,18 +42,15 @@ struct RecipeMainDefaultView: View {
 
     var body: some View {
         VStack {
-            RecipeGroupRow(title: "Popular", recipes: viewController.recipes, backendController: viewController.backendController)
+            RecipeGroupRow(title: "Popular", recipes: viewController.popularRecipes, backendController: viewController.backendController)
                    
             sectionDivider
             
-            RecipeGroupRow(title: "For You", recipes: viewController.recipes, backendController: viewController.backendController)
-
-            sectionDivider
-            
-            RecipeGroupRow(title: "Vegan", recipes: viewController.recipes, backendController: viewController.backendController)
+            RecipeGroupRow(title: "Vegan", recipes: viewController.categoryRecipes["vegan"] ?? [], backendController: viewController.backendController)
         }
         .onAppear() {
-            viewController.loadAllRecipes()
+            viewController.getPopularRecipes()
+            viewController.getVeganRecipes()
         }
     }
 }

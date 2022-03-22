@@ -14,10 +14,15 @@ struct RecipeMainSearchView: View {
         VStack {
             if let searchRecipes = viewController.searchRecipes {
                 ForEach(searchRecipes) { recipe in
-                    RecipeCard(recipe, width: UIScreen.main.bounds.size.width - 40)
+                    HStack {
+                        Spacer()
+                        RecipeCard(recipe, width: UIScreen.main.bounds.size.width - 40)
+                        Spacer()
+                    }
                 }
             }
         }
+        .padding(.top)
     }
 }
 

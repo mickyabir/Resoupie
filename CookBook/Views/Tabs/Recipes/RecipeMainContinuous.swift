@@ -9,18 +9,23 @@ import SwiftUI
 
 struct RecipeMainContinuousView: View {
     @ObservedObject var viewController: RecipeMainViewController
-
+    
     var body: some View {
         VStack {
             ForEach(viewController.recipes) { recipe in
-                RecipeCard(recipe, width: UIScreen.main.bounds.size.width - 40)
-                    .onAppear {
-                        if viewController.recipes.last == recipe {
-                            let _ = viewController.loadMoreRecipes()
+                HStack {
+                    Spacer()
+                    RecipeCard(recipe, width: UIScreen.main.bounds.size.width - 40)
+                        .onAppear {
+                            if viewController.recipes.last == recipe {
+                                let _ = viewController.loadMoreRecipes()
+                            }
                         }
-                    }
+                    Spacer()
+                }
             }
         }
+        .padding(.top)
         .onAppear() {
             viewController.loadRecipes()
         }
