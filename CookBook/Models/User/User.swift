@@ -12,4 +12,7 @@ struct User: Codable {
     var username: String
     var user_id: String
     var followers: Int
+    var recipe_count: Int
+    var bio: String
+    var location: String
 }

@@ -33,6 +33,8 @@ protocol UserBackendController {
     func checkFollowing(user_id: String) -> AnyPublisher<Bool, Error>
     func follow(user_id: String) -> AnyPublisher<Bool, Error>
     func unfollow(user_id: String) -> AnyPublisher<Bool, Error>
+    func updateBio(bio: String) -> AnyPublisher<Bool, Error>
+    func updateLocation(location: String) -> AnyPublisher<Bool, Error>
 }
 
 extension BackendController: UserBackendController {
@@ -164,6 +166,30 @@ extension BackendController: UserBackendController {
             .tryMap { response in
                 KeychainWrapper.main.deleteTokens()
                 AppStorageContainer.main.username = ""
+                return response.success
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func updateBio(bio: String) -> AnyPublisher<Bool, Error> {
+        let params = [
+            URLQueryItem(name: "bio", value: String(bio)),
+        ]
+
+        return authorizedRequest(path: UserBackend.path + "update/bio", method: "POST", modelType: SuccessResponse.self, params: params)
+            .map { response in
+                return response.success
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func updateLocation(location: String) -> AnyPublisher<Bool, Error> {
+        let params = [
+            URLQueryItem(name: "location", value: String(location)),
+        ]
+
+        return authorizedRequest(path: UserBackend.path + "update/location", method: "POST", modelType: SuccessResponse.self, params: params)
+            .map { response in
                 return response.success
             }
             .eraseToAnyPublisher()

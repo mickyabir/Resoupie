@@ -23,7 +23,10 @@ class ProfileOwnerViewController: UserSignInViewController {
     @Published var signupError: Bool = false
     @Published var presentNewRecipe = false
     @Published var presentSignIn: Bool = false
-    
+    @Published var followers: Int = 0
+    @Published var bio: String = ""
+    @Published var location: String = ""
+
     private var cancellables: Set<AnyCancellable> = Set()
     
     let backendController: ProfileOwnerBackendController
@@ -102,7 +105,7 @@ class ProfileOwnerViewController: UserSignInViewController {
                 self.username = ""
                 self.recipes = []
                 self.signedIn = false
-
+                
                 return ()
             }
             .flatMap(backendController.getCurrentUser)
@@ -111,7 +114,10 @@ class ProfileOwnerViewController: UserSignInViewController {
                 self.name = user.name
                 self.username = user.username
                 self.signedIn = true
-                
+                self.followers = user.followers
+                self.bio = user.bio
+                self.location = user.location
+
                 return user.username
             }
             .flatMap(backendController.getUserRecipes)
@@ -125,14 +131,16 @@ class ProfileOwnerViewController: UserSignInViewController {
     }
     
     func reloadProfile() {
-        backendController.getUserRecipes(username: username)
-            .eraseToAnyPublisher()
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { _ in
-            }, receiveValue: { recipes in
-                self.recipes = recipes
-            })
-            .store(in: &cancellables)
+        if !username.isEmpty {
+            backendController.getUserRecipes(username: username)
+                .eraseToAnyPublisher()
+                .receive(on: DispatchQueue.main)
+                .sink(receiveCompletion: { _ in
+                }, receiveValue: { recipes in
+                    self.recipes = recipes
+                })
+                .store(in: &cancellables)
+        }
     }
     
     func signOut() {
@@ -149,11 +157,30 @@ class ProfileOwnerViewController: UserSignInViewController {
             })
             .store(in: &cancellables)
     }
+    
+    func updateBio() {
+        backendController.updateBio(bio: bio)
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+            } receiveValue: { _ in
+            }
+            .store(in: &cancellables)
+    }
+    
+    func updateLocation() {
+        backendController.updateLocation(location: location)
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+            } receiveValue: { _ in
+            }
+            .store(in: &cancellables)
+    }
 }
 
 struct ProfileOwnerView: View {
     @ObservedObject var viewController: ProfileOwnerViewController
-    @State var isPresenting = false
+    @State var bioEdited = false
+    @State var locationEdited = false
 
     var body: some View {
         NavigationView {
@@ -162,6 +189,98 @@ struct ProfileOwnerView: View {
                 
                 ScrollView {
                     VStack {
+                        if viewController.signedIn {
+                            RectangleSectionInset(width: UIScreen.main.bounds.width - 40) {
+                                VStack(spacing: 20) {
+                                    
+                                    VStack {
+                                        RectangleSectionRow {
+                                            ZStack(alignment: .topLeading) {
+                                                TextEditor(text: $viewController.bio)
+                                                    .foregroundColor(Color.theme.lightText)
+                                                    .font(.body)
+                                                    .onChange(of: viewController.bio) { _ in
+                                                        withAnimation {
+                                                            bioEdited = true
+                                                        }
+                                                    }
+
+                                                if viewController.bio.isEmpty {
+                                                    Text("About Me")
+                                                        .foregroundColor(Color(UIColor.placeholderText))
+                                                        .padding(.horizontal, 5)
+                                                        .padding(.vertical, 9)
+                                                        .allowsHitTesting(false)
+                                                }
+                                            }
+                                        }
+                                        
+                                        HStack(spacing: 4) {
+                                            VStack(spacing: 10) {
+                                                Text("\(Image(systemName: "house.fill"))")
+                                                    .foregroundColor(Color.theme.lightText)
+                                                    .font(.body)
+                                                
+                                                Text("\(Image(systemName: "book.fill"))")
+                                                    .foregroundColor(Color.theme.lightText)
+                                                    .font(.body)
+                                                
+                                                Text("\(Image(systemName: "person.3.fill"))")
+                                                    .foregroundColor(Color.theme.lightText)
+                                                    .font(.body)
+                                            }
+                                            
+                                            VStack(alignment: .leading, spacing: 10) {
+                                                TextField("Location", text: $viewController.location)
+                                                    .foregroundColor(Color.theme.lightText)
+                                                    .font(.body)
+                                                    .onChange(of: viewController.location) { _ in
+                                                        withAnimation {
+                                                            locationEdited = true
+                                                        }
+                                                    }
+                                                
+                                                Text("\(viewController.recipes.count) recipes")
+                                                    .foregroundColor(Color.theme.lightText)
+                                                    .font(.body)
+                                                
+                                                Text("\(viewController.followers) followers")
+                                                    .foregroundColor(Color.theme.lightText)
+                                                    .font(.body)
+                                            }
+                                            
+                                            Spacer()
+                                        }
+                                        .padding(.top, 10)
+                                        
+                                        if bioEdited || locationEdited {
+                                            Divider()
+                                            
+                                            Button {
+                                                if bioEdited {
+                                                    viewController.updateBio()
+                                                }
+                                                
+                                                if locationEdited {
+                                                    viewController.updateLocation()
+                                                }
+                                                
+                                                withAnimation {
+                                                    bioEdited = false
+                                                    locationEdited = false
+                                                }
+                                            } label: {
+                                                Text("Save")
+                                            }
+                                            .font(.title3)
+                                            .padding(.top, 5)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.bottom)
+                        }
+                        
                         ForEach(viewController.recipes) { recipeMeta in
                             RecipeCard(recipeMeta, width: UIScreen.main.bounds.width - 40)
                         }
@@ -185,7 +304,7 @@ struct ProfileOwnerView: View {
                                 }
                             }
                         }
-
+                    
                 }
             }
             .navigationTitle(viewController.name == "" ? "Profile" : viewController.name)
@@ -207,6 +326,11 @@ struct ProfileOwnerView: View {
                             Image(systemName: "square.and.pencil")
                         }
                         .opacity(viewController.signedIn ? 1.0 : 0.0)
+                        .onChange(of: viewController.presentNewRecipe) { present in
+                            if !present {
+                                viewController.reloadProfile()
+                            }
+                        }
                     }
                 }
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -218,6 +342,15 @@ struct ProfileOwnerView: View {
                         Text("Sign Out")
                     }
                     .opacity(viewController.signedIn ? 1.0 : 0.0)
+                }
+                ToolbarItemGroup(placement: .keyboard) {
+                    HStack {
+                        Spacer()
+                        Button("Done") {
+                            let resign = #selector(UIResponder.resignFirstResponder)
+                            UIApplication.shared.sendAction(resign, to: nil, from: nil, for: nil)
+                        }
+                    }
                 }
             }
             .navigationBarTitleDisplayMode(.inline)

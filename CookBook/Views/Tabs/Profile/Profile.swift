@@ -15,7 +15,10 @@ class ProfileViewController: ObservableObject {
     @Published var name: String
     @Published var user_id: String
     @Published var followers: Int
-    
+    @Published var recipe_count: Int
+    @Published var bio: String = ""
+    @Published var location: String = ""
+
     @Published var username: String = ""
     @Published var following: Bool = false
     
@@ -28,6 +31,7 @@ class ProfileViewController: ObservableObject {
         self.name = name
         self.user_id = user_id
         self.followers = 0
+        self.recipe_count = 0
         self.loadMeta()
     }
     
@@ -76,6 +80,9 @@ class ProfileViewController: ObservableObject {
             } receiveValue: { user in
                 self.followers = user.followers
                 self.username = user.username
+                self.recipe_count = user.recipe_count
+                self.bio = user.bio
+                self.location = user.location
             }
             .store(in: &cancellables)
     }
@@ -109,7 +116,7 @@ struct ProfileView: View {
                             
                             VStack {
                                 RectangleSectionRow {
-                                    Text("From a small town in Israel, I have traveled the world and have experienced delicious cuisines. I'm here to share my experiences!")
+                                    Text(viewController.bio)
                                         .foregroundColor(Color.theme.lightText)
                                         .font(.body)
                                 }
@@ -130,11 +137,11 @@ struct ProfileView: View {
                                     }
                                     
                                     VStack(alignment: .leading, spacing: 10) {
-                                        Text("Los Angeles, California")
+                                        Text(viewController.location)
                                             .foregroundColor(Color.theme.lightText)
                                             .font(.body)
 
-                                        Text("3 recipes")
+                                        Text("\(viewController.recipe_count) recipes")
                                             .foregroundColor(Color.theme.lightText)
                                             .font(.body)
 
