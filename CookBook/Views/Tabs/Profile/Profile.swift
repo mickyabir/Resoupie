@@ -115,17 +115,21 @@ struct ProfileView: View {
                         VStack(spacing: 20) {
                             
                             VStack {
-                                RectangleSectionRow {
-                                    Text(viewController.bio)
-                                        .foregroundColor(Color.theme.lightText)
-                                        .font(.body)
+                                if !viewController.bio.isEmpty {
+                                    RectangleSectionRow {
+                                        Text(viewController.bio)
+                                            .foregroundColor(Color.theme.lightText)
+                                            .font(.body)
+                                    }
                                 }
                                 
                                 HStack(spacing: 4) {
                                     VStack(spacing: 10) {
-                                        Text("\(Image(systemName: "house.fill"))")
-                                            .foregroundColor(Color.theme.lightText)
-                                            .font(.body)
+                                        if !viewController.location.isEmpty {
+                                            Text("\(Image(systemName: "house.fill"))")
+                                                .foregroundColor(Color.theme.lightText)
+                                                .font(.body)
+                                        }
                                         
                                         Text("\(Image(systemName: "book.fill"))")
                                             .foregroundColor(Color.theme.lightText)
@@ -137,9 +141,11 @@ struct ProfileView: View {
                                     }
                                     
                                     VStack(alignment: .leading, spacing: 10) {
-                                        Text(viewController.location)
-                                            .foregroundColor(Color.theme.lightText)
-                                            .font(.body)
+                                        if !viewController.location.isEmpty {
+                                            Text(viewController.location)
+                                                .foregroundColor(Color.theme.lightText)
+                                                .font(.body)
+                                        }
 
                                         Text("\(viewController.recipe_count) recipes")
                                             .foregroundColor(Color.theme.lightText)

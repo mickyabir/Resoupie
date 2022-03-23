@@ -209,7 +209,7 @@ extension EditRecipeView {
                 TextField("Time", text: $recipe.time)
                     .foregroundColor(Color.theme.text)
                 
-                EmojiTextField(text: $recipe.emoji, placeholder: "Emoji")
+                TextField("Emoji", text: $recipe.emoji)
                     .foregroundColor(Color.theme.text)
                     .onChange(of: recipe.emoji) { _ in
                         recipe.emoji = String(recipe.emoji.onlyEmoji().prefix(1))
