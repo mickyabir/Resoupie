@@ -19,7 +19,7 @@ class CoordinatePickerViewModel: ObservableObject {
     @Published var country: String?
     @Published var locality: String?
     @Published var subLocality: String?
-
+    
     var locations: [PinLocation] = []
     
     func selectCurrentRegion(continuation: @escaping () -> ()) {
@@ -69,7 +69,12 @@ struct CoordinatePicker: View {
     
     @ObservedObject var viewModel: CoordinatePickerViewModel
     
-    @State var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 0.07, longitudeDelta: 0.07))
+    @StateObject var locationManager = LocationManager()
+    
+    //    @State var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 0.07, longitudeDelta: 0.07))
+    @State var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 55, longitudeDelta: 60))
+    
+    @State var foundInitialLocation: Bool = false
     
     init(_ viewModel: CoordinatePickerViewModel) {
         self.viewModel = viewModel
@@ -86,7 +91,7 @@ struct CoordinatePicker: View {
             .onTapGesture {
                 
             }
-
+            
             Circle()
                 .strokeBorder(Color.white, lineWidth: 4)
                 .background(Circle().foregroundColor(Color.blue).opacity(0.1))
@@ -102,6 +107,20 @@ struct CoordinatePicker: View {
             } label: {
                 Text("Select")
             }
+        }
+        .onChange(of: locationManager.location, perform: { location in
+            if !foundInitialLocation, let location = locationManager.location {
+                DispatchQueue.main.async {
+                    withAnimation {
+                        region.center = location
+                        region.span = MKCoordinateSpan(latitudeDelta: 0.07, longitudeDelta: 0.07)
+                    }
+                }
+                foundInitialLocation = true
+            }
+        })
+        .onAppear {
+            locationManager.requestLocation()
         }
     }
 }

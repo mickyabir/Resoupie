@@ -73,6 +73,7 @@
 		81DC90D827EA795E00F32201 /* RectangleSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81DC90D727EA795E00F32201 /* RectangleSection.swift */; };
 		81DC90DB27EA79C700F32201 /* RectangleSectionInset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81DC90DA27EA79C700F32201 /* RectangleSectionInset.swift */; };
 		81DC90DD27EA7A8900F32201 /* RectangleSectionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81DC90DC27EA7A8900F32201 /* RectangleSectionRow.swift */; };
+		81DC90DF27EAA08200F32201 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81DC90DE27EAA08200F32201 /* LocationManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -163,6 +164,7 @@
 		81DC90D727EA795E00F32201 /* RectangleSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RectangleSection.swift; sourceTree = "<group>"; };
 		81DC90DA27EA79C700F32201 /* RectangleSectionInset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RectangleSectionInset.swift; sourceTree = "<group>"; };
 		81DC90DC27EA7A8900F32201 /* RectangleSectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RectangleSectionRow.swift; sourceTree = "<group>"; };
+		81DC90DE27EAA08200F32201 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -470,6 +472,7 @@
 			children = (
 				81862D8F27AC6C13006C947F /* Theme.swift */,
 				818D399C27CAF8ED008F4A47 /* ImageLoader.swift */,
+				81DC90DE27EAA08200F32201 /* LocationManager.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -685,6 +688,7 @@
 				812F176127CB50F70095F7D0 /* RecipeMainContinuous.swift in Sources */,
 				8196C2A227D80D9800901F02 /* RecipeMainSearchView.swift in Sources */,
 				818D399327CAE2E3008F4A47 /* Character.swift in Sources */,
+				81DC90DF27EAA08200F32201 /* LocationManager.swift in Sources */,
 				812F176A27CB51CD0095F7D0 /* FlexibleView.swift in Sources */,
 				81B1BF90279FA6CA00EC85BB /* CoordinatePicker.swift in Sources */,
 				81862D9027AC6C13006C947F /* Theme.swift in Sources */,

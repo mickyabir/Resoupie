@@ -32,9 +32,13 @@ class WorldViewController: ObservableObject {
 }
 
 struct WorldView: View {
+    @StateObject var locationManager = LocationManager()
+    
     @State var zoom: CGFloat = 15
     
-    @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+    //    @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+    
+    @State var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.053578, longitude: -118.465992), span: MKCoordinateSpan(latitudeDelta: 55, longitudeDelta: 60))
     
     @ObservedObject var viewController: WorldViewController
     
@@ -70,9 +74,6 @@ struct WorldView: View {
                 .onChange(of: region) { newRegion in
                     //            viewController.fetchRecipes(region: newRegion)
                 }
-                .onAppear {
-                    viewController.fetchRecipes(region: region)
-                }
                 
                 Button {
                     viewController.fetchRecipes(region: region)
@@ -91,6 +92,17 @@ struct WorldView: View {
             .navigationBarHidden(true)
         }
         .navigationBarHidden(true)
-
+        .onAppear {
+            locationManager.requestLocation()
+            if let location = locationManager.location {
+                DispatchQueue.main.async {
+                    withAnimation {
+                        region.center = location
+                        region.span = MKCoordinateSpan(latitudeDelta: 0.07, longitudeDelta: 0.07)
+                        viewController.fetchRecipes(region: region)
+                    }
+                }
+            }
+        }
     }
 }
