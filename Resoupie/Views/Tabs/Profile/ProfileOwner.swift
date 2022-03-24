@@ -358,5 +358,6 @@ struct ProfileOwnerView: View {
         .onAppear {
             viewController.reloadProfile()
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }

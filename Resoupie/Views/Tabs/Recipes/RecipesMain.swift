@@ -155,5 +155,6 @@ struct RecipesMainView: View {
                 viewController.search(searchText)
             }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }

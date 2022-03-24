@@ -221,5 +221,6 @@ struct GroceriesView: View {
             }
             .environment(\.editMode, self.$editMode)
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }

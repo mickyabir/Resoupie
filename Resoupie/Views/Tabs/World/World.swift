@@ -104,5 +104,6 @@ struct WorldView: View {
                 }
             }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }

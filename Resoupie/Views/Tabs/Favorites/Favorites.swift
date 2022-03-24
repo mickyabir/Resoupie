@@ -142,5 +142,6 @@ struct FavoritesView: View {
                 }
             ])
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
