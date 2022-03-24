@@ -47,12 +47,14 @@ struct WorldView: View {
     
     @State var lastRegion: MKCoordinateRegion?
     
+    @State var firstTimeLocation: Bool = true
+    
     var body: some View {
         let places = viewController.recipes.map { Place(id: $0.id, emoji: $0.recipe.emoji, coordinate: $0.recipe.coordinate()!) }
         
         NavigationView {
             ZStack(alignment: .bottom) {
-                NavigationLink(destination: RecipeDetail(chosenRecipeIndex != nil ? viewController.recipes[chosenRecipeIndex!] : RecipeMeta.empty, backendController: BackendController()), isActive: $displayRecipe) {
+                NavigationLink(destination: RecipeDetail(chosenRecipeIndex != nil && chosenRecipeIndex! < viewController.recipes.count ? viewController.recipes[chosenRecipeIndex!] : RecipeMeta.empty, backendController: BackendController()), isActive: $displayRecipe) {
                     EmptyView()
                 }
                 .opacity(0)
@@ -93,13 +95,17 @@ struct WorldView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            locationManager.requestLocation()
-            if let location = locationManager.location {
-                DispatchQueue.main.async {
-                    withAnimation {
-                        region.center = location
-                        region.span = MKCoordinateSpan(latitudeDelta: 0.07, longitudeDelta: 0.07)
-                        viewController.fetchRecipes(region: region)
+            if firstTimeLocation {
+                locationManager.requestLocation()
+                if let location = locationManager.location {
+                    firstTimeLocation = false
+
+                    DispatchQueue.main.async {
+                        withAnimation {
+                            region.center = location
+                            region.span = MKCoordinateSpan(latitudeDelta: 0.07, longitudeDelta: 0.07)
+                            viewController.fetchRecipes(region: region)
+                        }
                     }
                 }
             }
