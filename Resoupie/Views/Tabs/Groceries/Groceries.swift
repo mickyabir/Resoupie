@@ -34,7 +34,9 @@ struct GroceriesView: View {
                             let listIndex = groceries.firstIndex(of: list)!
                             Section(header:
                                         HStack {
-                                Image(systemName: "folder.fill.badge.minus").foregroundColor(Color.red)
+                                Image(systemName: "folder.fill.badge.minus")
+                                    .foregroundColor(Color.red)
+                                    .font(.title2.weight(.semibold))
                                     .onTapGesture {
                                         showingRemoveListAlert = true
                                         selectedRemoveListIndex = listIndex
@@ -44,6 +46,7 @@ struct GroceriesView: View {
                                     .frame(width: editMode == .active ? 30 : 0)
                                 
                                 TextField("List", text: $groceries[listIndex].name)
+                                    .font(.title2.weight(.semibold))
                                     .foregroundColor(Color.theme.title)
                                     .disableAutocorrection(true)
                                     .onTapGesture {
@@ -118,6 +121,7 @@ struct GroceriesView: View {
                                     Spacer()
                                 }
                             }
+                            .textCase(nil)
                             .alert(isPresented: $showingRemoveListAlert) {
                                 Alert(title: Text("Delete list?"),
                                       primaryButton: .destructive(Text("Delete")) {
