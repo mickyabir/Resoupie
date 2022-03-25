@@ -34,6 +34,8 @@ class RecipeDetailViewController: StarsRatingViewController {
     var forkViewController: RecipeDetailViewController?
     var forkRecipeMeta: RecipeMeta?
     
+    var forkChildren: [RecipeMeta] = []
+    
     @State var coordinateRegion: MKCoordinateRegion
     
     @Published var locationName: String = ""
@@ -84,6 +86,7 @@ class RecipeDetailViewController: StarsRatingViewController {
         
         checkFavorited()
         getForkInfo()
+        getForkChildren()
     }
     
     func folderBadgeTapped() {
@@ -155,6 +158,16 @@ class RecipeDetailViewController: StarsRatingViewController {
             }, receiveValue: { forkRecipe in
                 self.forkRecipeMeta = forkRecipe
                 self.forkViewController = RecipeDetailViewController(forkRecipe, backendController: self.backendController)
+            })
+            .store(in: &cancellables)
+    }
+    
+    func getForkChildren() {
+        backendController.getForkChildren(recipe_id: recipeMeta.id)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { children in
+                self.forkChildren = children
             })
             .store(in: &cancellables)
     }
@@ -249,7 +262,9 @@ struct RecipeDetail: View {
                 VStack(spacing: 20) {
                     header(offset: scroll)
                     
-                    forkButtonSection
+                    aboutRecipeSection
+                    
+                    forkSection
                     
                     if let location = recipeMeta.recipe.coordinate() {
                         mapViewSection(location)
@@ -629,7 +644,7 @@ extension RecipeDetail {
         }
     }
     
-    private var forkButtonSection: some View {
+    private var aboutRecipeSection: some View {
         RecipeDetailSectionInset {
             VStack(spacing: 20) {
                 
@@ -667,21 +682,62 @@ extension RecipeDetail {
                         }
                     }
                 }
-                
-//                Divider()
-                
-                HStack {
-                    Spacer ()
-                    Text("Fork This Recipe")
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                }
-                .onTapGesture {
-                    presentEditRecipe = true
-                }
             }
         }
         .foregroundColor(Color.theme.tint)
+    }
+    
+    private var forkSection: some View {
+        RecipeDetailSectionInset {
+            VStack(spacing: 20) {
+                
+                VStack {
+                    HStack {
+                        Text("Forks")
+                            .foregroundColor(Color.theme.title)
+                            .font(.title3)
+                        Spacer()
+                    }
+                    
+                    Divider()
+                    
+                    Spacer()
+                    
+                    Group {
+                        if viewController.forkChildren.isEmpty {
+                            Text("Be the first to fork this recipe!")
+                                .font(.body)
+                                .foregroundColor(Color.theme.lightText)
+                        } else {
+                            let forkCount = viewController.forkChildren.count
+                            let plurality = forkCount > 1 ? "s" : ""
+                            let itThem = forkCount > 1 ? "them" : "it"
+                            NavigationLink(destination: ForkChildren(viewController.forkChildren)) {
+                                HStack(spacing: 0) {
+                                    Text("This recipe has \(viewController.forkChildren.count) fork\(plurality). ")
+                                        .foregroundColor(Color.theme.lightText)
+                                    Text("Check \(itThem) out!")
+                                        .foregroundColor(Color.theme.tint)
+                                }
+                                .font(.body)
+                            }
+                        }
+                    }
+                    .padding(.vertical)
+                    
+                    HStack {
+                        Spacer ()
+                        Text("Fork This Recipe")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                    }
+                    .onTapGesture {
+                        presentEditRecipe = true
+                    }
+                }
+            }
+            .foregroundColor(Color.theme.tint)
+        }
     }
     
     

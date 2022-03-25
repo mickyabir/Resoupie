@@ -36,6 +36,7 @@ protocol RecipeBackendController {
     func loadDefaultPageRecipes() -> AnyPublisher<[String:[RecipeMeta]], Error>
     func loadAllRecipes() -> AnyPublisher<[RecipeMeta], Error>
     func getForkInfo(recipe_id: String) -> AnyPublisher<ForkInfoModel, Error>
+    func getForkChildren(recipe_id: String) -> AnyPublisher<[RecipeMeta], Error>
     func uploadRecipeToServer(recipe: Recipe) -> AnyPublisher<Bool, Error>
     func searchRecipes(searchString: String, limit: Int) -> AnyPublisher<[RecipeMeta], Error>
 }
@@ -54,6 +55,11 @@ extension BackendController: RecipeBackendController {
     
     func getForkInfo(recipe_id: String) -> AnyPublisher<ForkInfoModel, Error> {
         return authorizedRequest(path: RecipeBackend.path + recipe_id + "/parent", method: "GET", modelType: ForkInfoModel.self)
+            .eraseToAnyPublisher()
+    }
+    
+    func getForkChildren(recipe_id: String) -> AnyPublisher<[RecipeMeta], Error> {
+        return authorizedRequest(path: RecipeBackend.path + recipe_id + "/children", method: "GET", modelType: [RecipeMeta].self)
             .eraseToAnyPublisher()
     }
     
