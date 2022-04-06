@@ -27,7 +27,30 @@ class EditRecipeViewController: ObservableObject {
     }
     
     func publishRecipe(_ recipe: Recipe, image: UIImage) -> Bool {
-        if recipe.name == "" || recipe.ingredients.isEmpty || recipe.steps.isEmpty {
+        if recipe.tags
+            .map({ $0.isEmpty })
+            .reduce(true, { current, next in
+                return current && next
+            }) {
+            return false
+        }
+        if recipe.ingredients
+            .map({ $0.name.isEmpty || $0.quantity.isEmpty || $0.unit.isEmpty })
+            .reduce(true, { current, next in
+                return current && next
+            }) {
+            return false
+        }
+
+        if recipe.steps
+            .map({ $0.isEmpty })
+            .reduce(true, { current, next in
+                return current && next
+            }) {
+            return false
+        }
+        
+        if recipe.name.isEmpty || recipe.time.isEmpty || recipe.emoji.isEmpty || recipe.about.isEmpty || recipe.servings == 0 {
             return false
         }
                 
@@ -77,6 +100,7 @@ struct EditRecipeView: View {
     @StateObject var viewController = EditRecipeViewController(BackendController())
     
     @State var recipe: Recipe
+    
     let parent_id: String?
     
     @State var locationEnabled: Bool = false
@@ -97,6 +121,14 @@ struct EditRecipeView: View {
     
     @Binding var isPresented: Bool
     
+    @State var showClearAlert: Bool = false
+    
+    @State var imageSectionWarning: Bool = false
+    @State var methodSectionWarning: Bool = false
+    @State var aboutSectionWarning: Bool = false
+    @State var ingredientsSectionWarning: Bool = false
+    @State var tagSectionWarning: Bool = false
+
     init(_ recipe: Recipe = .empty, parent_id: String? = nil, isPresented: Binding<Bool>) {
         self.recipe = recipe
         self.parent_id = parent_id
@@ -119,6 +151,8 @@ struct EditRecipeView: View {
                 ingredientsSection
                 
                 methodSection
+                
+                clearSection
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical)
@@ -129,6 +163,58 @@ struct EditRecipeView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
+                    if recipe.steps
+                        .map({ $0.isEmpty })
+                        .reduce(true, { current, next in
+                            return current && next
+                        }) {
+                        withAnimation {
+                            methodSectionWarning = true
+                        }
+                    } else {
+                        withAnimation {
+                            methodSectionWarning = false
+                        }
+                    }
+                    
+                    if recipe.name.isEmpty || recipe.time.isEmpty || recipe.emoji.isEmpty || recipe.about.isEmpty || recipe.servings == 0 {
+                        withAnimation {
+                            aboutSectionWarning = true
+                        }
+                    } else {
+                        withAnimation {
+                            aboutSectionWarning = false
+                        }
+                    }
+                    
+                    if recipe.ingredients
+                        .map({ $0.name.isEmpty || $0.quantity.isEmpty || $0.unit.isEmpty })
+                        .reduce(true, { current, next in
+                            return current && next
+                        }) {
+                        withAnimation {
+                            ingredientsSectionWarning = true
+                        }
+                    } else {
+                        withAnimation {
+                            ingredientsSectionWarning = false
+                        }
+                    }
+                    
+                    if recipe.tags
+                        .map({ $0.isEmpty })
+                        .reduce(true, { current, next in
+                            return current && next
+                        }) {
+                        withAnimation {
+                            tagSectionWarning = true
+                        }
+                    } else {
+                        withAnimation {
+                            tagSectionWarning = false
+                        }
+                    }
+                    
                     if let image = image {
                         if !locationEnabled {
                             recipe.coordinate_lat = nil
@@ -141,6 +227,10 @@ struct EditRecipeView: View {
                             isPresented = false
                         }
                         
+                    } else {
+                        withAnimation {
+                            imageSectionWarning = true
+                        }
                     }
                 } label: {
                     Text("Publish")
@@ -220,6 +310,7 @@ extension EditRecipeView {
                 aboutEditorSection
             }
         }
+        .shadow(color: Color.theme.red.opacity(aboutSectionWarning ? 0.4 : 0.0), radius: 10)
     }
     
     private var imageSection: some View {
@@ -255,6 +346,14 @@ extension EditRecipeView {
                 }
                 .foregroundColor(Color.theme.tint)
                 .padding(.bottom)
+            }
+        }
+        .shadow(color: Color.theme.red.opacity(imageSectionWarning ? 0.4 : 0.0), radius: 10)
+        .onChange(of: image) { newValue in
+            if image != nil {
+                withAnimation {
+                    imageSectionWarning = false
+                }
             }
         }
     }
@@ -482,6 +581,7 @@ extension EditRecipeView {
                 }
             }
         }
+        .shadow(color: Color.theme.red.opacity(ingredientsSectionWarning ? 0.4 : 0.0), radius: 10)
     }
     
     private func stepEditor(_ index: Int) -> some View {
@@ -589,6 +689,7 @@ extension EditRecipeView {
                 }
             }
         }
+        .shadow(color: Color.theme.red.opacity(methodSectionWarning ? 0.4 : 0.0), radius: 10)
     }
     
     private var tagSection: some View {
@@ -649,6 +750,39 @@ extension EditRecipeView {
                         tagEditorFocused = true
                     }
 
+            }
+        }
+        .shadow(color: Color.theme.red.opacity(tagSectionWarning ? 0.4 : 0.0), radius: 10)
+    }
+    
+    private var clearSection: some View {
+        RecipeDetailSectionInset {
+            HStack {
+                Spacer()
+                
+                Button {
+                    showClearAlert = true
+
+                } label: {
+                    Text("Clear")
+                        .foregroundColor(Color.theme.tint)
+                        .font(.title3)
+                }
+                
+                Spacer()
+            }
+            .alert(isPresented: $showClearAlert) {
+                Alert(
+                    title: Text("Are you sure?"),
+                    message: Text("This can't be undone"),
+                    primaryButton: .destructive(Text("Clear")) {
+                        image = nil
+                        locationEnabled = false
+                        viewController.location = nil
+                        recipe = .empty
+                    },
+                    secondaryButton: .cancel()
+                )
             }
         }
     }

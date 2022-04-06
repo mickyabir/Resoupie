@@ -131,6 +131,7 @@ struct UserSignIn<ViewController: UserSignInViewController>: View {
                     }
                     
                     TextField("Username", text: $viewController.username)
+                        .textContentType(.username)
                         .padding(.horizontal)
                         .submitLabel(.next)
                         .autocapitalization(.none)
@@ -149,6 +150,7 @@ struct UserSignIn<ViewController: UserSignInViewController>: View {
                     Spacer()
                     
                     SecureField("Password", text: $viewController.password)
+                        .textContentType(viewController.accessState == .signUp ? .newPassword : .password)
                         .padding(.horizontal)
                         .autocapitalization(.none)
                         .submitLabel(.go)

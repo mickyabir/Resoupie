@@ -8,6 +8,11 @@
 import Foundation
 import MapKit
 
+struct IngredientSection: Hashable, Codable {
+    var name: String
+    var ingredients: [Ingredient]
+}
+
 struct Recipe: Hashable, Codable {
     var about: String
     var image: String
