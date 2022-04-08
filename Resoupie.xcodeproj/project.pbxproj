@@ -32,6 +32,7 @@
 		8141EA2527A3740E008BE746 /* CustomAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8141EA2427A3740E008BE746 /* CustomAsyncImage.swift */; };
 		8148CD2E28001EAC00F634DF /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8148CD2D28001EAC00F634DF /* Notifications.swift */; };
 		8148CD30280021EB00F634DF /* NotificationsViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8148CD2F280021EB00F634DF /* NotificationsViewer.swift */; };
+		8148CD322800B87500F634DF /* KeyboardReadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8148CD312800B87500F634DF /* KeyboardReadable.swift */; };
 		814C8CF72797631E0056A7D2 /* ResoupieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814C8CF62797631E0056A7D2 /* ResoupieApp.swift */; };
 		814C8CF92797631E0056A7D2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814C8CF82797631E0056A7D2 /* ContentView.swift */; };
 		814C8CFB2797631F0056A7D2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 814C8CFA2797631F0056A7D2 /* Assets.xcassets */; };
@@ -123,6 +124,7 @@
 		8141EA2427A3740E008BE746 /* CustomAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomAsyncImage.swift; sourceTree = "<group>"; };
 		8148CD2D28001EAC00F634DF /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		8148CD2F280021EB00F634DF /* NotificationsViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsViewer.swift; sourceTree = "<group>"; };
+		8148CD312800B87500F634DF /* KeyboardReadable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardReadable.swift; sourceTree = "<group>"; };
 		814C8CF32797631E0056A7D2 /* Resoupie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Resoupie.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		814C8CF62797631E0056A7D2 /* ResoupieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResoupieApp.swift; sourceTree = "<group>"; };
 		814C8CF82797631E0056A7D2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -492,6 +494,7 @@
 				81862D8F27AC6C13006C947F /* Theme.swift */,
 				818D399C27CAF8ED008F4A47 /* ImageLoader.swift */,
 				81DC90DE27EAA08200F32201 /* LocationManager.swift */,
+				8148CD312800B87500F634DF /* KeyboardReadable.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -701,6 +704,7 @@
 				8148CD2E28001EAC00F634DF /* Notifications.swift in Sources */,
 				810365B927E932B300B70344 /* Sequence.swift in Sources */,
 				8179D68027D59A3700A48E58 /* EmojiTextField.swift in Sources */,
+				8148CD322800B87500F634DF /* KeyboardReadable.swift in Sources */,
 				8128CF2127D0315800EFDFC7 /* StarsRating.swift in Sources */,
 				818D399127CAE2C0008F4A47 /* String.swift in Sources */,
 				81BAF3EE2799FDBB004B0767 /* World.swift in Sources */,

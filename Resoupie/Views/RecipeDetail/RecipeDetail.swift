@@ -50,6 +50,8 @@ class RecipeDetailViewController: StarsRatingViewController {
     @Published var ingredientInGroceryList: [Bool]
     @Published var cookedCount: Int = 0
     
+    @Published var editable: Bool = false
+    
     init(_ recipeMeta: RecipeMeta, backendController: Backend) {
         self.recipeMeta = recipeMeta
         rating = recipeMeta.rating
@@ -62,7 +64,8 @@ class RecipeDetailViewController: StarsRatingViewController {
         favorited = false
         
         self.backendController = backendController
-
+        
+        editable = recipeMeta.user_id == AppStorageContainer.main.user_id
         
         ingredientInGroceryList =  AppStorageContainer.main.ingredientsInGroceryList(recipeMeta)
         
@@ -269,10 +272,13 @@ struct RecipeDetail: View {
     @State private var showNavBarEmoji: Bool = false
     
     @State private var presentEditRecipe: Bool = false
+    @State private var activeSheet: Int = 0
     
     @State private var showStepsSections: [Bool]
     @State private var showIngredientsSections: [Bool]
-
+    
+    @State var presentNewRecipe: Bool = false
+    
     @Environment(\.presentationMode) var presentation
     
     init(_ recipeMeta: RecipeMeta, backendController: BackendController) {
@@ -283,7 +289,7 @@ struct RecipeDetail: View {
         
         _showStepsSections = State(initialValue: recipeMeta.recipe.stepsSections.map({ _ in true }))
         _showIngredientsSections = State(initialValue: recipeMeta.recipe.ingredientsSections.map({ _ in true }))
-
+        
         _viewController = StateObject(wrappedValue: RecipeDetailViewController(recipeMeta, backendController: backendController))
         
     }
@@ -322,6 +328,10 @@ struct RecipeDetail: View {
                     }
                     
                     cookedButtonSection
+                    
+                    if viewController.editable {
+                        editButtonSection
+                    }
                 }
                 .readScroll { scroll in
                     self.scroll = scroll
@@ -355,16 +365,22 @@ struct RecipeDetail: View {
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $presentEditRecipe) {
             NavigationView {
-                EditRecipeView(recipeMeta.recipe.childOf(parent_id: recipeMeta.id), isPresented: $presentEditRecipe)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            Button {
-                                presentEditRecipe = false
-                            } label: {
-                                Text("Cancel")
-                            }
+                Group {
+                    if activeSheet == 1 {
+                        EditRecipeView(recipeMeta.childOf(parent_id: recipeMeta.id), isPresented: $presentEditRecipe)
+                    } else if activeSheet == 2 {
+                        EditRecipeView(recipeMeta, isPresented: $presentEditRecipe)
+                    }
+                }
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button {
+                            presentEditRecipe = false
+                        } label: {
+                            Text("Cancel")
                         }
                     }
+                }
             }
         }
     }
@@ -590,9 +606,9 @@ extension RecipeDetail {
                         Text(section.name)
                             .font(.headline)
                             .foregroundColor(Color.theme.headline)
-
+                        
                         Spacer()
-
+                        
                         Button {
                             withAnimation {
                                 showIngredientsSections[sectionIndex].toggle()
@@ -819,9 +835,9 @@ extension RecipeDetail {
                         Spacer ()
                         Text("Fork This Recipe")
                         Spacer()
-                        Image(systemName: "chevron.right")
                     }
                     .onTapGesture {
+                        activeSheet = 1
                         presentEditRecipe = true
                     }
                 }
@@ -834,7 +850,7 @@ extension RecipeDetail {
         RecipeDetailSection {
             HStack {
                 Spacer()
-
+                
                 VStack {
                     Button {
                         viewController.cookedButtonPressed()
@@ -846,6 +862,25 @@ extension RecipeDetail {
                         .foregroundColor(Color.theme.lightText)
                         .font(.footnote)
                 }
+                Spacer()
+            }
+            .padding(.vertical, 15)
+            .padding(.horizontal, 20)
+        }
+    }
+    
+    private var editButtonSection: some View {
+        RecipeDetailSection {
+            HStack {
+                Spacer()
+                
+                Button {
+                    activeSheet = 2
+                    presentEditRecipe = true
+                } label: {
+                    Text("Edit Recipe")
+                }
+                
                 Spacer()
             }
             .padding(.vertical, 15)
@@ -912,24 +947,3 @@ extension RecipeDetail {
         }
     }
 }
-
-//struct RecipeDetail_Previews: PreviewProvider {
-//    static var previews: some View {
-//        let ingredients: [Ingredient] = [
-//            Ingredient(name: "Test", quantity: "1", unit: "Unit"),
-//            Ingredient(name: "Test", quantity: "2", unit: "Unit"),
-//            Ingredient(name: "Test", quantity: "3", unit: "Unit")
-//        ]
-//        let location = CLLocationCoordinate2D(latitude: 37.332077, longitude: -122.02962) // Apple Park, California
-//        
-//        let steps = [
-//            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-//            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-//        ]
-//        
-//        let recipe = Recipe(about: "", image: "621c33b12cfadc340f1c20bd", name: "Spaghetti", ingredients: ingredients, steps: steps, coordinate_lat: location.latitude, coordinate_long: location.longitude, emoji: "🍝", servings: 2, tags: ["vegan", "italian", "pasta", "easy", "t"], time: "25 min", specialTools: ["Tool 1"], parent_id: nil)
-//        
-//        let recipeMeta = RecipeMeta(id: "", author: "Micky Abir", user_id: "", recipe: recipe, rating: 4.3, favorited: 82)
-//        RecipeDetail(recipeMeta, backendController: BackendController())
-//    }
-//}
