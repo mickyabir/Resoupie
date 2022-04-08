@@ -614,7 +614,7 @@ extension EditRecipeView {
                             TextField("Section Name", text: $recipe.ingredientsSections[sectionIndex].name)
                                 .foregroundColor(Color.theme.text)
                             
-                            Spacer()                            
+                            Spacer()
                         }
                         
                         ForEach(section.ingredients.indices, id: \.self) { index in
@@ -925,6 +925,7 @@ extension EditRecipeView {
                         viewController.location = nil
                         recipe = .empty
                         viewController.saveDraft(.empty)
+                        servings = nil
                     },
                     secondaryButton: .cancel()
                 )
