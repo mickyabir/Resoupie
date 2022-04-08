@@ -19,7 +19,7 @@ struct RecipeMeta: Hashable, Codable, Identifiable {
 extension RecipeMeta {
     func contains(_ searchText: String) -> Bool {
         let searchText = searchText.lowercased()
-        return author.lowercased().contains(searchText) || recipe.name.lowercased().contains(searchText) || !recipe.ingredients.filter({ $0.name.lowercased().contains(searchText) }).isEmpty || !recipe.specialTools.filter({ $0.lowercased().contains(searchText) }).isEmpty || !recipe.specialTools.filter({ $0.lowercased().contains(searchText) }).isEmpty
+        return author.lowercased().contains(searchText) || recipe.name.lowercased().contains(searchText) || !recipe.ingredientsSections.compactMap({ $0.ingredients }).reduce([], +).filter({ $0.name.lowercased().contains(searchText) }).isEmpty || !recipe.specialTools.filter({ $0.lowercased().contains(searchText) }).isEmpty || !recipe.specialTools.filter({ $0.lowercased().contains(searchText) }).isEmpty
     }
 }
 

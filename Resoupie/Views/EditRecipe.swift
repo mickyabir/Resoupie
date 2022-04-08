@@ -34,7 +34,7 @@ class EditRecipeViewController: ObservableObject {
             }) {
             return false
         }
-        if recipe.ingredients
+        if recipe.ingredientsSections.compactMap({ $0.ingredients }).reduce([], +)
             .map({ $0.name.isEmpty || $0.quantity.isEmpty || $0.unit.isEmpty })
             .reduce(true, { current, next in
                 return current && next
@@ -42,7 +42,7 @@ class EditRecipeViewController: ObservableObject {
             return false
         }
 
-        if recipe.steps
+        if recipe.stepsSections.compactMap({ $0.steps }).reduce([], +)
             .map({ $0.isEmpty })
             .reduce(true, { current, next in
                 return current && next
@@ -163,7 +163,7 @@ struct EditRecipeView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    if recipe.steps
+                    if recipe.stepsSections.compactMap({ $0.steps }).reduce([], +)
                         .map({ $0.isEmpty })
                         .reduce(true, { current, next in
                             return current && next
@@ -187,7 +187,7 @@ struct EditRecipeView: View {
                         }
                     }
                     
-                    if recipe.ingredients
+                    if recipe.ingredientsSections.compactMap({ $0.ingredients }).reduce([], +)
                         .map({ $0.name.isEmpty || $0.quantity.isEmpty || $0.unit.isEmpty })
                         .reduce(true, { current, next in
                             return current && next
@@ -521,60 +521,89 @@ extension EditRecipeView {
                 Divider()
                 
                 VStack(spacing: 20) {
-                    ForEach(recipe.ingredients.indices, id: \.self) { index in
+                    ForEach(recipe.ingredientsSections.indices, id: \.self) { sectionIndex in
+                        let section = recipe.ingredientsSections[sectionIndex]
+                        
                         HStack {
                             if editIngredients {
                                 Button {
-                                    recipe.ingredients.remove(at: index)
+                                    recipe.ingredientsSections.remove(at: sectionIndex)
                                 } label: {
-                                    Image(systemName: "minus.circle.fill")
+                                    Image(systemName: "rectangle.badge.minus")
                                         .foregroundColor(Color.theme.red)
-                                        .font(.title3)
-                                }
-                                .transition(.move(edge: .leading))
-                            }
-
-                            VStack {
-                                TextField("Ingredient name", text: $recipe.ingredients[index].name)
-                                    .foregroundColor(Color.theme.text)
-                                
-                                HStack {
-                                    TextField("Quantity", text: $recipe.ingredients[index].quantity)
-                                        .foregroundColor(Color.theme.text)
-                                        .keyboardType(.decimalPad)
-
-                                    TextField("Unit", text: $recipe.ingredients[index].unit)
-                                        .foregroundColor(Color.theme.text)
+                                        .font(.headline)
                                 }
                             }
+                            
+                            TextField("Section Name", text: $recipe.ingredientsSections[sectionIndex].name)
+                                .foregroundColor(Color.theme.text)
                             
                             Spacer()
                             
-                            if editIngredients {
                             Button {
-                                recipe.ingredients.insert(Ingredient(name: "", quantity: "", unit: ""), at: index + 1)
+                                recipe.ingredientsSections[sectionIndex].ingredients.append(Ingredient(name: "", quantity: "", unit: ""))
                             } label: {
-                                Image(systemName: "plus.circle.fill")
+                                Image(systemName: "plus")
                                     .foregroundColor(Color.theme.tint)
-                                    .font(.title3)
-                            }
-                            .transition(.move(edge: .trailing))
+                                    .font(.title2)
                             }
                         }
                         
-                        if index < recipe.ingredients.count - 1 {
-                            Divider()
+                        ForEach(section.ingredients.indices, id: \.self) { index in
+                            HStack {
+                                if editIngredients {
+                                    Button {
+                                        recipe.ingredientsSections[sectionIndex].ingredients.remove(at: index)
+                                    } label: {
+                                        Image(systemName: "minus.circle.fill")
+                                            .foregroundColor(Color.theme.red)
+                                            .font(.title3)
+                                    }
+                                    .transition(.move(edge: .leading))
+                                }
+
+                                VStack {
+                                    TextField("Ingredient name", text: $recipe.ingredientsSections[sectionIndex].ingredients[index].name)
+                                        .foregroundColor(Color.theme.text)
+                                    
+                                    HStack {
+                                        TextField("Quantity", text: $recipe.ingredientsSections[sectionIndex].ingredients[index].quantity)
+                                            .foregroundColor(Color.theme.text)
+                                            .keyboardType(.decimalPad)
+
+                                        TextField("Unit", text: $recipe.ingredientsSections[sectionIndex].ingredients[index].unit)
+                                            .foregroundColor(Color.theme.text)
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                if editIngredients {
+                                Button {
+                                    recipe.ingredientsSections[sectionIndex].ingredients.insert(Ingredient(name: "", quantity: "", unit: ""), at: index + 1)
+                                } label: {
+                                    Image(systemName: "plus.circle.fill")
+                                        .foregroundColor(Color.theme.tint)
+                                        .font(.title3)
+                                }
+                                .transition(.move(edge: .trailing))
+                                }
+                            }
+                            
+                            if index < recipe.ingredientsSections[sectionIndex].ingredients.count - 1 {
+                                Divider()
+                            }
                         }
                     }
                     
                     HStack {
                         Spacer()
                         Button {
-                            recipe.ingredients.append(Ingredient(name: "", quantity: "", unit: ""))
+                            recipe.ingredientsSections.append(IngredientsSection(name: "", ingredients: []))
                         } label: {
-                            Image(systemName: "plus")
+                            Text("Add Section")
                                 .foregroundColor(Color.theme.tint)
-                                .font(.title2)
+                                .font(.headline)
                         }
                         Spacer()
                     }
@@ -584,7 +613,7 @@ extension EditRecipeView {
         .shadow(color: Color.theme.red.opacity(ingredientsSectionWarning ? 0.4 : 0.0), radius: 10)
     }
     
-    private func stepEditor(_ index: Int) -> some View {
+    private func stepEditor(_ index: Int, sectionIndex: Int) -> some View {
         ZStack(alignment: .topLeading) {
             let placeHolders = [
                 "First, you need to...",
@@ -592,11 +621,11 @@ extension EditRecipeView {
                 "In this step...."
             ]
 
-            TextEditor(text: $recipe.steps[index])
+            TextEditor(text: $recipe.stepsSections[sectionIndex].steps[index])
                 .foregroundColor(Color.theme.text)
                 .frame(height: 40)
             
-            if recipe.steps[index].isEmpty {
+            if recipe.stepsSections[sectionIndex].steps[index].isEmpty {
                 Text("\(placeHolders[min(index, placeHolders.count - 1)])")
                     .foregroundColor(Color(UIColor.placeholderText))
                     .padding(.horizontal, 5)
@@ -636,53 +665,81 @@ extension EditRecipeView {
                 Divider()
                 
                 VStack(spacing: 20) {
-                    ForEach(recipe.steps.indices, id: \.self) { index in
+                    ForEach(recipe.stepsSections.indices, id: \.self) { sectionIndex in
+                        let section = recipe.stepsSections[sectionIndex]
+                        
                         HStack {
                             if editMethod {
                                 Button {
-                                    recipe.steps.remove(at: index)
+                                    recipe.stepsSections.remove(at: sectionIndex)
                                 } label: {
-                                    Image(systemName: "minus.circle.fill")
+                                    Image(systemName: "rectangle.badge.minus")
                                         .foregroundColor(Color.theme.red)
-                                        .font(.title3)
+                                        .font(.headline)
                                 }
-                                .transition(.move(edge: .leading))
                             }
-
-                            HStack {
-                                Image(systemName: "\(min(index + 1, 50) ).circle.fill")
-                                    .foregroundColor(Color.theme.lightText)
-                                    .font(.title3)
-                                stepEditor(index)
-                            }
+                            TextField("Section Name", text: $recipe.stepsSections[sectionIndex].name)
+                                .foregroundColor(Color.theme.text)
                             
                             Spacer()
                             
-                            if editMethod {
                             Button {
-                                recipe.steps.insert("", at: index + 1)
+                                recipe.stepsSections[sectionIndex].steps.append("")
                             } label: {
-                                Image(systemName: "plus.circle.fill")
+                                Image(systemName: "plus")
                                     .foregroundColor(Color.theme.tint)
-                                    .font(.title3)
-                            }
-                            .transition(.move(edge: .trailing))
+                                    .font(.title2)
                             }
                         }
                         
-                        if index < recipe.steps.count - 1 {
-                            Divider()
+                        ForEach(section.steps.indices, id: \.self) { index in
+                            HStack {
+                                if editMethod {
+                                    Button {
+                                        recipe.stepsSections[sectionIndex].steps.remove(at: index)
+                                    } label: {
+                                        Image(systemName: "minus.circle.fill")
+                                            .foregroundColor(Color.theme.red)
+                                            .font(.title3)
+                                    }
+                                    .transition(.move(edge: .leading))
+                                }
+
+                                HStack {
+                                    Image(systemName: "\(min(index + 1, 50) ).circle.fill")
+                                        .foregroundColor(Color.theme.lightText)
+                                        .font(.title3)
+                                    stepEditor(index, sectionIndex: sectionIndex)
+                                }
+                                
+                                Spacer()
+                                
+                                if editMethod {
+                                Button {
+                                    recipe.stepsSections[sectionIndex].steps.insert("", at: index + 1)
+                                } label: {
+                                    Image(systemName: "plus.circle.fill")
+                                        .foregroundColor(Color.theme.tint)
+                                        .font(.title3)
+                                }
+                                .transition(.move(edge: .trailing))
+                                }
+                            }
+                            
+                            if index < recipe.stepsSections[sectionIndex].steps.count - 1 {
+                                Divider()
+                            }
                         }
                     }
                     
                     HStack {
                         Spacer()
                         Button {
-                            recipe.steps.append("")
+                            recipe.stepsSections.append(StepsSection(name: "", steps: []))
                         } label: {
-                            Image(systemName: "plus")
+                            Text("Add Section")
                                 .foregroundColor(Color.theme.tint)
-                                .font(.title2)
+                                .font(.headline)
                         }
                         Spacer()
                     }

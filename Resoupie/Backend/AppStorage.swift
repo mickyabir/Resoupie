@@ -42,16 +42,22 @@ extension AppStorageContainer {
     
     func ingredientsInGroceryList(_ recipeMeta: RecipeMeta) -> [Bool] {
         if let listIndex = groceries.firstIndex(where: { $0.id == hashRecipeToId(recipeMeta) }) {
-            return recipeMeta.recipe.ingredients.map { ingredient in
-                groceries[listIndex].items.firstIndex(where: { $0.id == hashIngredientToId(ingredient) }) != nil
+            return recipeMeta.recipe.ingredientsSections.flatMap { section in
+                section.ingredients.map { ingredient in
+                    groceries[listIndex].items.firstIndex(where: { $0.id == hashIngredientToId(ingredient) }) != nil
+                }
             }
         } else {
-            return recipeMeta.recipe.ingredients.map { _ in false }
+            return recipeMeta.recipe.ingredientsSections.flatMap { section in
+                return section.ingredients.map { _ in false }
+            }
         }
     }
     
     func insertListFromRecipe(_ recipeMeta: RecipeMeta) {
-        let groceryListItems = recipeMeta.recipe.ingredients.map({ GroceryListItem(id: hashIngredientToId($0), ingredient: getIngredientString($0), check: false) })
+        let groceryListItems = recipeMeta.recipe.ingredientsSections.flatMap { section in
+            section.ingredients.map({ GroceryListItem(id: hashIngredientToId($0), ingredient: getIngredientString($0), check: false) })
+        }
 
         if let listIndex = groceries.firstIndex(where: { $0.id == hashRecipeToId(recipeMeta) }) {
             groceries[listIndex].items.insert(contentsOf: groceryListItems, at: 0)
