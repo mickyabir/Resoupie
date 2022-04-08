@@ -18,12 +18,21 @@ class EditRecipeViewController: ObservableObject {
     @Published var coordinateRegion = MKCoordinateRegion()
     @Published var mapMarker = [Place(id: "", emoji: "", coordinate: CLLocationCoordinate2D())]
 
+    @Published var time: Date = Date()
+    
     let backendController: BackendController
     
     private var cancellables = Set<AnyCancellable>()
     
     init(_ backendController: BackendController) {
         self.backendController = backendController
+        
+        Timer.publish(every: 3, tolerance: 1, on: .main, in: .default)
+            .autoconnect()
+            .sink { [weak self] time in
+                self?.time = time
+            }
+            .store(in: &cancellables)
     }
     
     func publishRecipe(_ recipe: Recipe, image: UIImage) -> Bool {
@@ -94,6 +103,14 @@ class EditRecipeViewController: ObservableObject {
                 .store(in: &cancellables)
         }
     }
+    
+    func saveDraft(_ recipe: Recipe) {
+        AppStorageContainer.main.saveRecipe(recipe)
+    }
+    
+    func getDraft() -> Recipe {
+        return AppStorageContainer.main.loadRecipe()
+    }
 }
 
 struct EditRecipeView: View {
@@ -128,11 +145,19 @@ struct EditRecipeView: View {
     @State var aboutSectionWarning: Bool = false
     @State var ingredientsSectionWarning: Bool = false
     @State var tagSectionWarning: Bool = false
-
+        
     init(_ recipe: Recipe = .empty, parent_id: String? = nil, isPresented: Binding<Bool>) {
         self.recipe = recipe
         self.parent_id = parent_id
         self._isPresented = isPresented
+    }
+    
+    func loadDraft() {
+        if recipe == .empty {
+            DispatchQueue.main.async {
+                recipe = viewController.getDraft()
+            }
+        }
     }
     
     var body: some View {
@@ -157,6 +182,9 @@ struct EditRecipeView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical)
         }
+        .onChange(of: viewController.time, perform: { _ in
+            viewController.saveDraft(recipe)
+        })
         .background(Color.theme.background)
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(recipe.name)
@@ -250,7 +278,9 @@ struct EditRecipeView: View {
         .sheet(isPresented: $showImageLibrary) {
             PhotoPicker(image: $image)
         }
-        .onAppear {
+        .onAppear {            
+            loadDraft()
+
             viewController.checkLocation()
             servings = recipe.servings > 0 ? recipe.servings : nil
         }

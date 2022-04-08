@@ -14,6 +14,18 @@ class AppStorageContainer {
     @AppStorage("username") var username: String = ""
     @AppStorage("user_id") var user_id: String = ""
     @AppStorage("groceryLists") var groceries: [GroceryList] = []
+    @AppStorage("draftRecipe") var recipeDrafts: [Recipe] = [.empty]
+}
+
+// MARK: Draft
+extension AppStorageContainer {
+    func saveRecipe(_ recipe: Recipe) {
+        recipeDrafts = [recipe]
+    }
+    
+    func loadRecipe() -> Recipe {
+        return recipeDrafts[0]
+    }
 }
 
 // MARK: Groceries
