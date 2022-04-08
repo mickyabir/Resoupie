@@ -334,7 +334,9 @@ extension EditRecipeView {
         ZStack(alignment: .topLeading) {
             TextEditor(text: $recipe.about)
                 .foregroundColor(Color.theme.text)
-                .frame(height: 40)
+                .frame(minHeight: 60)
+                .fixedSize(horizontal: false, vertical: true)
+
             
             if recipe.about.isEmpty {
                 Text("What makes this recipe special")
@@ -697,7 +699,8 @@ extension EditRecipeView {
 
             TextEditor(text: $recipe.stepsSections[sectionIndex].steps[index])
                 .foregroundColor(Color.theme.text)
-                .frame(height: 40)
+                .fixedSize(horizontal: false, vertical: true)
+
             
             if recipe.stepsSections[sectionIndex].steps[index].isEmpty {
                 Text("\(placeHolders[min(index, placeHolders.count - 1)])")
@@ -920,13 +923,13 @@ extension EditRecipeView {
     }
 }
 
-//struct EditRecipe_Previews: PreviewProvider {
-//    static var previews: some View {
-//        var recipe = Recipe.empty.childOf(parent_id: "Parent!")
-//        let _ = (recipe.specialTools = ["Whisk", "Blender"])
-//        let _ = (recipe.tags = ["yummy", "easy", "italian"])
-//        NavigationView {
-//            EditRecipeView(recipe, isPresented: .constant(true))
-//        }
-//    }
-//}
+struct EditRecipe_Previews: PreviewProvider {
+    static var previews: some View {
+        var recipe = RecipeMeta.empty.childOf(parent_id: "Parent!")
+        let _ = (recipe.recipe.specialTools = ["Whisk", "Blender"])
+        let _ = (recipe.recipe.tags = ["yummy", "easy", "italian"])
+        NavigationView {
+            EditRecipeView(recipe, isPresented: .constant(true))
+        }
+    }
+}
