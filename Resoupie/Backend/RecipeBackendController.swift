@@ -200,6 +200,30 @@ extension BackendController: RecipeBackendController {
             .eraseToAnyPublisher()
     }
     
+    func editRecipe(recipe: Recipe, recipe_id: String) -> AnyPublisher<Bool, Error> {
+        var jsonData: Data?
+        do {
+            jsonData = try JSONEncoder().encode(recipe)
+        } catch {
+            print(error)
+        }
+        
+        let params = [
+            URLQueryItem(name: "recipe_id", value: recipe_id)
+        ]
+
+                
+        guard let jsonData = jsonData else {
+            return Empty<Bool, Error>(completeImmediately: true).eraseToAnyPublisher()
+        }
+        
+        return authorizedRequest(path: RecipeBackend.path + recipe_id + "/edit", method: "POST", modelType: SuccessResponse.self, params: params, body: jsonData, contentType: .json)
+            .tryMap { response in
+                response.success
+            }
+            .eraseToAnyPublisher()
+    }
+    
     func searchRecipes(searchString: String, limit: Int) -> AnyPublisher<[RecipeMeta], Error> {
         let params = [
             URLQueryItem(name: "search_string", value: searchString),

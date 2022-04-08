@@ -35,7 +35,11 @@ class EditRecipeViewController: ObservableObject {
             .store(in: &cancellables)
     }
     
-    func publishRecipe(_ recipe: Recipe, image: UIImage) -> Bool {
+    func setLocation(_ location: CLLocationCoordinate2D?) {
+        self.location = location
+    }
+    
+    func publishRecipe(_ recipe: Recipe, image: UIImage?, recipe_id: String? = nil) -> Bool {
         if recipe.tags
             .map({ $0.isEmpty })
             .reduce(true, { current, next in
@@ -63,28 +67,56 @@ class EditRecipeViewController: ObservableObject {
         if recipe.name.isEmpty || recipe.time.isEmpty || recipe.emoji.isEmpty || recipe.about.isEmpty || recipe.servings == 0 {
             return false
         }
-                
+        
         var publishRecipe = recipe
-        backendController.uploadImageToServer(image: image)
-            .receive(on: DispatchQueue.main)
-            .tryMap { image_id -> Recipe in
-                publishRecipe.image = image_id
-                return publishRecipe
+        
+        if let recipe_id = recipe_id {
+            if let image = image {
+                backendController.uploadImageToServer(image: image)
+                    .receive(on: DispatchQueue.main)
+                    .tryMap { image_id -> (Recipe, String) in
+                        publishRecipe.image = image_id
+                        return (publishRecipe, recipe_id)
+                    }
+                    .flatMap(backendController.editRecipe)
+                    .eraseToAnyPublisher()
+                    .receive(on: DispatchQueue.main)
+                    .sink(receiveCompletion: { _ in
+                    }, receiveValue: { success in
+                        //                self.presentationMode.wrappedValue.dismiss()
+                    })
+                    .store(in: &cancellables)
+            } else {
+                backendController.editRecipe(recipe: recipe, recipe_id: recipe_id)
+                    .receive(on: DispatchQueue.main)
+                    .sink(receiveCompletion: { _ in
+                    }, receiveValue: { success in
+                        //                self.presentationMode.wrappedValue.dismiss()
+                    })
+                    .store(in: &cancellables)
             }
-            .flatMap(backendController.uploadRecipeToServer)
-            .eraseToAnyPublisher()
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { _ in
-            }, receiveValue: { success in
-//                self.presentationMode.wrappedValue.dismiss()
-            })
-            .store(in: &cancellables)
+        } else if let image = image {
+            backendController.uploadImageToServer(image: image)
+                .receive(on: DispatchQueue.main)
+                .tryMap { image_id -> Recipe in
+                    publishRecipe.image = image_id
+                    return publishRecipe
+                }
+                .flatMap(backendController.uploadRecipeToServer)
+                .eraseToAnyPublisher()
+                .receive(on: DispatchQueue.main)
+                .sink(receiveCompletion: { _ in
+                }, receiveValue: { success in
+                    //                self.presentationMode.wrappedValue.dismiss()
+                })
+                .store(in: &cancellables)
+        }
         
         return true
     }
     
     func checkLocation() {
-        location = coordinatePickerViewModel.chosenRegion
+        location = location ?? coordinatePickerViewModel.chosenRegion
         
         if let location = location {
             coordinateRegion = MKCoordinateRegion(center: location, span: MKCoordinateSpan(latitudeDelta: 0.4, longitudeDelta: 0.4))
@@ -124,7 +156,6 @@ struct EditRecipeView: View {
     @State var locationEnabled: Bool = false
     
     @State private var image: UIImage?
-    @State private var recipeImage: UIImage?
     @State private var showImageLibrary = false
 
     @State private var servings: Int? = nil
@@ -146,11 +177,15 @@ struct EditRecipeView: View {
     @State var aboutSectionWarning: Bool = false
     @State var ingredientsSectionWarning: Bool = false
     @State var tagSectionWarning: Bool = false
+    
+    let recipe_id: String?
         
-    init(_ recipe: Recipe = .empty, parent_id: String? = nil, isPresented: Binding<Bool>) {
-        self.recipe = recipe
+    init(_ recipeMeta: RecipeMeta = .empty, parent_id: String? = nil, isPresented: Binding<Bool>) {
+        self.recipe = recipeMeta.recipe
         self.parent_id = parent_id
         self._isPresented = isPresented
+        let owner = recipeMeta.user_id == AppStorageContainer.main.user_id
+        self.recipe_id = recipeMeta.id.isEmpty || !owner ? nil : recipeMeta.id
     }
     
     func loadDraft() {
@@ -245,18 +280,22 @@ struct EditRecipeView: View {
                         }
                     }
                     
+                    if !locationEnabled {
+                        recipe.coordinate_lat = nil
+                        recipe.coordinate_long = nil
+                    } else {
+                        recipe.coordinate_lat = viewController.location?.latitude
+                        recipe.coordinate_long = viewController.location?.longitude
+                    }
+                    
                     if let image = image {
-                        if !locationEnabled {
-                            recipe.coordinate_lat = nil
-                            recipe.coordinate_long = nil
-                        } else {
-                            recipe.coordinate_lat = viewController.location?.latitude
-                            recipe.coordinate_long = viewController.location?.longitude
-                        }
-                        if viewController.publishRecipe(recipe, image: image) {
+                        if viewController.publishRecipe(recipe, image: image, recipe_id: recipe_id) {
                             isPresented = false
                         }
-                        
+                    } else if !recipe.image.isEmpty {
+                        if viewController.publishRecipe(recipe, image: nil, recipe_id: recipe_id) {
+                            isPresented = false
+                        }
                     } else {
                         withAnimation {
                             imageSectionWarning = true
@@ -282,7 +321,8 @@ struct EditRecipeView: View {
         }
         .onAppear {            
             loadDraft()
-
+            locationEnabled = recipe.coordinate() != nil
+            viewController.setLocation(recipe.coordinate())
             viewController.checkLocation()
             servings = recipe.servings > 0 ? recipe.servings : nil
         }
@@ -369,12 +409,14 @@ extension EditRecipeView {
                             .clipped()
                     }
                     .frame(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
+                } else if !recipe.image.isEmpty {
+                    CustomAsyncImage(imageId: recipe.image, width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
                 }
-
+                
                 Button {
                     showImageLibrary = true
                 } label: {
-                    Text("\(Image(systemName: "camera")) \(image == nil ? "New" : "Edit") Image")
+                    Text("\(Image(systemName: "camera")) \(recipe.image.isEmpty && image == nil ? "New" : "Edit") Image")
                 }
                 .foregroundColor(Color.theme.tint)
                 .padding(.bottom)
@@ -878,13 +920,13 @@ extension EditRecipeView {
     }
 }
 
-struct EditRecipe_Previews: PreviewProvider {
-    static var previews: some View {
-        var recipe = Recipe.empty.childOf(parent_id: "Parent!")
-        let _ = (recipe.specialTools = ["Whisk", "Blender"])
-        let _ = (recipe.tags = ["yummy", "easy", "italian"])
-        NavigationView {
-            EditRecipeView(recipe, isPresented: .constant(true))
-        }
-    }
-}
+//struct EditRecipe_Previews: PreviewProvider {
+//    static var previews: some View {
+//        var recipe = Recipe.empty.childOf(parent_id: "Parent!")
+//        let _ = (recipe.specialTools = ["Whisk", "Blender"])
+//        let _ = (recipe.tags = ["yummy", "easy", "italian"])
+//        NavigationView {
+//            EditRecipeView(recipe, isPresented: .constant(true))
+//        }
+//    }
+//}

@@ -11,6 +11,7 @@ import SwiftUI
 import Combine
 
 struct SignInTokenModel: Codable {
+    var user_id: String
     var access_token: String
     var refresh_token: String
 }
@@ -133,6 +134,7 @@ extension BackendController: UserBackendController {
                 KeychainWrapper.main.saveAccessToken(accessToken: response.access_token)
                 KeychainWrapper.main.saveRefreshToken(refreshToken: response.refresh_token)
                 AppStorageContainer.main.username = username
+                AppStorageContainer.main.user_id = response.user_id
                 return true
             }
             .eraseToAnyPublisher()        
@@ -162,6 +164,7 @@ extension BackendController: UserBackendController {
                 KeychainWrapper.main.saveAccessToken(accessToken: response.access_token)
                 KeychainWrapper.main.saveRefreshToken(refreshToken: response.refresh_token)
                 AppStorageContainer.main.username = username
+                AppStorageContainer.main.user_id = response.user_id
                 return true
             }
             .eraseToAnyPublisher()
@@ -173,6 +176,7 @@ extension BackendController: UserBackendController {
             .tryMap { response in
                 KeychainWrapper.main.deleteTokens()
                 AppStorageContainer.main.username = ""
+                AppStorageContainer.main.user_id = ""
                 return response.success
             }
             .eraseToAnyPublisher()

@@ -23,6 +23,13 @@ extension RecipeMeta {
         let searchText = searchText.lowercased()
         return author.lowercased().contains(searchText) || recipe.name.lowercased().contains(searchText) || !recipe.ingredientsSections.compactMap({ $0.ingredients }).reduce([], +).filter({ $0.name.lowercased().contains(searchText) }).isEmpty || !recipe.specialTools.filter({ $0.lowercased().contains(searchText) }).isEmpty || !recipe.specialTools.filter({ $0.lowercased().contains(searchText) }).isEmpty
     }
+    
+    func childOf(parent_id: String) -> RecipeMeta {
+        var child = self
+        child.recipe = child.recipe.childOf(parent_id: parent_id)
+        return child
+    }
+
 }
 
 extension RecipeMeta {

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct ContentView: View, KeyboardReadable {
     @State private var selection = 1
     
     let backendController: BackendController
@@ -17,6 +17,7 @@ struct ContentView: View {
     let worldViewController: WorldViewController
     
     @State var presentNewRecipe: Bool = false
+    @State private var isKeyboardVisible = false
     
     init() {
         backendController = BackendController()
@@ -59,7 +60,7 @@ struct ContentView: View {
                     .tag(4)
             }
             
-            if selection >= 1 && selection <= 3 && profileOwnerViewController.signedIn {
+            if selection >= 1 && selection <= 3 && profileOwnerViewController.signedIn && !isKeyboardVisible {
                 Button {
                     presentNewRecipe = true
                 } label: {
@@ -76,6 +77,9 @@ struct ContentView: View {
                 .padding(.bottom, 70)
             }
         }
+        .onReceive(keyboardPublisher, perform: { visible in
+            isKeyboardVisible = visible
+        })
         .sheet(isPresented: $presentNewRecipe) {
             NavigationView {
                 EditRecipeView(isPresented: $presentNewRecipe)
