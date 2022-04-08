@@ -26,13 +26,16 @@ class ProfileOwnerViewController: UserSignInViewController {
     @Published var followers: Int = 0
     @Published var bio: String = ""
     @Published var location: String = ""
-
+    
+    @Published var notifications: Notifications = Notifications(new_notifications: [], notifications: [])
+    @Published var notificationsAvailable: Bool = true
+    
     private var cancellables: Set<AnyCancellable> = Set()
     
     let backendController: ProfileOwnerBackendController
     
-    init(_ backendController: ProfileOwnerBackendController) {
-        self.backendController = backendController
+    init() {
+        self.backendController = BackendController()
         self.loadProfile()
     }
     
@@ -121,11 +124,16 @@ class ProfileOwnerViewController: UserSignInViewController {
                 return user.username
             }
             .flatMap(backendController.getUserRecipes)
-            .eraseToAnyPublisher()
+            .receive(on: DispatchQueue.main)
+            .map { recipes in
+                self.recipes = recipes
+            }
+            .flatMap(backendController.getNotifications)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
-            }, receiveValue: { recipes in
-                self.recipes = recipes
+            }, receiveValue: { notifications in
+                self.notifications = notifications
+                self.notificationsAvailable = !notifications.new_notifications.isEmpty
             })
             .store(in: &cancellables)
     }
@@ -135,9 +143,15 @@ class ProfileOwnerViewController: UserSignInViewController {
             backendController.getUserRecipes(username: username)
                 .eraseToAnyPublisher()
                 .receive(on: DispatchQueue.main)
-                .sink(receiveCompletion: { _ in
-                }, receiveValue: { recipes in
+                .map { recipes in
                     self.recipes = recipes
+                }
+                .flatMap(backendController.getNotifications)
+                .receive(on: DispatchQueue.main)
+                .sink(receiveCompletion: { _ in
+                }, receiveValue: { notifications in
+                    self.notifications = notifications
+                    self.notificationsAvailable = !notifications.new_notifications.isEmpty
                 })
                 .store(in: &cancellables)
         }
@@ -175,6 +189,17 @@ class ProfileOwnerViewController: UserSignInViewController {
             }
             .store(in: &cancellables)
     }
+    
+    func readNotifications() {
+        notificationsAvailable = false
+        
+        backendController.readNotifications()
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+            } receiveValue: { _ in
+            }
+            .store(in: &cancellables)
+    }
 }
 
 struct ProfileOwnerView: View {
@@ -184,7 +209,7 @@ struct ProfileOwnerView: View {
 
     var body: some View {
         NavigationView {
-            ZStack {
+            ZStack(alignment: .bottomTrailing) {
                 Color.theme.background
                 
                 ScrollView {
@@ -289,6 +314,26 @@ struct ProfileOwnerView: View {
                     .frame(maxWidth: .infinity)
                 }
                 
+                Button {
+                    viewController.presentNewRecipe = true
+                } label: {
+                    Image(systemName: "square.and.pencil")
+                        .padding(8)
+                }
+                .font(.system(size: 36))
+                .background(
+                    Circle()
+                        .foregroundColor(Color.white)
+                        .shadow(color: Color.black.opacity(0.15), radius: 10)
+                )
+                .padding([.bottom, .trailing], 15)
+                .onChange(of: viewController.presentNewRecipe) { present in
+                    if !present {
+                        viewController.reloadProfile()
+                    }
+                }
+
+                
                 UserSignIn(viewController: viewController)
                     .opacity(viewController.userAccess ? 1.0 : 0.0)
             }
@@ -319,18 +364,18 @@ struct ProfileOwnerView: View {
                             Text("Sign In")
                         }
                         .opacity(!viewController.signedIn ? 1.0 : 0.0)
-                        
-                        Button {
-                            viewController.presentNewRecipe = true
-                        } label: {
-                            Image(systemName: "square.and.pencil")
+
+                        NavigationLink(destination: NotificationsViewer(notifications: viewController.notifications)) {
+                            Image(systemName: "bell" + (viewController.notificationsAvailable ? ".badge" : ""))
+                                .foregroundStyle(viewController.notificationsAvailable ? Color.theme.red : Color.theme.tint, Color.theme.tint)
                         }
                         .opacity(viewController.signedIn ? 1.0 : 0.0)
-                        .onChange(of: viewController.presentNewRecipe) { present in
-                            if !present {
-                                viewController.reloadProfile()
+                        .simultaneousGesture(
+                            TapGesture().onEnded { _ in
+                                viewController.readNotifications()
                             }
-                        }
+                        )
+
                     }
                 }
                 ToolbarItem(placement: .navigationBarLeading) {

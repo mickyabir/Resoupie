@@ -11,14 +11,13 @@ struct ContentView: View {
     @State private var selection = 1
     
     let backendController: BackendController
-    let profileOwnerViewController: ProfileOwnerViewController
+    @StateObject var profileOwnerViewController: ProfileOwnerViewController = ProfileOwnerViewController()
     let recipeMainViewController: RecipeMainViewController
     let favoritesViewController: FavoritesViewController
     let worldViewController: WorldViewController
     
     init() {
         backendController = BackendController()
-        profileOwnerViewController = ProfileOwnerViewController(backendController)
         recipeMainViewController = RecipeMainViewController(backendController)
         favoritesViewController = FavoritesViewController(backendController)
         worldViewController = WorldViewController(backendController)        
@@ -40,7 +39,7 @@ struct ContentView: View {
 
             ProfileOwnerView(viewController: profileOwnerViewController)
                 .tabItem {
-                    Label("Profile", systemImage: "person.crop.circle")
+                    Label("Profile", systemImage: "person.crop.circle" + (profileOwnerViewController.notificationsAvailable ? ".badge" : ""))
                 }
                 .tag(2)
 

@@ -23,6 +23,11 @@ enum UserError: Error {
     case invalid
 }
 
+struct NotificationsResponse: Codable {
+    var new_notifications: [String]
+    var notifications: [String]
+}
+
 protocol UserBackendController {
     func verifyToken() -> AnyPublisher<Bool, Error>
     func getUser(user_id: String) -> AnyPublisher<User, Error>
@@ -35,6 +40,8 @@ protocol UserBackendController {
     func unfollow(user_id: String) -> AnyPublisher<Bool, Error>
     func updateBio(bio: String) -> AnyPublisher<Bool, Error>
     func updateLocation(location: String) -> AnyPublisher<Bool, Error>
+    func getNotifications() -> AnyPublisher<Notifications, Error>
+    func readNotifications() -> AnyPublisher<Bool, Error>
 }
 
 extension BackendController: UserBackendController {
@@ -189,6 +196,19 @@ extension BackendController: UserBackendController {
         ]
 
         return authorizedRequest(path: UserBackend.path + "update/location", method: "POST", modelType: SuccessResponse.self, params: params)
+            .map { response in
+                return response.success
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func getNotifications() -> AnyPublisher<Notifications, Error> {
+        return authorizedRequest(path: UserBackend.path + "notifications", method: "GET", modelType: Notifications.self)
+            .eraseToAnyPublisher()
+    }
+    
+    func readNotifications() -> AnyPublisher<Bool, Error> {
+        return authorizedRequest(path: UserBackend.path + "read_notifications", method: "POST", modelType: SuccessResponse.self)
             .map { response in
                 return response.success
             }
