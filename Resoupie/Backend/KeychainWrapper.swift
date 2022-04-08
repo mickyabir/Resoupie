@@ -76,8 +76,6 @@ class KeychainWrapper {
             kSecAttrApplicationTag: tag
         ] as CFDictionary
         
-        let status = SecItemDelete(query)
-        
-        print(status)
+        let _ = SecItemDelete(query)        
     }
 }

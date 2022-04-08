@@ -21,6 +21,10 @@ struct RecipeRateResponse: Codable {
     var rating: Double
 }
 
+struct IntegerResponse: Codable {
+    var num: Int
+}
+
 protocol RecipeBackendController {
     func getRecipesWorld(position: CLLocationCoordinate2D, latDelta: Double, longDelta: Double) -> AnyPublisher<[RecipeMeta], Error>
     func getUserFavorites() -> AnyPublisher<[RecipeMeta], Error>
@@ -40,6 +44,8 @@ protocol RecipeBackendController {
     func getForkChildren(recipe_id: String) -> AnyPublisher<[RecipeMeta], Error>
     func uploadRecipeToServer(recipe: Recipe) -> AnyPublisher<Bool, Error>
     func searchRecipes(searchString: String, limit: Int) -> AnyPublisher<[RecipeMeta], Error>
+    func userCookedRecipe(recipe_id: String) -> AnyPublisher<Bool, Error>
+    func getUserCookedCount(recipe_id: String) -> AnyPublisher<Int, Error>
 }
 
 
@@ -201,6 +207,22 @@ extension BackendController: RecipeBackendController {
         ]
         
         return request(path: RecipeBackend.path + "search", method: "GET", modelType: [RecipeMeta].self, params: params)
+            .eraseToAnyPublisher()
+    }
+    
+    func userCookedRecipe(recipe_id: String) -> AnyPublisher<Bool, Error> {
+        return authorizedRequest(path: RecipeBackend.path + recipe_id + "/cooked", method: "POST", modelType: SuccessResponse.self)
+            .map { response in
+                return response.success
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func getUserCookedCount(recipe_id: String) -> AnyPublisher<Int, Error> {
+        return authorizedRequest(path: RecipeBackend.path + recipe_id + "/cooked_count", method: "GET", modelType: IntegerResponse.self)
+            .map { response in
+                return response.num
+            }
             .eraseToAnyPublisher()
     }
 }

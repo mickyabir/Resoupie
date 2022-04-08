@@ -48,6 +48,7 @@ class RecipeDetailViewController: StarsRatingViewController {
     @Published var currentServings: Int?
     
     @Published var ingredientInGroceryList: [Bool]
+    @Published var cookedCount: Int = 0
     
     init(_ recipeMeta: RecipeMeta, backendController: Backend) {
         self.recipeMeta = recipeMeta
@@ -87,8 +88,19 @@ class RecipeDetailViewController: StarsRatingViewController {
         checkFavorited()
         getForkInfo()
         getForkChildren()
+        getCookedCount()
         
         viewRecipe()
+    }
+    
+    func getCookedCount() {
+        backendController.getUserCookedCount(recipe_id: recipeMeta.id)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { count in
+                self.cookedCount = count
+            })
+            .store(in: &cancellables)
     }
     
     func viewRecipe() {
@@ -232,6 +244,16 @@ class RecipeDetailViewController: StarsRatingViewController {
             })
             .store(in: &cancellables)
     }
+    
+    func cookedButtonPressed() {
+        backendController.userCookedRecipe(recipe_id: recipeMeta.id)
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+            } receiveValue: { _ in
+                self.cookedCount += 1
+            }
+            .store(in: &cancellables)
+    }
 }
 
 struct RecipeDetail: View {
@@ -298,6 +320,8 @@ struct RecipeDetail: View {
                     if !recipeMeta.recipe.tags.isEmpty {
                         tagSection
                     }
+                    
+                    cookedButtonSection
                 }
                 .readScroll { scroll in
                     self.scroll = scroll
@@ -806,6 +830,28 @@ extension RecipeDetail {
         }
     }
     
+    private var cookedButtonSection: some View {
+        RecipeDetailSection {
+            HStack {
+                Spacer()
+
+                VStack {
+                    Button {
+                        viewController.cookedButtonPressed()
+                    } label: {
+                        Text("Just Cooked This")
+                    }
+                    
+                    Text("Total: \(viewController.cookedCount)")
+                        .foregroundColor(Color.theme.lightText)
+                        .font(.footnote)
+                }
+                Spacer()
+            }
+            .padding(.vertical, 15)
+            .padding(.horizontal, 20)
+        }
+    }
     
     private func mapView(_ location: CLLocationCoordinate2D) -> some View {
         Map(coordinateRegion: $viewController.coordinateRegion, annotationItems: [Place(id: "", emoji: recipeMeta.recipe.emoji, coordinate: location)]) { place in
