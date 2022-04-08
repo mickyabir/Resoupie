@@ -21,14 +21,13 @@ class ProfileOwnerViewController: UserSignInViewController {
     @Published var accessState: AccessState = .signIn
     @Published var signinError: Bool = false
     @Published var signupError: Bool = false
-    @Published var presentNewRecipe = false
     @Published var presentSignIn: Bool = false
     @Published var followers: Int = 0
     @Published var bio: String = ""
     @Published var location: String = ""
     
     @Published var notifications: Notifications = Notifications(new_notifications: [], notifications: [])
-    @Published var notificationsAvailable: Bool = true
+    @Published var notificationsAvailable: Bool = false
     
     private var cancellables: Set<AnyCancellable> = Set()
     
@@ -167,7 +166,6 @@ class ProfileOwnerViewController: UserSignInViewController {
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in
             }, receiveValue: { success in
-                print(success)
             })
             .store(in: &cancellables)
     }
@@ -314,43 +312,8 @@ struct ProfileOwnerView: View {
                     .frame(maxWidth: .infinity)
                 }
                 
-                Button {
-                    viewController.presentNewRecipe = true
-                } label: {
-                    Image(systemName: "square.and.pencil")
-                        .padding(8)
-                }
-                .font(.system(size: 36))
-                .background(
-                    Circle()
-                        .foregroundColor(Color.white)
-                        .shadow(color: Color.black.opacity(0.15), radius: 10)
-                )
-                .padding([.bottom, .trailing], 15)
-                .onChange(of: viewController.presentNewRecipe) { present in
-                    if !present {
-                        viewController.reloadProfile()
-                    }
-                }
-
-                
                 UserSignIn(viewController: viewController)
                     .opacity(viewController.userAccess ? 1.0 : 0.0)
-            }
-            .sheet(isPresented: $viewController.presentNewRecipe) {
-                NavigationView {
-                    EditRecipeView(isPresented: $viewController.presentNewRecipe)
-                        .toolbar {
-                            ToolbarItem(placement: .navigationBarLeading) {
-                                Button {
-                                    viewController.presentNewRecipe = false
-                                } label: {
-                                    Text("Cancel")
-                                }
-                            }
-                        }
-                    
-                }
             }
             .navigationTitle(viewController.name == "" ? "Profile" : viewController.name)
             .toolbar {
