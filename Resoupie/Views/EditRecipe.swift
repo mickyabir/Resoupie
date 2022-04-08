@@ -43,6 +43,7 @@ class EditRecipeViewController: ObservableObject {
             }) {
             return false
         }
+        
         if recipe.ingredientsSections.compactMap({ $0.ingredients }).reduce([], +)
             .map({ $0.name.isEmpty || $0.quantity.isEmpty || $0.unit.isEmpty })
             .reduce(true, { current, next in
@@ -156,6 +157,7 @@ struct EditRecipeView: View {
         if recipe == .empty {
             DispatchQueue.main.async {
                 recipe = viewController.getDraft()
+                servings = Int(recipe.servings)
             }
         }
     }
