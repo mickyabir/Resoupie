@@ -600,59 +600,62 @@ extension RecipeDetail {
                     .padding(.bottom)
                 
                 ForEach(recipeMeta.recipe.ingredientsSections.indices, id: \.self) { sectionIndex in
-                    let section = recipeMeta.recipe.ingredientsSections[sectionIndex]
-                    
-                    HStack {
-                        Text(section.name)
-                            .font(.headline)
-                            .foregroundColor(Color.theme.headline)
+                    VStack {
+                        let section = recipeMeta.recipe.ingredientsSections[sectionIndex]
                         
-                        Spacer()
-                        
-                        Button {
-                            withAnimation {
-                                showIngredientsSections[sectionIndex].toggle()
-                            }
-                        } label: {
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(Color.theme.tint)
-                                .rotationEffect(.degrees(showIngredientsSections[sectionIndex] ? 90 : 0))
-                        }
-                    }
-                    
-                    if showIngredientsSections[sectionIndex] {
-                        ForEach (section.ingredients.indices, id: \.self) { index in
-                            let ingredient = section.ingredients[index]
-                            HStack {
-                                Image(systemName: viewController.ingredientInGroceryList[index] ? "plus.circle.fill" : "plus.circle")
-                                    .foregroundColor(Color.theme.accent)
-                                    .font(.system(size: 24))
-                                    .onTapGesture {
-                                        viewController.ingredientAddPressed(ingredient)
-                                    }
-                                
-                                var currentQuantity = Double(ingredient.quantity) ?? 0
-                                if let currentServings = viewController.currentServings {
-                                    let _ = (currentQuantity = currentQuantity / Double(recipeMeta.recipe.servings) * Double(currentServings))
+                        HStack {
+                            Text(section.name)
+                                .font(.headline)
+                                .foregroundColor(Color.theme.headline)
+                            
+                            Spacer()
+                            
+                            Button {
+                                withAnimation {
+                                    showIngredientsSections[sectionIndex].toggle()
                                 }
-                                
-                                let doubleQuantityString = (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity)
-                                let doubleQuantity = Double(doubleQuantityString) ?? 0
-                                let finalQuantity = tryIntString(d: doubleQuantity)
-                                let ingredientText = finalQuantity + " " + ingredient.unit + " " + ingredient.name
-                                
-                                Text(ingredientText)
-                                    .strikethrough(viewController.hasIngredient[index], color: Color.theme.lightText)
-                                    .foregroundColor(viewController.hasIngredient[index] ? Color.theme.lightText : Color.theme.text)
-                                    .onTapGesture {
-                                        viewController.ingredientPressed(index)
-                                    }
-                                
-                                Spacer()
+                            } label: {
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(Color.theme.tint)
+                                    .rotationEffect(.degrees(showIngredientsSections[sectionIndex] ? 90 : 0))
                             }
-                            .padding(.vertical, 5)
+                        }
+                        
+                        if showIngredientsSections[sectionIndex] {
+                            ForEach (section.ingredients.indices, id: \.self) { index in
+                                let ingredient = section.ingredients[index]
+                                HStack {
+                                    Image(systemName: viewController.ingredientInGroceryList[index] ? "plus.circle.fill" : "plus.circle")
+                                        .foregroundColor(Color.theme.accent)
+                                        .font(.system(size: 24))
+                                        .onTapGesture {
+                                            viewController.ingredientAddPressed(ingredient)
+                                        }
+                                    
+                                    var currentQuantity = Double(ingredient.quantity) ?? 0
+                                    if let currentServings = viewController.currentServings {
+                                        let _ = (currentQuantity = currentQuantity / Double(recipeMeta.recipe.servings) * Double(currentServings))
+                                    }
+                                    
+                                    let doubleQuantityString = (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity)
+                                    let doubleQuantity = Double(doubleQuantityString) ?? 0
+                                    let finalQuantity = tryIntString(d: doubleQuantity)
+                                    let ingredientText = finalQuantity + " " + ingredient.unit + " " + ingredient.name
+                                    
+                                    Text(ingredientText)
+                                        .strikethrough(viewController.hasIngredient[index], color: Color.theme.lightText)
+                                        .foregroundColor(viewController.hasIngredient[index] ? Color.theme.lightText : Color.theme.text)
+                                        .onTapGesture {
+                                            viewController.ingredientPressed(index)
+                                        }
+                                    
+                                    Spacer()
+                                }
+                                .padding(.vertical, 5)
+                            }
                         }
                     }
+                    .padding(.bottom, sectionIndex < recipeMeta.recipe.ingredientsSections.count - 1 ? 20 : 0)
                 }
             }
         }
@@ -673,48 +676,51 @@ extension RecipeDetail {
                 
                 VStack(spacing: 10) {
                     ForEach(recipeMeta.recipe.stepsSections.indices, id: \.self) { sectionIndex in
-                        let section = recipeMeta.recipe.stepsSections[sectionIndex]
-                        
-                        HStack {
-                            Text(section.name)
-                                .font(.headline)
-                                .foregroundColor(Color.theme.headline)
+                        VStack {
+                            let section = recipeMeta.recipe.stepsSections[sectionIndex]
                             
-                            Spacer()
-                            
-                            Button {
-                                withAnimation {
-                                    showStepsSections[sectionIndex].toggle()
-                                }
-                            } label: {
-                                Image(systemName: "chevron.right")
-                                    .rotationEffect(.degrees(showStepsSections[sectionIndex] ? 90 : 0))
-                                    .foregroundColor(Color.theme.tint)
-                            }
-                        }
-                        if showStepsSections[sectionIndex] {
-                            ForEach(section.steps, id: \.self) { step in
-                                let index = recipeMeta.recipe.stepsSections[sectionIndex].steps.firstIndex(of: step)!
-                                HStack {
-                                    let imageName = String(index + 1) + ".circle" + (viewController.completedStep[index] ? ".fill" : "")
-                                    Image(systemName: imageName)
-                                        .foregroundColor(Color.theme.accent)
-                                        .font(.system(size: 24))
-                                    
-                                    Text(step)
-                                        .strikethrough(viewController.completedStep[index], color: Color.theme.lightText)
-                                        .foregroundColor(viewController.completedStep[index] ? Color.theme.lightText : Color.theme.text)
-                                        .padding(.vertical, 5)
-                                    
-                                    Spacer()
-                                }
-                                .onTapGesture {
-                                    viewController.stepPressed(index)
-                                }
+                            HStack {
+                                Text(section.name)
+                                    .font(.headline)
+                                    .foregroundColor(Color.theme.headline)
                                 
-                                Divider().opacity(index < section.steps.count - 1 ? 1.0 : 0.0)
+                                Spacer()
+                                
+                                Button {
+                                    withAnimation {
+                                        showStepsSections[sectionIndex].toggle()
+                                    }
+                                } label: {
+                                    Image(systemName: "chevron.right")
+                                        .rotationEffect(.degrees(showStepsSections[sectionIndex] ? 90 : 0))
+                                        .foregroundColor(Color.theme.tint)
+                                }
+                            }
+                            if showStepsSections[sectionIndex] {
+                                ForEach(section.steps, id: \.self) { step in
+                                    let index = recipeMeta.recipe.stepsSections[sectionIndex].steps.firstIndex(of: step)!
+                                    HStack {
+                                        let imageName = String(index + 1) + ".circle" + (viewController.completedStep[index] ? ".fill" : "")
+                                        Image(systemName: imageName)
+                                            .foregroundColor(Color.theme.accent)
+                                            .font(.system(size: 24))
+                                        
+                                        Text(step)
+                                            .strikethrough(viewController.completedStep[index], color: Color.theme.lightText)
+                                            .foregroundColor(viewController.completedStep[index] ? Color.theme.lightText : Color.theme.text)
+                                            .padding(.vertical, 5)
+                                        
+                                        Spacer()
+                                    }
+                                    .onTapGesture {
+                                        viewController.stepPressed(index)
+                                    }
+                                    
+                                    Divider().opacity(index < section.steps.count - 1 ? 1.0 : 0.0)
+                                }
                             }
                         }
+                        .padding(.bottom, sectionIndex < recipeMeta.recipe.stepsSections.count - 1 ? 20 : 0)
                     }
                 }
             }
