@@ -220,6 +220,7 @@ struct ProfileOwnerView: View {
                                         RectangleSectionRow {
                                             ZStack(alignment: .topLeading) {
                                                 TextEditor(text: $viewController.bio)
+                                                    .fixedSize(horizontal: false, vertical: true)
                                                     .foregroundColor(Color.theme.lightText)
                                                     .font(.body)
                                                     .onChange(of: viewController.bio) { _ in

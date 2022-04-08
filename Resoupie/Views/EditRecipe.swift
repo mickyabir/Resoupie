@@ -614,15 +614,7 @@ extension EditRecipeView {
                             TextField("Section Name", text: $recipe.ingredientsSections[sectionIndex].name)
                                 .foregroundColor(Color.theme.text)
                             
-                            Spacer()
-                            
-                            Button {
-                                recipe.ingredientsSections[sectionIndex].ingredients.append(Ingredient(name: "", quantity: "", unit: ""))
-                            } label: {
-                                Image(systemName: "plus")
-                                    .foregroundColor(Color.theme.tint)
-                                    .font(.title2)
-                            }
+                            Spacer()                            
                         }
                         
                         ForEach(section.ingredients.indices, id: \.self) { index in
@@ -666,10 +658,22 @@ extension EditRecipeView {
                                 }
                             }
                             
-                            if index < recipe.ingredientsSections[sectionIndex].ingredients.count - 1 {
-                                Divider()
-                            }
+                            Divider()
                         }
+                        
+                        HStack {
+                            Spacer()
+                            Button {
+                                recipe.ingredientsSections[sectionIndex].ingredients.append(Ingredient(name: "", quantity: "", unit: ""))
+                            } label: {
+                                Image(systemName: "plus")
+                                    .foregroundColor(Color.theme.tint)
+                                    .font(.title2)
+                            }
+                            Spacer()
+                        }
+                        
+                        Divider()
                     }
                     
                     HStack {
@@ -759,14 +763,6 @@ extension EditRecipeView {
                                 .foregroundColor(Color.theme.text)
                             
                             Spacer()
-                            
-                            Button {
-                                recipe.stepsSections[sectionIndex].steps.append("")
-                            } label: {
-                                Image(systemName: "plus")
-                                    .foregroundColor(Color.theme.tint)
-                                    .font(.title2)
-                            }
                         }
                         
                         ForEach(section.steps.indices, id: \.self) { index in
@@ -803,10 +799,24 @@ extension EditRecipeView {
                                 }
                             }
                             
-                            if index < recipe.stepsSections[sectionIndex].steps.count - 1 {
-                                Divider()
-                            }
+                            Divider()
                         }
+                        
+                        HStack {
+                            Spacer()
+                            
+                            Button {
+                                recipe.stepsSections[sectionIndex].steps.append("")
+                            } label: {
+                                Image(systemName: "plus")
+                                    .foregroundColor(Color.theme.tint)
+                                    .font(.title2)
+                            }
+
+                            Spacer()
+                        }
+                        
+                        Divider()
                     }
                     
                     HStack {
