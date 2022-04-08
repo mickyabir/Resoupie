@@ -8,17 +8,22 @@
 import Foundation
 import MapKit
 
-struct IngredientSection: Hashable, Codable {
+struct IngredientsSection: Hashable, Codable {
     var name: String
     var ingredients: [Ingredient]
+}
+
+struct StepsSection: Hashable, Codable {
+    var name: String
+    var steps: [String]
 }
 
 struct Recipe: Hashable, Codable {
     var about: String
     var image: String
     var name: String
-    var ingredients: [Ingredient]
-    var steps: [String]
+    var ingredientsSections: [IngredientsSection]
+    var stepsSections: [StepsSection]
     var coordinate_lat: Double?
     var coordinate_long: Double?
     var emoji: String
@@ -46,7 +51,7 @@ struct Recipe: Hashable, Codable {
 extension Recipe {
     static var empty: Recipe {
         get {
-            Recipe(about: "", image: "", name: "", ingredients: [], steps: [], coordinate_lat: nil, coordinate_long: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
+            Recipe(about: "", image: "", name: "", ingredientsSections: [IngredientsSection(name: "Main", ingredients: [])], stepsSections: [StepsSection(name: "Main", steps: [])], coordinate_lat: nil, coordinate_long: nil, emoji: "", servings: 0, tags: [], time: "", specialTools: [], parent_id: nil)
         }
     }
 }

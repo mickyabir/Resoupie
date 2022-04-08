@@ -56,8 +56,8 @@ class RecipeDetailViewController: StarsRatingViewController {
         coordinateRegion = MKCoordinateRegion(center: center ?? CLLocationCoordinate2D(), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
         
         hasSpecialTool = [Bool](repeating: false, count: recipeMeta.recipe.specialTools.count)
-        hasIngredient = [Bool](repeating: false, count: recipeMeta.recipe.ingredients.count)
-        completedStep = [Bool](repeating: false, count: recipeMeta.recipe.steps.count)
+        hasIngredient = [Bool](repeating: false, count: recipeMeta.recipe.ingredientsSections.compactMap({ $0.ingredients.count }).reduce(0, +))
+        completedStep = [Bool](repeating: false, count: recipeMeta.recipe.stepsSections.compactMap({ $0.steps.count }).reduce(0, +))
         favorited = false
         
         self.backendController = backendController
@@ -108,7 +108,7 @@ class RecipeDetailViewController: StarsRatingViewController {
     }
     
     func ingredientAddPressed(_ ingredient: Ingredient) {
-        let ingredientIndex = recipeMeta.recipe.ingredients.firstIndex(of: ingredient)
+        let ingredientIndex = recipeMeta.recipe.ingredientsSections.compactMap({ $0.ingredients }).reduce([], +).firstIndex(of: ingredient)
         ingredientInGroceryList[ingredientIndex!].toggle()
         
         if AppStorageContainer.main.ingredientInList(ingredient, recipeMeta: recipeMeta) {
@@ -237,6 +237,9 @@ struct RecipeDetail: View {
     
     @State private var presentEditRecipe: Bool = false
     
+    @State private var showStepsSections: [Bool]
+    @State private var showIngredientsSections: [Bool]
+
     @Environment(\.presentationMode) var presentation
     
     init(_ recipeMeta: RecipeMeta, backendController: BackendController) {
@@ -245,6 +248,9 @@ struct RecipeDetail: View {
         navbarHeight = 100
         initialOffset = -navbarHeight
         
+        _showStepsSections = State(initialValue: recipeMeta.recipe.stepsSections.map({ _ in true }))
+        _showIngredientsSections = State(initialValue: recipeMeta.recipe.ingredientsSections.map({ _ in true }))
+
         _viewController = StateObject(wrappedValue: RecipeDetailViewController(recipeMeta, backendController: backendController))
         
     }
@@ -540,37 +546,62 @@ extension RecipeDetail {
                 }
                 
                 Divider()
+                    .padding(.bottom)
                 
-                ForEach (recipeMeta.recipe.ingredients.indices, id: \.self) { index in
-                    let ingredient = recipeMeta.recipe.ingredients[index]
+                ForEach(recipeMeta.recipe.ingredientsSections.indices, id: \.self) { sectionIndex in
+                    let section = recipeMeta.recipe.ingredientsSections[sectionIndex]
+                    
                     HStack {
-                        Image(systemName: viewController.ingredientInGroceryList[index] ? "plus.circle.fill" : "plus.circle")
-                            .foregroundColor(Color.theme.accent)
-                            .font(.system(size: 24))
-                            .onTapGesture {
-                                viewController.ingredientAddPressed(ingredient)
-                            }
-                        
-                        var currentQuantity = Double(ingredient.quantity) ?? 0
-                        if let currentServings = viewController.currentServings {
-                            let _ = (currentQuantity = currentQuantity / Double(recipeMeta.recipe.servings) * Double(currentServings))
-                        }
-                        
-                        let doubleQuantityString = (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity)
-                        let doubleQuantity = Double(doubleQuantityString) ?? 0
-                        let finalQuantity = tryIntString(d: doubleQuantity)
-                        let ingredientText = finalQuantity + " " + ingredient.unit + " " + ingredient.name
-                        
-                        Text(ingredientText)
-                            .strikethrough(viewController.hasIngredient[index], color: Color.theme.lightText)
-                            .foregroundColor(viewController.hasIngredient[index] ? Color.theme.lightText : Color.theme.text)
-                            .onTapGesture {
-                                viewController.ingredientPressed(index)
-                            }
-                        
+                        Text(section.name)
+                            .font(.headline)
+                            .foregroundColor(Color.theme.headline)
+
                         Spacer()
+
+                        Button {
+                            withAnimation {
+                                showIngredientsSections[sectionIndex].toggle()
+                            }
+                        } label: {
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(Color.theme.tint)
+                                .rotationEffect(.degrees(showIngredientsSections[sectionIndex] ? 90 : 0))
+                        }
                     }
-                    .padding(.vertical, 5)
+                    
+                    if showIngredientsSections[sectionIndex] {
+                        ForEach (section.ingredients.indices, id: \.self) { index in
+                            let ingredient = section.ingredients[index]
+                            HStack {
+                                Image(systemName: viewController.ingredientInGroceryList[index] ? "plus.circle.fill" : "plus.circle")
+                                    .foregroundColor(Color.theme.accent)
+                                    .font(.system(size: 24))
+                                    .onTapGesture {
+                                        viewController.ingredientAddPressed(ingredient)
+                                    }
+                                
+                                var currentQuantity = Double(ingredient.quantity) ?? 0
+                                if let currentServings = viewController.currentServings {
+                                    let _ = (currentQuantity = currentQuantity / Double(recipeMeta.recipe.servings) * Double(currentServings))
+                                }
+                                
+                                let doubleQuantityString = (currentQuantity > 0 ? String(currentQuantity.truncate(places: 2)) : ingredient.quantity)
+                                let doubleQuantity = Double(doubleQuantityString) ?? 0
+                                let finalQuantity = tryIntString(d: doubleQuantity)
+                                let ingredientText = finalQuantity + " " + ingredient.unit + " " + ingredient.name
+                                
+                                Text(ingredientText)
+                                    .strikethrough(viewController.hasIngredient[index], color: Color.theme.lightText)
+                                    .foregroundColor(viewController.hasIngredient[index] ? Color.theme.lightText : Color.theme.text)
+                                    .onTapGesture {
+                                        viewController.ingredientPressed(index)
+                                    }
+                                
+                                Spacer()
+                            }
+                            .padding(.vertical, 5)
+                        }
+                    }
                 }
             }
         }
@@ -590,25 +621,49 @@ extension RecipeDetail {
                     .padding(.bottom)
                 
                 VStack(spacing: 10) {
-                    ForEach (recipeMeta.recipe.steps, id: \.self) { step in
-                        let index = recipeMeta.recipe.steps.firstIndex(of: step)!
+                    ForEach(recipeMeta.recipe.stepsSections.indices, id: \.self) { sectionIndex in
+                        let section = recipeMeta.recipe.stepsSections[sectionIndex]
+                        
                         HStack {
-                            Image(systemName: String(index + 1) + ".circle" + (viewController.completedStep[index] ? ".fill" : ""))
-                                .foregroundColor(Color.theme.accent)
-                                .font(.system(size: 24))
-                            
-                            Text(step)
-                                .strikethrough(viewController.completedStep[index], color: Color.theme.lightText)
-                                .foregroundColor(viewController.completedStep[index] ? Color.theme.lightText : Color.theme.text)
-                                .padding(.vertical, 5)
+                            Text(section.name)
+                                .font(.headline)
+                                .foregroundColor(Color.theme.headline)
                             
                             Spacer()
+                            
+                            Button {
+                                withAnimation {
+                                    showStepsSections[sectionIndex].toggle()
+                                }
+                            } label: {
+                                Image(systemName: "chevron.right")
+                                    .rotationEffect(.degrees(showStepsSections[sectionIndex] ? 90 : 0))
+                                    .foregroundColor(Color.theme.tint)
+                            }
                         }
-                        .onTapGesture {
-                            viewController.stepPressed(index)
+                        if showStepsSections[sectionIndex] {
+                            ForEach(section.steps, id: \.self) { step in
+                                let index = recipeMeta.recipe.stepsSections[sectionIndex].steps.firstIndex(of: step)!
+                                HStack {
+                                    let imageName = String(index + 1) + ".circle" + (viewController.completedStep[index] ? ".fill" : "")
+                                    Image(systemName: imageName)
+                                        .foregroundColor(Color.theme.accent)
+                                        .font(.system(size: 24))
+                                    
+                                    Text(step)
+                                        .strikethrough(viewController.completedStep[index], color: Color.theme.lightText)
+                                        .foregroundColor(viewController.completedStep[index] ? Color.theme.lightText : Color.theme.text)
+                                        .padding(.vertical, 5)
+                                    
+                                    Spacer()
+                                }
+                                .onTapGesture {
+                                    viewController.stepPressed(index)
+                                }
+                                
+                                Divider().opacity(index < section.steps.count - 1 ? 1.0 : 0.0)
+                            }
                         }
-                        
-                        Divider().opacity(index < recipeMeta.recipe.steps.count - 1 ? 1.0 : 0.0)
                     }
                 }
             }
@@ -801,23 +856,23 @@ extension RecipeDetail {
     }
 }
 
-struct RecipeDetail_Previews: PreviewProvider {
-    static var previews: some View {
-        let ingredients: [Ingredient] = [
-            Ingredient(name: "Test", quantity: "1", unit: "Unit"),
-            Ingredient(name: "Test", quantity: "2", unit: "Unit"),
-            Ingredient(name: "Test", quantity: "3", unit: "Unit")
-        ]
-        let location = CLLocationCoordinate2D(latitude: 37.332077, longitude: -122.02962) // Apple Park, California
-        
-        let steps = [
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-        ]
-        
-        let recipe = Recipe(about: "", image: "621c33b12cfadc340f1c20bd", name: "Spaghetti", ingredients: ingredients, steps: steps, coordinate_lat: location.latitude, coordinate_long: location.longitude, emoji: "🍝", servings: 2, tags: ["vegan", "italian", "pasta", "easy", "t"], time: "25 min", specialTools: ["Tool 1"], parent_id: nil)
-        
-        let recipeMeta = RecipeMeta(id: "", author: "Micky Abir", user_id: "", recipe: recipe, rating: 4.3, favorited: 82)
-        RecipeDetail(recipeMeta, backendController: BackendController())
-    }
-}
+//struct RecipeDetail_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let ingredients: [Ingredient] = [
+//            Ingredient(name: "Test", quantity: "1", unit: "Unit"),
+//            Ingredient(name: "Test", quantity: "2", unit: "Unit"),
+//            Ingredient(name: "Test", quantity: "3", unit: "Unit")
+//        ]
+//        let location = CLLocationCoordinate2D(latitude: 37.332077, longitude: -122.02962) // Apple Park, California
+//        
+//        let steps = [
+//            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+//            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+//        ]
+//        
+//        let recipe = Recipe(about: "", image: "621c33b12cfadc340f1c20bd", name: "Spaghetti", ingredients: ingredients, steps: steps, coordinate_lat: location.latitude, coordinate_long: location.longitude, emoji: "🍝", servings: 2, tags: ["vegan", "italian", "pasta", "easy", "t"], time: "25 min", specialTools: ["Tool 1"], parent_id: nil)
+//        
+//        let recipeMeta = RecipeMeta(id: "", author: "Micky Abir", user_id: "", recipe: recipe, rating: 4.3, favorited: 82)
+//        RecipeDetail(recipeMeta, backendController: BackendController())
+//    }
+//}
