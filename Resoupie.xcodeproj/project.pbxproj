@@ -30,6 +30,8 @@
 		813F156927A2161D00214CE0 /* RecipeBackendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813F156827A2161D00214CE0 /* RecipeBackendController.swift */; };
 		8141EA2327A3707C008BE746 /* BackendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8141EA2227A3707C008BE746 /* BackendController.swift */; };
 		8141EA2527A3740E008BE746 /* CustomAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8141EA2427A3740E008BE746 /* CustomAsyncImage.swift */; };
+		8148CD2E28001EAC00F634DF /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8148CD2D28001EAC00F634DF /* Notifications.swift */; };
+		8148CD30280021EB00F634DF /* NotificationsViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8148CD2F280021EB00F634DF /* NotificationsViewer.swift */; };
 		814C8CF72797631E0056A7D2 /* ResoupieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814C8CF62797631E0056A7D2 /* ResoupieApp.swift */; };
 		814C8CF92797631E0056A7D2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814C8CF82797631E0056A7D2 /* ContentView.swift */; };
 		814C8CFB2797631F0056A7D2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 814C8CFA2797631F0056A7D2 /* Assets.xcassets */; };
@@ -119,6 +121,8 @@
 		813F156827A2161D00214CE0 /* RecipeBackendController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeBackendController.swift; sourceTree = "<group>"; };
 		8141EA2227A3707C008BE746 /* BackendController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendController.swift; sourceTree = "<group>"; };
 		8141EA2427A3740E008BE746 /* CustomAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomAsyncImage.swift; sourceTree = "<group>"; };
+		8148CD2D28001EAC00F634DF /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
+		8148CD2F280021EB00F634DF /* NotificationsViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsViewer.swift; sourceTree = "<group>"; };
 		814C8CF32797631E0056A7D2 /* Resoupie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Resoupie.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		814C8CF62797631E0056A7D2 /* ResoupieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResoupieApp.swift; sourceTree = "<group>"; };
 		814C8CF82797631E0056A7D2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -256,6 +260,14 @@
 			path = Backend;
 			sourceTree = "<group>";
 		};
+		8148CD2C28001E9F00F634DF /* Notification */ = {
+			isa = PBXGroup;
+			children = (
+				8148CD2D28001EAC00F634DF /* Notifications.swift */,
+			);
+			path = Notification;
+			sourceTree = "<group>";
+		};
 		814C8CEA2797631D0056A7D2 = {
 			isa = PBXGroup;
 			children = (
@@ -337,6 +349,7 @@
 		814C8D21279764BE0056A7D2 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				8148CD2C28001E9F00F634DF /* Notification */,
 				812F176627CB515B0095F7D0 /* User */,
 				812F175B27CB50950095F7D0 /* GroceryList */,
 				812F175A27CB506C0095F7D0 /* Recipe */,
@@ -380,6 +393,7 @@
 			children = (
 				812F176B27CB54D50095F7D0 /* Profile.swift */,
 				81BAF3F5279CB8DB004B0767 /* ProfileOwner.swift */,
+				8148CD2F280021EB00F634DF /* NotificationsViewer.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -645,6 +659,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8148CD30280021EB00F634DF /* NotificationsViewer.swift in Sources */,
 				8179D67E27D2C9DF00A48E58 /* RecipeDetailSectionInset.swift in Sources */,
 				818D398D27CAE21C008F4A47 /* View.swift in Sources */,
 				8128CF1C27CF6DDD00EFDFC7 /* UINavigationController.swift in Sources */,
@@ -683,6 +698,7 @@
 				813F156927A2161D00214CE0 /* RecipeBackendController.swift in Sources */,
 				8179715C27AA7F1B00DE1753 /* RecipeCard.swift in Sources */,
 				81DC90DB27EA79C700F32201 /* RectangleSectionInset.swift in Sources */,
+				8148CD2E28001EAC00F634DF /* Notifications.swift in Sources */,
 				810365B927E932B300B70344 /* Sequence.swift in Sources */,
 				8179D68027D59A3700A48E58 /* EmojiTextField.swift in Sources */,
 				8128CF2127D0315800EFDFC7 /* StarsRating.swift in Sources */,

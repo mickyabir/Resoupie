@@ -14,6 +14,7 @@ struct RecipeMeta: Hashable, Codable, Identifiable {
     var recipe: Recipe
     var rating: Double
     var favorited: Int
+    var views: Int
 }
 
 extension RecipeMeta {
@@ -26,7 +27,7 @@ extension RecipeMeta {
 extension RecipeMeta {
     static var empty: RecipeMeta {
         get {
-            RecipeMeta(id: "", author: "", user_id: "", recipe: Recipe.empty, rating: 0, favorited: 0)
+            RecipeMeta(id: "", author: "", user_id: "", recipe: Recipe.empty, rating: 0, favorited: 0, views: 0)
         }
     }
 }

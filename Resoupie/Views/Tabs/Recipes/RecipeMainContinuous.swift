@@ -11,7 +11,7 @@ struct RecipeMainContinuousView: View {
     @ObservedObject var viewController: RecipeMainViewController
     
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             ForEach(viewController.recipes) { recipe in
                 HStack {
                     Spacer()
