@@ -157,7 +157,7 @@ struct EditRecipeView: View {
         if recipe == .empty {
             DispatchQueue.main.async {
                 recipe = viewController.getDraft()
-                servings = Int(recipe.servings)
+                servings = recipe.servings > 0 ? Int(recipe.servings) : nil
             }
         }
     }
@@ -869,6 +869,7 @@ extension EditRecipeView {
                         locationEnabled = false
                         viewController.location = nil
                         recipe = .empty
+                        viewController.saveDraft(.empty)
                     },
                     secondaryButton: .cancel()
                 )

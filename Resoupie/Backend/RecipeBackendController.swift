@@ -36,6 +36,7 @@ protocol RecipeBackendController {
     func loadDefaultPageRecipes() -> AnyPublisher<[String:[RecipeMeta]], Error>
     func loadAllRecipes() -> AnyPublisher<[RecipeMeta], Error>
     func getForkInfo(recipe_id: String) -> AnyPublisher<ForkInfoModel, Error>
+    func viewRecipe(recipe_id: String) -> AnyPublisher<SuccessResponse, Error>
     func getForkChildren(recipe_id: String) -> AnyPublisher<[RecipeMeta], Error>
     func uploadRecipeToServer(recipe: Recipe) -> AnyPublisher<Bool, Error>
     func searchRecipes(searchString: String, limit: Int) -> AnyPublisher<[RecipeMeta], Error>
@@ -51,6 +52,11 @@ extension RecipeBackendController {
 extension BackendController: RecipeBackendController {
     internal struct RecipeBackend {
         static let path = "recipes/"
+    }
+    
+    func viewRecipe(recipe_id: String) -> AnyPublisher<SuccessResponse, Error> {
+        return authorizedRequest(path: RecipeBackend.path + recipe_id + "/view", method: "POST", modelType: SuccessResponse.self)
+            .eraseToAnyPublisher()
     }
     
     func getForkInfo(recipe_id: String) -> AnyPublisher<ForkInfoModel, Error> {
@@ -160,7 +166,7 @@ extension BackendController: RecipeBackendController {
     }
     
     func loadDefaultPageRecipes() -> AnyPublisher<[String:[RecipeMeta]], Error> {
-        return request(path: RecipeBackend.path + "default", method: "GET", modelType: [String:[RecipeMeta]].self)
+        return authorizedRequest(path: RecipeBackend.path + "default", method: "GET", modelType: [String:[RecipeMeta]].self)
             .eraseToAnyPublisher()
     }
     

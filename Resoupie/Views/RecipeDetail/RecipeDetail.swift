@@ -87,6 +87,17 @@ class RecipeDetailViewController: StarsRatingViewController {
         checkFavorited()
         getForkInfo()
         getForkChildren()
+        
+        viewRecipe()
+    }
+    
+    func viewRecipe() {
+        backendController.viewRecipe(recipe_id: recipeMeta.id)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { _ in
+            }, receiveValue: { success in
+            })
+            .store(in: &cancellables)
     }
     
     func folderBadgeTapped() {
